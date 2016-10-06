@@ -1,0 +1,223 @@
+---
+title: "Example external report from the Microarray pipeline"
+output: html_document
+---
+
+```{r global_options, include=FALSE}
+# Set global chunk options, based on whether the report is internal or external
+external<-"TRUE"
+
+if (external=="TRUE"){
+knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
+                      echo=FALSE, warning=FALSE,message=FALSE, results="hide")
+} else {
+knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
+                      echo=TRUE, warning=TRUE, message=TRUE)
+}
+```
+
+
+####**A) Generate QC plots on raw data**
+
+```{r}  
+  ## raw data plots
+  for (i in 1:nbfacs)
+  {
+    #  MAplot
+    # MA plots are then used to visualize intensity-dependent ratio for each group
+    igp=which(pData(raw())$SampleGroup==labfacs[i])
+    #png(paste(project,"-MAplot-",labfacs[i],"-rawdata.png",sep=""),width=1000,height=1000)
+    MAplot(raw()[,igp],pairs=TRUE,plotFun=smoothScatter,main="MVA plot",labels=raw()[,igp]$SampleID)
+   # dev.off()
+    cat("group : ",i, "plot done\n")
+  }
+```
+
+```{r}
+  #png(paste(project,"-histog-rawdata.png",sep=""))
+  hist(raw(),which="all", main ="Intensity distribution before normalization")
+# Add the sample names to the legend
+  #legend("topright",phenotable$SampleName)
+```  
+```{r}  
+  # boxplot(celfiles[,1:2], col=c(3,2)) # default both
+  #png(paste(project,"-boxplot-rawdata.png",sep=""),width=1000,height=700)
+  par(mar=c(8, 4, 4, 8) + 0.1)
+  boxplot(raw(), col=c(3,2),which="all", main="Boxplots before normalization",las=2, cex.axis=0.7,names=pData(raw())$SampleID)
+```  
+
+
+```{r, message=FALSE, warning=FALSE}  
+  # RLE plots are constructed using log-scale estimates for the expression of each probe set on each array. For each probe set and each array, ratios are calculated between the expression of a probe set and the median expression of this probe set across all arrays of the experiment. For each array, these relative expression values are displayed as a box plot. Since it is assumed that in most experiments only relatively few genes are differentially expressed, the boxes should be similar in range and be centered close to 0. 
+  # celfiles.qc <- fitProbeLevelModel(celfiles)
+  
+  #png(paste(project,"-rle-plot.png",sep=""),width=1000,height=700)
+  par(mar=c(8, 4, 4, 8) + 0.1,las=2, cex.axis=0.8)
+  RLE(qc(), main="RLE", names = raw()$SampleID)
+```
+
+```{r}
+ # (NUSE) represents normalized standard error (SE) estimates from the PLM fit. The SE estimates are normalized such that for each probe set, the median standard error across all arrays is equal to 1. A box plot of NUSE values is drawn for each array. On the NUSE plot, arrays with lower quality will have boxes that are centered higher and/or have a larger spread than the other good quality arrays from the same experiment. Typically, boxes centered above 1.1 represent arrays that have quality problems which are often detected in several of the other QC measures
+  #png(paste(project,"-nuse-plot.png",sep=""),width=1000,height=700)
+  par(mar=c(8, 4, 4, 8) + 0.1,las=2,cex.axis=0.8)
+  NUSE(qc(), main="NUSE", names = raw()$SampleID)
+```
+
+```{r}
+  #cat("Probeset presence Plot ...\n ")
+  
+  # present Absent Calls
+  # PAp = paCalls(raw()[, 1:2])
+  # if (input$Platform=="h133p2") {
+  if (raw()@annotation=="pd.hg.u133.plus.2") {  
+    PApset = paCalls(raw(),"MAS5")
+    PApsetNC <- dim(PApset[[2]])[2]
+    PApsetNR <- dim(PApset[[2]])[1]
+    pres=c()
+    for (i in 1:PApsetNC) pres=c(pres,length(which(PApset[[2]][,i]<0.05)))
+    # names(pres)=colnames(PApset[[2]])
+  } else {
+  PApset = paCalls(raw(),"PSDABG")
+  PApsetNC <- dim(PApset)[2]
+  PApsetNR <- dim(PApset)[1]
+    
+  pres=c()
+  for (i in 1:PApsetNC) pres=c(pres,length(which(PApset[,i]<0.05)))
+  # names(pres)=colnames(PApset)
+  }
+  #head(PApset)
+  
+   names(pres)=pData(raw())$SampleID
+  
+  pres=round((pres/PApsetNR)*100,2)
+  
+  # hist(pres)
+  # plot(density(pres))
+  
+  #png(paste(project,"-probesetcalls.png",sep=""),width=1000,height=1000)
+  par(mar=c(8, 4, 4, 8) + 0.1)
+  plot(pres, type="l",ylab="Presence percentage", main ="Probesets presence",xaxt="n", xlab="")
+  axis(1,at=c(1:PApsetNC),labels=names(pres),las=2,cex.lab=0.4)
+```
+
+
+####**B) QC plots after normalization**
+```{r}
+  ## some plots
+  #png(paste(project,"-boxplot-rma.png",sep=""),width=1000,height=1000)
+  par(mar=c(8, 4, 4, 8) + 0.1)
+  boxplot(norm(),col=c(3,2), main="Boxplots after RMA normalization",las=2, cex.axis=0.8,names=pData(norm())$SampleID)
+```
+
+```{r}
+  # MA plots for groups after RMA
+  for (i in 1:nbfacs)
+  {
+    #  MAplot
+    igp=which(pData(norm())$SampleGroup==labfacs[i])
+    #png(paste(project,"-MAplot-",labfacs[i],"-rma.png",sep=""),width=1000,height=1000)
+    MAplot(norm()[,igp],pairs=TRUE,plotFun=smoothScatter,main="MVA plot",labels=norm()[,igp]$SampleID) # 
+  }
+``` 
+
+```{r, messsage=FALSE, warning=FALSE}  
+  #trad.scatter.plot(exprs(celfiles.rma)[,1],exprs(celfiles.rma)[,2],fc.line.col="lightblue",col="blue")
+ #arrayQualityMetrics(expressionset = celfiles.rma, intgroup=c("SampleGroup"), outdir = "QC_normalized", force =TRUE)
+```
+
+```{r}
+  #png(paste(project,"-Histo-rma.png",sep=""),width=1000,height=1000)
+  hist(norm(), main="Intensity distribution after Normalization")
+  # Add the sample names to the legend
+  legend("topright",c("sdf","dfsd"))
+```
+
+```{r}
+  #pca
+  pr1=prcomp(t(exprs(norm())),scale=T)
+  summary(pr1)
+  pr1$x # scores for the samples
+  (pr1$sdev)**2 ## variances for all , equiv to eigen values
+  head(pr1$rotation[,1:2]) # loading for pc1 and pc2 (pc vs genes)
+  # pc are the eigen vectors
+  
+  igp1=which(pData(norm())$SampleGroup==labfacs[1])
+  xrange=range(pr1$x[,1])
+  yrange=range(pr1$x[,2])
+  
+  pc1.var=100*round(((pr1$sdev)**2)[1]/sum((pr1$sdev)**2),digits=2) # %var pc1 
+  pc2.var=100*round(((pr1$sdev)**2)[2]/sum((pr1$sdev)**2),digits=2) # % var pc2
+  
+  xlab=paste("PC1 - ",pc1.var," % of variation",sep="")
+  ylab=paste("PC2 - ",pc2.var," % of variation",sep="")
+  
+  #png(paste(project,"-pca-rma.png",sep=""),width=1000,height=1000)
+  
+  plot(pr1$x[igp1,1],pr1$x[igp1,2],col=1,main="prcomp after scaling",ylab=ylab,xlab=xlab,xlim=xrange,ylim=yrange)
+  for (i in 2:nbfacs)
+  {
+    igp=which(pData(norm())$SampleGroup==labfacs[i])
+    points(pr1$x[igp,1],pr1$x[igp,2],col=i)
+    
+  }
+  legend('bottom', labfacs,lty=1, col=1:nbfacs, bty='n', cex=.6)
+```
+
+```{r}
+  # MDS plot after normalization,group labels
+  par(mar=c(10,7,1,1))
+ # png(paste(project,"-MDS_afterNorm.png",sep=""),width=1000,height=1000)
+  plotMDS(exprs(norm()),main="MDS plot,after normalization",cex=0.7,bty="n",col=c("red","red","red","black","black","black"))
+```
+
+
+```{r}
+  #hclust
+  
+  eset <- exprs(norm()) # now a matrix
+  colnames(eset)=paste(pData(norm())$SampleID,"_",pData(norm())$SampleGroup,sep="")
+  #colnames(eset)=pData(celfiles.rma)$barcode.s.
+  
+  # standardize before clustering
+  eset.s=scale(eset)
+  distance.s <- dist(t(eset.s))
+  clusters.s <- hclust(distance.s)
+  d2=as.dist(1-cor(eset.s))
+  
+  #png(paste(project,"-HC-EuclPears-Scale-rma.png",sep=""),width=1000,height=1000)
+  par(mfrow=c(1,2))
+  plot(clusters.s,main="Euclidean with scale")
+  # rect.hclust(clusters.s, k=2, border="red")
+  plot(hclust(d2), main="Pearson Correlation with scale")
+  # rect.hclust(hclust(d2), k=2, border="red")
+```
+
+```{r}
+  ## heatmap
+  #
+  distylog2=dist(t(eset))
+  mat = as.matrix(distylog2)
+  heatmap.2(mat, trace="none", margin=c(10,10))
+  # 
+  #dev.copy(png,paste(project,"-heatmap_samplebysample-noscale.png",sep=""),width=1000,height=1000)
+```
+
+```{r}
+  nb=length(deg())
+  for (i in 1:nb)
+  {
+    
+    all.genes.con = deg()[[i]]
+    
+    ## generate plotMA from geneplotter
+    
+    dataf=data.frame("m"=all.genes.con$AveExpr,"fc"=all.genes.con$logFC,"sig"=all.genes.con$adj.P.Val<0.05)
+    #png(paste(project,"-MAplot-",cons[i],".png",sep=""),width=1000,height=700)
+    plotMA(dataf,main=names(deg())[i],ylim=c(-2,2))
+    # name=paste("all.genes.con",i,sep="")
+  
+  }
+ 
+```
+
+
