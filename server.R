@@ -4,7 +4,17 @@ library(pd.mogene.2.0.st)
 library(mogene20sttranscriptcluster.db)
 library(pd.hg.u133.plus.2)
 library(hgu133plus2.db)
-library(GSEA)
+library(pd.hugene.2.0.st)
+library(hugene20sttranscriptcluster.db)
+library(pd.clariom.s.human.ht)
+library(clariomshumanhttranscriptcluster.db)
+library(pd.clariom.s.human)
+library(clariomshumantranscriptcluster.db)
+library(pd.clariom.s.mouse.ht)
+library(clariomsmousehttranscriptcluster.db)
+library(pd.clariom.s.mouse)
+library(clariomsmousetranscriptcluster.db)
+#library(GSEA)
 library(limma)
 library(oligo)
 library(gplots)
@@ -56,7 +66,8 @@ shinyServer(function(input, output) {
           info("Please sort your phenotype on sample name and upload it again. Leaving...")
           stopApp(-1)
         }
-        if (celfiles@annotation!="pd.hg.u133.plus.2" & celfiles@annotation!="pd.mogene.2.0.st") {
+        if (celfiles@annotation!="pd.hg.u133.plus.2" & celfiles@annotation!="pd.mogene.2.0.st" & celfiles@annotation!="pd.hugene.2.0.st" & celfiles@annotation!="pd.clariom.s.human.ht" & celfiles@annotation!="pd.clariom.s.human" & celfiles@annotation!="pd.clariom.s.mouse.ht" & celfiles@annotation!="pd.clariom.s.mouse") {
+        #if (celfiles@annotation!="pd.hg.u133.plus.2" & celfiles@annotation!="pd.mogene.2.0.st") {
         #  if (celfiles@annotation!="pd.hg.u133.plus.2") {
                #cat("Please sort your phenotype on sample name and upload it again. \n")
           info(paste0("Affymetrix platform: ",celfiles@annotation," NOT supported. Leaving..."))
@@ -75,7 +86,8 @@ shinyServer(function(input, output) {
       {
         withProgress(message = 'Normalization', detail = 'starting ...', value = 0, {
         # if (input$Platform=="h133p2") {
-        if (raw()@annotation=="pd.hg.u133.plus.2") {
+        #if (raw()@annotation=="pd.hg.u133.plus.2") {
+        if (raw()@annotation=="pd.hg.u133.plus.2" | raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.human" | raw()@annotation=="pd.clariom.s.mouse.ht" | raw()@annotation=="pd.clariom.s.mouse") {
         celfiles.rma =rma(raw(), background=TRUE, normalize=TRUE, subset=NULL)
         } else {
           celfiles.rma =rma(raw(), background=TRUE, normalize=TRUE, subset=NULL, target="core")  
@@ -135,14 +147,44 @@ shinyServer(function(input, output) {
           
           #library(mogene20sttranscriptcluster.db)
           #if (input$Platform=="mst2") {
+          #if (raw()@annotation=="pd.mogene.2.0.st") {  
+          #  Annot <- data.frame(ACCNUM=sapply(contents(mogene20sttranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(mogene20sttranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(mogene20sttranscriptclusterGENENAME), paste, collapse=", "))
+          #} else {
+           # if (input$Platform=="h133p2") {
+          #   if (raw()@annotation=="pd.hg.u133.plus.2") {
+          #     Annot <- data.frame(ACCNUM=sapply(contents(hgu133plus2ACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(hgu133plus2SYMBOL), paste, collapse=", "), DESC=sapply(contents(hgu133plus2GENENAME), paste, collapse=", "))
+          #  } 
+          #} 
+          
           if (raw()@annotation=="pd.mogene.2.0.st") {  
             Annot <- data.frame(ACCNUM=sapply(contents(mogene20sttranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(mogene20sttranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(mogene20sttranscriptclusterGENENAME), paste, collapse=", "))
           } else {
            # if (input$Platform=="h133p2") {
              if (raw()@annotation=="pd.hg.u133.plus.2") {
                Annot <- data.frame(ACCNUM=sapply(contents(hgu133plus2ACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(hgu133plus2SYMBOL), paste, collapse=", "), DESC=sapply(contents(hgu133plus2GENENAME), paste, collapse=", "))
-            } 
-          } 
+            } else {
+              if (raw()@annotation=="pd.hugene.2.0.st") {
+                Annot <- data.frame(ACCNUM=sapply(contents(hugene20sttranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(hugene20sttranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(hugene20sttranscriptclusterGENENAME), paste, collapse=", "))
+              } else {
+                if (raw()@annotation=="pd.clariom.s.human.ht") {
+                  Annot <- data.frame(ACCNUM=sapply(contents(clariomshumanhttranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(clariomshumanhttranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(clariomshumanhttranscriptclusterGENENAME), paste, collapse=", "))
+                } else {
+                  if (raw()@annotation=="pd.clariom.s.mouse.ht") {
+                    Annot <- data.frame(ACCNUM=sapply(contents(clariomsmousehttranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(clariomsmousehttranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(clariomsmousehttranscriptclusterGENENAME), paste, collapse=", "))
+                  } else {
+                    if (raw()@annotation=="pd.clariom.s.mouse") {
+                      Annot <- data.frame(ACCNUM=sapply(contents(clariomsmousetranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(clariomsmousetranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(clariomsmousetranscriptclusterGENENAME), paste, collapse=", "))
+                    } else {
+                      if (raw()@annotation=="pd.clariom.s.human") {
+                        Annot <- data.frame(ACCNUM=sapply(contents(clariomshumantranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(clariomshumantranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(clariomshumantranscriptclusterGENENAME), paste, collapse=", "))
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+          
           incProgress(0.25, detail = 'Annotation done')
           mylist=vector("list",nb)
           
@@ -372,13 +414,15 @@ shinyServer(function(input, output) {
          ## get gene list
          gene  <- as.character(dat.s[,9])
          # if (input$Platform=="mst2") {
-         if (raw()@annotation=="pd.mogene.2.0.st") {  
+         #if (raw()@annotation=="pd.mogene.2.0.st") {  
+         if (raw()@annotation=="pd.mogene.2.0.st" | raw()@annotation=="pd.clariom.s.mouse.ht" | raw()@annotation=="pd.clariom.s.mouse") {
          data(KEGG_mm); mykegg=unique(unlist(GSEA.db$pathway.list)); ngene=intersect(gene,mykegg)
          xx=doGSEA(db="KEGG_mm", gene=ngene, filter.num=0, fdr=T)
          
          } else {
            # if (input$Platform=="h133p2") {
-           if (raw()@annotation=="pd.hg.u133.plus.2") {  
+           #if (raw()@annotation=="pd.hg.u133.plus.2") {  
+           if (raw()@annotation=="pd.hg.u133.plus.2" | raw()@annotation=="pd.hugene.2.0.st" | raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.human") { 
              data(KEGG); mykegg=unique(unlist(GSEA.db$pathway.list)); ngene=intersect(gene,mykegg)
              xx=doGSEA(db="KEGG", gene=ngene, filter.num=0, fdr=T)
            }
@@ -403,12 +447,14 @@ shinyServer(function(input, output) {
          gene  <- as.character(dat.s[,9])
          # doGSEA(db="GO_mm", gene=gene, filter.num=0, fdr=T);
          # if (input$Platform=="mst2") {
-         if (raw()@annotation=="pd.mogene.2.0.st") {
+         #if (raw()@annotation=="pd.mogene.2.0.st") {
+         if (raw()@annotation=="pd.mogene.2.0.st" | raw()@annotation=="pd.clariom.s.mouse.ht" | raw()@annotation=="pd.clariom.s.mouse") {
            data(GO_mm); mygo=unique(unlist(GSEA.db$pathway.list)); ngene=intersect(gene,mygo)
            yy=doGSEA(db="GO_mm", gene=ngene, filter.num=0, fdr=T)
          } else {
            # if (input$Platform=="h133p2") {
-             if (raw()@annotation=="pd.hg.u133.plus.2") {
+             #if (raw()@annotation=="pd.hg.u133.plus.2") {
+             if (raw()@annotation=="pd.hg.u133.plus.2" | raw()@annotation=="pd.hugene.2.0.st" | raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.human") {
                data(GO); mygo=unique(unlist(GSEA.db$pathway.list)); ngene=intersect(gene,mygo) 
              yy=doGSEA(db="GO", gene=ngene, filter.num=0, fdr=T)
            }
