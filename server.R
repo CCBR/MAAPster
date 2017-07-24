@@ -34,8 +34,10 @@ library(rmarkdown)
 library(ggplot2)
 library(ggfortify)
 
-# setwd("/Users/elloumif/Documents/shiny")
+
+#setwd("/Users/valdezkm/Documents/MicroarrayPipeline/CodeInProgress/MicroArrayPipeline")
 # 500 MB max upload size
+
 options(shiny.maxRequestSize = 500*1024^2)
 
 shinyServer(function(input, output) {
@@ -200,6 +202,42 @@ shinyServer(function(input, output) {
             all <- merge(all.genes.con, Annot,by.x=0, by.y=0, all.x=T)
             all=all[order(all$P.Value),]
             colnames(all)[1]="probsetID"
+          
+ ##           #### START HERE!!!!!!!!        ##################
+              
+            iup=which(all$P.Value<0.05 & all$logFC>=0)
+            idw=which(all$P.Value<0.05 & all$logFC<0)
+            fin.up=all[iup,]
+  
+            if (length(iup) > 500)
+            {
+              fin.up=fin.up[order(fin.up$P.Value),]
+              fin.up=fin.up[1:500,]
+            }
+            x2=rownames(fin.up)
+            gup=apply(array(as.character(x2)),1,function(z) unlist(strsplit(z, "\\|"))[2])
+            
+            fin.dw=final[idw,]
+            if (length(idw) > 500)
+            {
+              fin.dw=fin.dw[order(fin.dw$P.Value),]
+              fin.dw=fin.dw[1:500,]
+            }
+            x2=rownames(fin.dw)
+            gdw=apply(array(as.character(x2)),1,function(z) unlist(strsplit(z, "\\|"))[2])
+            
+            
+            write.csv(gup, file = 'gup.csv')
+            write.csv(gdw, file = 'gdw.csv')
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             # Write out to a file:
             write.table(all,file=paste(input$ProjectID,"_",cons[i],"_all_genes.txt",sep=""),sep="\t",row.names=F)
@@ -207,6 +245,10 @@ shinyServer(function(input, output) {
             
             mylist[[i]]=all
             ## end for
+            
+            
+            
+            
           }
           all <- merge(exprs(norm()), Annot,by.x=0, by.y=0, all.x=T)
           write.table(all,file=paste(input$ProjectID,"_normalized_data.txt",sep=""),sep="\t",row.names=F)
@@ -214,6 +256,8 @@ shinyServer(function(input, output) {
           names(mylist)=cons
           incProgress(0.5, detail = 'DEG done')
           mylist
+          
+        
           
         })
         ##-------------
@@ -396,75 +440,90 @@ shinyServer(function(input, output) {
        #{
          ##
         deg()[[input$NumContrasts]] , caption =paste0("contrast: ",names(deg())[input$NumContrasts])
-         
         # deg()[[1]]
-         ##
        #}
      )
      )
-     output$kegg=DT::renderDataTable(DT::datatable(
+     output$topUp=DT::renderDataTable(DT::datatable(
        {
-         ##
-         
-         dat=deg()[[input$NumContrasts]]
-         ## Hypergeometric Tests
-         ## P value cutoff
-         dat.i <- which(as.numeric(dat[,5]) < input$pval & abs(as.numeric(dat[,2])) >= input$fc)
-         dat.s <- dat[dat.i,]
-         ## get gene list
-         gene  <- as.character(dat.s[,9])
-         # if (input$Platform=="mst2") {
-         #if (raw()@annotation=="pd.mogene.2.0.st") {  
-         if (raw()@annotation=="pd.mogene.2.0.st" | raw()@annotation=="pd.clariom.s.mouse.ht" | raw()@annotation=="pd.clariom.s.mouse") {
-         data(KEGG_mm); mykegg=unique(unlist(GSEA.db$pathway.list)); ngene=intersect(gene,mykegg)
-         xx=doGSEA(db="KEGG_mm", gene=ngene, filter.num=0, fdr=T)
-         
-         } else {
-           # if (input$Platform=="h133p2") {
-           #if (raw()@annotation=="pd.hg.u133.plus.2") {  
-           if (raw()@annotation=="pd.hg.u133.plus.2" | raw()@annotation=="pd.hugene.2.0.st" | raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.human") { 
-             data(KEGG); mykegg=unique(unlist(GSEA.db$pathway.list)); ngene=intersect(gene,mykegg)
-             xx=doGSEA(db="KEGG", gene=ngene, filter.num=0, fdr=T)
-           }
-         }
-         write.table(xx,file=paste(input$ProjectID,"_kegg_results_contrast_",input$NumContrasts,"_",input$pval,"_pvalue_",input$fc,"_logFC.txt",sep=""),sep="\t",row.names=F)
-         xx 
-         ##
-       } , caption =paste0("KEGG for contrast: ",names(deg())[input$NumContrasts])
+         hey = c("Heyyy","How you doin")
+         hey = as.data.frame(hey)
+         hey
+       }
+     )
+     )
+     output$topDown=DT::renderDataTable(DT::datatable(
+       {
+         yo = c("Yo","What's up")
+         yo = as.data.frame(yo)
+         yo
+       }  #caption =paste0("GO for contrast: ",names(deg())[input$NumContrasts])
      )
      )
      
-     output$go=DT::renderDataTable(DT::datatable(
-       {
+     
+#     output$kegg=DT::renderDataTable(DT::datatable(
+#       {
          ##
          
-         dat=deg()[[input$NumContrasts]]
+#         dat=deg()[[input$NumContrasts]]
          ## Hypergeometric Tests
          ## P value cutoff
-         dat.i <- which(as.numeric(dat[,5]) < input$pval & abs(as.numeric(dat[,2])) >= input$fc)
-         dat.s <- dat[dat.i,]
+#         dat.i <- which(as.numeric(dat[,5]) < input$pval & abs(as.numeric(dat[,2])) >= input$fc)
+#         dat.s <- dat[dat.i,]
          ## get gene list
-         gene  <- as.character(dat.s[,9])
+#         gene  <- as.character(dat.s[,9])
+         # if (input$Platform=="mst2") {
+#         if (raw()@annotation=="pd.mogene.2.0.st" | raw()@annotation=="pd.clariom.s.mouse.ht" | raw()@annotation=="pd.clariom.s.mouse") {  
+#           data(KEGG_mm); mykegg=unique(unlist(GSEA.db$pathway.list)); ngene=intersect(gene,mykegg)
+#           xx=doGSEA(db="KEGG_mm", gene=ngene, filter.num=0, fdr=T)
+           
+#         } else {
+           # if (input$Platform=="h133p2") {
+#           if (raw()@annotation=="pd.hg.u133.plus.2" | raw()@annotation=="pd.hugene.2.0.st" | raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.human") {  
+#             data(KEGG); mykegg=unique(unlist(GSEA.db$pathway.list)); ngene=intersect(gene,mykegg)
+#             xx=doGSEA(db="KEGG", gene=ngene, filter.num=0, fdr=T)
+#           }
+#         }
+#         write.table(xx,file=paste(input$ProjectID,"_kegg_results_contrast_",input$NumContrasts,"_",input$pval,"_pvalue_",input$fc,"_logFC.txt",sep=""),sep="\t",row.names=F)
+#         xx 
+         ##
+     # } , caption =paste0("KEGG for contrast: ",names(deg())[input$NumContrasts])
+     #)
+     #)
+
+#     output$go=DT::renderDataTable(DT::datatable(
+#       {
+         ##
+         
+#         dat=deg()[[input$NumContrasts]]
+         ## Hypergeometric Tests
+         ## P value cutoff
+#         dat.i <- which(as.numeric(dat[,5]) < input$pval & abs(as.numeric(dat[,2])) >= input$fc)
+#         dat.s <- dat[dat.i,]
+         ## get gene list
+#         gene  <- as.character(dat.s[,9])
          # doGSEA(db="GO_mm", gene=gene, filter.num=0, fdr=T);
          # if (input$Platform=="mst2") {
-         #if (raw()@annotation=="pd.mogene.2.0.st") {
-         if (raw()@annotation=="pd.mogene.2.0.st" | raw()@annotation=="pd.clariom.s.mouse.ht" | raw()@annotation=="pd.clariom.s.mouse") {
-           data(GO_mm); mygo=unique(unlist(GSEA.db$pathway.list)); ngene=intersect(gene,mygo)
-           yy=doGSEA(db="GO_mm", gene=ngene, filter.num=0, fdr=T)
-         } else {
+#         if (raw()@annotation=="pd.mogene.2.0.st" | raw()@annotation=="pd.clariom.s.mouse.ht" | raw()@annotation=="pd.clariom.s.mouse") {
+#           data(GO_mm); mygo=unique(unlist(GSEA.db$pathway.list)); ngene=intersect(gene,mygo)
+#           yy=doGSEA(db="GO_mm", gene=ngene, filter.num=0, fdr=T)
+#         } else {
            # if (input$Platform=="h133p2") {
-             #if (raw()@annotation=="pd.hg.u133.plus.2") {
-             if (raw()@annotation=="pd.hg.u133.plus.2" | raw()@annotation=="pd.hugene.2.0.st" | raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.human") {
-               data(GO); mygo=unique(unlist(GSEA.db$pathway.list)); ngene=intersect(gene,mygo) 
-             yy=doGSEA(db="GO", gene=ngene, filter.num=0, fdr=T)
-           }
-         };
+#           if (raw()@annotation=="pd.hg.u133.plus.2" | raw()@annotation=="pd.hugene.2.0.st" | raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.human") {
+#             data(GO); mygo=unique(unlist(GSEA.db$pathway.list)); ngene=intersect(gene,mygo) 
+#             yy=doGSEA(db="GO", gene=ngene, filter.num=0, fdr=T)
+#           }
+#         };
          ##
-         write.table(yy,file=paste(input$ProjectID,"_go_results_contrast_",input$NumContrasts,"_",input$pval,"_pvalue_",input$fc,"_logFC.txt",sep=""),sep="\t",row.names=F)
-         yy
-       }  , caption =paste0("GO for contrast: ",names(deg())[input$NumContrasts])
-     )
-     )
+#         write.table(yy,file=paste(input$ProjectID,"_go_results_contrast_",input$NumContrasts,"_",input$pval,"_pvalue_",input$fc,"_logFC.txt",sep=""),sep="\t",row.names=F)
+#         yy
+#       }  , caption =paste0("GO for contrast: ",names(deg())[input$NumContrasts])
+#     )
+#     )
+     
+     
+
      
      ##
      output$downloadTables <- downloadHandler(
