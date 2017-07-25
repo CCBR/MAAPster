@@ -67,8 +67,8 @@ shinyUI(fluidPage(
                   ),
                   navbarMenu (title="DEG-Enrichments-tables",
                               tabPanel("DEG",DT::dataTableOutput("deg")),
-                              tabPanel("Top Up",DT::dataTableOutput("topUp")),
-                              tabPanel("Top Down",DT::dataTableOutput("topDown"))
+                              tabPanel("Top Up Pathways",DT::dataTableOutput("topUp")),
+                              tabPanel("Top Down Pathways",DT::dataTableOutput("topDown"))
                   ),
                   navbarMenu (title="Help",
                               tabPanel("Manual",htmlOutput("manu"))

@@ -189,13 +189,11 @@ shinyServer(function(input, output) {
           
           incProgress(0.25, detail = 'Annotation done')
           mylist=vector("list",nb)
-          
+             
           for (i in 1:nb)
           {
             
             all.genes.con = topTable(ebayes.fit2, coef = i, number=nrow(ebayes.fit2))
-            
-            
             
             # Merge data frames together (like a database table join)
             
@@ -203,8 +201,8 @@ shinyServer(function(input, output) {
             all=all[order(all$P.Value),]
             colnames(all)[1]="probsetID"
           
- ##           #### START HERE!!!!!!!!        ##################
-              
+            #L2P pathway starts here KV
+            
             iup=which(all$P.Value<0.05 & all$logFC>=0)
             idw=which(all$P.Value<0.05 & all$logFC<0)
             fin.up=all[iup,]
@@ -214,30 +212,41 @@ shinyServer(function(input, output) {
               fin.up=fin.up[order(fin.up$P.Value),]
               fin.up=fin.up[1:500,]
             }
-            x2=rownames(fin.up)
-            gup=apply(array(as.character(x2)),1,function(z) unlist(strsplit(z, "\\|"))[2])
+            #x2=rownames(fin.up)
+            #gup=apply(array(as.character(x2)),1,function(z) unlist(strsplit(z, "\\|"))[2])
             
-            fin.dw=final[idw,]
+            fin.dw=all[idw,]
             if (length(idw) > 500)
             {
               fin.dw=fin.dw[order(fin.dw$P.Value),]
               fin.dw=fin.dw[1:500,]
             }
-            x2=rownames(fin.dw)
-            gdw=apply(array(as.character(x2)),1,function(z) unlist(strsplit(z, "\\|"))[2])
+            #x2=rownames(fin.dw)
+            #gdw=apply(array(as.character(x2)),1,function(z) unlist(strsplit(z, "\\|"))[2])
             
+                 
+            if (raw()@annotation=="pd.hg.u133.plus.2" | raw()@annotation=="pd.hugene.2.0.st" | raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.human") 
+            {
+              cat(fin.up$SYMBOL,file=(paste0(input$ProjectID,'_Top500_Up.txt')), sep='\n')
+              cat(fin.dw$SYMBOL,file=(paste0(input$ProjectID,'_Top500_Down.txt')),sep='\n')
+            }
+            else
+            {
+              cat(fin.up$SYMBOL,file="Top500temp_Up.txt",sep='\n')
+              cat(fin.dw$SYMBOL,file="Top500temp_Dw.txt",sep='\n')
             
-            write.csv(gup, file = 'gup.csv')
-            write.csv(gdw, file = 'gdw.csv')
+            system(paste0("cat Top500temp_Up.txt | grep -v \"^NA\" | ./m2h | grep -v XXXX | cut -f2 -d\" \" >",input$ProjectID,"_Top500_Up.txt"))
+            system(paste0("cat Top500temp_Dw.txt | grep -v \"^NA\" | ./m2h | grep -v XXXX | cut -f2 -d\" \" >",input$ProjectID,"_Top500_Down.txt"))
+            }
+            system(paste0("cat ",input$ProjectID,"_Top500_Up.txt |sort | uniq | ./l2p >",input$ProjectID,"_Pathways_Up.txt"))
+            system(paste0("cat ",input$ProjectID,"_Top500_Down.txt |sort | uniq | ./l2p >",input$ProjectID,"_Pathways_Down.txt"))
             
-            
-            
-            
-            
-            
-            
-            
-            
+            addUpCol = read.table(paste0(input$ProjectID,"_Pathways_Up.txt"), sep = '\t')
+            addDwCol = read.table(paste0(input$ProjectID,"_Pathways_Down.txt"), sep = '\t')
+            colnames(addUpCol)=c("pval","fdr","ratio","nb.hits","nb.genes.path","nb.user.genes","tot.back.genes","path_id","source","description","type","gene.list")
+            colnames(addDwCol)=c("pval","fdr","ratio","nb.hits","nb.genes.path","nb.user.genes","tot.back.genes","path_id","source","description","type","gene.list")
+            write.table(addUpCol, file = paste0(input$ProjectID,"_Pathways_Up.txt"), sep = '\t', row.names = F)
+            write.table(addDwCol, file = paste0(input$ProjectID,"_Pathways_Down.txt"), sep = '\t', row.names = F)
             
             # Write out to a file:
             write.table(all,file=paste(input$ProjectID,"_",cons[i],"_all_genes.txt",sep=""),sep="\t",row.names=F)
@@ -245,9 +254,6 @@ shinyServer(function(input, output) {
             
             mylist[[i]]=all
             ## end for
-            
-            
-            
             
           }
           all <- merge(exprs(norm()), Annot,by.x=0, by.y=0, all.x=T)
@@ -263,6 +269,7 @@ shinyServer(function(input, output) {
         ##-------------
       }
     )
+  
     
     observeEvent(input$rep, {
        
@@ -444,20 +451,19 @@ shinyServer(function(input, output) {
        #}
      )
      )
+     
      output$topUp=DT::renderDataTable(DT::datatable(
        {
-         hey = c("Heyyy","How you doin")
-         hey = as.data.frame(hey)
-         hey
-       }
+        topUp = read.table(paste0(input$ProjectID,"_Pathways_Up.txt"), sep = '\t', header = T)
+        topUp
+       } , caption=paste0("Top Upregulated Pathways:", names(deg())[input$NumContrasts])
      )
      )
      output$topDown=DT::renderDataTable(DT::datatable(
        {
-         yo = c("Yo","What's up")
-         yo = as.data.frame(yo)
-         yo
-       }  #caption =paste0("GO for contrast: ",names(deg())[input$NumContrasts])
+        topDw = read.table(paste0(input$ProjectID,"_Pathways_Down.txt"), sep = '\t', header = T)
+        topDw
+       } , caption=paste0("Top Downregulated Pathways:", names(deg())[input$NumContrasts])
      )
      )
      
