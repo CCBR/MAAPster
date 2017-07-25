@@ -69,35 +69,92 @@ knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
   # present Absent Calls
   # PAp = paCalls(raw()[, 1:2])
   # if (input$Platform=="h133p2") {
-  if (raw()@annotation=="pd.hg.u133.plus.2") {  
-    PApset = paCalls(raw(),"MAS5")
-    PApsetNC <- dim(PApset[[2]])[2]
-    PApsetNR <- dim(PApset[[2]])[1]
-    pres=c()
-    for (i in 1:PApsetNC) pres=c(pres,length(which(PApset[[2]][,i]<0.05)))
-    # names(pres)=colnames(PApset[[2]])
-  } else {
-  PApset = paCalls(raw(),"PSDABG")
-  PApsetNC <- dim(PApset)[2]
-  PApsetNR <- dim(PApset)[1]
-    
-  pres=c()
-  for (i in 1:PApsetNC) pres=c(pres,length(which(PApset[,i]<0.05)))
-  # names(pres)=colnames(PApset)
+  
+  #The code below excludes clariom chips from probeset calls -KV
+  
+   if (raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.mouse.ht" | raw()@annotation=="pd.clariom.s.mouse" | raw()@annotation=="pd.clariom.s.human") {
   }
+  
+  if (raw()@annotation=="pd.hg.u133.plus.2") {  
+      PApset = paCalls(raw(),"MAS5") 
+      PApsetNC <- dim(PApset[[2]])[2]
+      PApsetNR <- dim(PApset[[2]])[1]
+      pres=c()
+      for (i in 1:PApsetNC) pres=c(pres,length(which(PApset[[2]][,i]<0.05)))
+      # names(pres)=colnames(PApset[[2]])
+          #head(PApset)
+      names(pres)=pData(raw())$SampleID
+    
+      pres=round((pres/PApsetNR)*100,2)
+    
+      # hist(pres)
+      # plot(density(pres))
+
+      #png(paste(project,"-probesetcalls.png",sep=""),width=1000,height=1000)
+      par(mar=c(8, 4, 4, 8) + 0.1)
+      plot(pres, type="l",ylab="Presence percentage", main ="Probesets presence",xaxt="n", xlab="")
+      axis(1,at=c(1:PApsetNC),labels=names(pres),las=2,cex.lab=0.4)
+    
+      } else {
+        if (raw()@annotation=="pd.mogene.2.0.st" | raw()@annotation=="pd.hugene.2.0.st") {
+          PApset = paCalls(raw(),"PSDABG")
+          PApsetNC <- dim(PApset)[2]
+          PApsetNR <- dim(PApset)[1]
+
+          pres=c()
+          for (i in 1:PApsetNC) pres=c(pres,length(which(PApset[,i]<0.05)))
+          # names(pres)=colnames(PApset)
+
+          #head(PApset)
+
+          names(pres)=pData(raw())$SampleID
+
+          pres=round((pres/PApsetNR)*100,2)
+
+          # hist(pres)
+          # plot(density(pres))
+
+          #png(paste(project,"-probesetcalls.png",sep=""),width=1000,height=1000)
+          par(mar=c(8, 4, 4, 8) + 0.1)
+          plot(pres, type="l",ylab="Presence percentage", main ="Probesets presence",xaxt="n", xlab="")
+          axis(1,at=c(1:PApsetNC),labels=names(pres),las=2,cex.lab=0.4)
+        }
+      }
+  
+  
+  
+  
+  
+  
+  #if (raw()@annotation=="pd.hg.u133.plus.2") {  
+   #PApset = paCalls(raw(),"MAS5")
+   #PApsetNC <- dim(PApset[[2]])[2]
+   #PApsetNR <- dim(PApset[[2]])[1]
+   #pres=c()
+   #for (i in 1:PApsetNC) pres=c(pres,length(which(PApset[[2]][,i]<0.05)))
+    #names(pres)=colnames(PApset[[2]])
+  #} else {
+  #PApset = paCalls(raw(),"PSDABG")
+  #PApsetNC <- dim(PApset)[2]
+  #PApsetNR <- dim(PApset)[1]
+    
+  #pres=c()
+  #for (i in 1:PApsetNC) pres=c(pres,length(which(PApset[,i]<0.05)))
+  # names(pres)=colnames(PApset)
+  #}
   #head(PApset)
   
-   names(pres)=pData(raw())$SampleID
+   #names(pres)=pData(raw())$SampleID
   
-  pres=round((pres/PApsetNR)*100,2)
+  #pres=round((pres/PApsetNR)*100,2)
   
-  # hist(pres)
-  # plot(density(pres))
+  #hist(pres)
+  #plot(density(pres))
   
   #png(paste(project,"-probesetcalls.png",sep=""),width=1000,height=1000)
-  par(mar=c(8, 4, 4, 8) + 0.1)
-  plot(pres, type="l",ylab="Presence percentage", main ="Probesets presence",xaxt="n", xlab="")
-  axis(1,at=c(1:PApsetNC),labels=names(pres),las=2,cex.lab=0.4)
+  #par(mar=c(8, 4, 4, 8) + 0.1)
+  #plot(pres, type="l",ylab="Presence percentage", main ="Probesets presence",xaxt="n", xlab="")
+  #axis(1,at=c(1:PApsetNC),labels=names(pres),las=2,cex.lab=0.4)
 ```
 
 

@@ -4,7 +4,17 @@ library(pd.mogene.2.0.st)
 library(mogene20sttranscriptcluster.db)
 library(pd.hg.u133.plus.2)
 library(hgu133plus2.db)
-library(GSEA)
+library(pd.hugene.2.0.st)
+library(hugene20sttranscriptcluster.db)
+library(pd.clariom.s.human.ht)
+library(clariomshumanhttranscriptcluster.db)
+library(pd.clariom.s.human)
+library(clariomshumantranscriptcluster.db)
+library(pd.clariom.s.mouse.ht)
+library(clariomsmousehttranscriptcluster.db)
+library(pd.clariom.s.mouse)
+library(clariomsmousetranscriptcluster.db)
+#library(GSEA)
 library(limma)
 library(oligo)
 library(gplots)
@@ -24,8 +34,10 @@ library(rmarkdown)
 library(ggplot2)
 library(ggfortify)
 
-# setwd("/Users/elloumif/Documents/shiny")
+
+#setwd("/Users/valdezkm/Documents/MicroarrayPipeline/CodeInProgress/MicroArrayPipeline")
 # 500 MB max upload size
+
 options(shiny.maxRequestSize = 500*1024^2)
 
 shinyServer(function(input, output) {
@@ -56,7 +68,8 @@ shinyServer(function(input, output) {
           info("Please sort your phenotype on sample name and upload it again. Leaving...")
           stopApp(-1)
         }
-        if (celfiles@annotation!="pd.hg.u133.plus.2" & celfiles@annotation!="pd.mogene.2.0.st") {
+        if (celfiles@annotation!="pd.hg.u133.plus.2" & celfiles@annotation!="pd.mogene.2.0.st" & celfiles@annotation!="pd.hugene.2.0.st" & celfiles@annotation!="pd.clariom.s.human.ht" & celfiles@annotation!="pd.clariom.s.human" & celfiles@annotation!="pd.clariom.s.mouse.ht" & celfiles@annotation!="pd.clariom.s.mouse") {
+        #if (celfiles@annotation!="pd.hg.u133.plus.2" & celfiles@annotation!="pd.mogene.2.0.st") {
         #  if (celfiles@annotation!="pd.hg.u133.plus.2") {
                #cat("Please sort your phenotype on sample name and upload it again. \n")
           info(paste0("Affymetrix platform: ",celfiles@annotation," NOT supported. Leaving..."))
@@ -75,7 +88,8 @@ shinyServer(function(input, output) {
       {
         withProgress(message = 'Normalization', detail = 'starting ...', value = 0, {
         # if (input$Platform=="h133p2") {
-        if (raw()@annotation=="pd.hg.u133.plus.2") {
+        #if (raw()@annotation=="pd.hg.u133.plus.2") {
+        if (raw()@annotation=="pd.hg.u133.plus.2" | raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.human" | raw()@annotation=="pd.clariom.s.mouse.ht" | raw()@annotation=="pd.clariom.s.mouse") {
         celfiles.rma =rma(raw(), background=TRUE, normalize=TRUE, subset=NULL)
         } else {
           celfiles.rma =rma(raw(), background=TRUE, normalize=TRUE, subset=NULL, target="core")  
@@ -135,29 +149,104 @@ shinyServer(function(input, output) {
           
           #library(mogene20sttranscriptcluster.db)
           #if (input$Platform=="mst2") {
+          #if (raw()@annotation=="pd.mogene.2.0.st") {  
+          #  Annot <- data.frame(ACCNUM=sapply(contents(mogene20sttranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(mogene20sttranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(mogene20sttranscriptclusterGENENAME), paste, collapse=", "))
+          #} else {
+           # if (input$Platform=="h133p2") {
+          #   if (raw()@annotation=="pd.hg.u133.plus.2") {
+          #     Annot <- data.frame(ACCNUM=sapply(contents(hgu133plus2ACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(hgu133plus2SYMBOL), paste, collapse=", "), DESC=sapply(contents(hgu133plus2GENENAME), paste, collapse=", "))
+          #  } 
+          #} 
+          
           if (raw()@annotation=="pd.mogene.2.0.st") {  
             Annot <- data.frame(ACCNUM=sapply(contents(mogene20sttranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(mogene20sttranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(mogene20sttranscriptclusterGENENAME), paste, collapse=", "))
           } else {
            # if (input$Platform=="h133p2") {
              if (raw()@annotation=="pd.hg.u133.plus.2") {
                Annot <- data.frame(ACCNUM=sapply(contents(hgu133plus2ACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(hgu133plus2SYMBOL), paste, collapse=", "), DESC=sapply(contents(hgu133plus2GENENAME), paste, collapse=", "))
-            } 
-          } 
+            } else {
+              if (raw()@annotation=="pd.hugene.2.0.st") {
+                Annot <- data.frame(ACCNUM=sapply(contents(hugene20sttranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(hugene20sttranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(hugene20sttranscriptclusterGENENAME), paste, collapse=", "))
+              } else {
+                if (raw()@annotation=="pd.clariom.s.human.ht") {
+                  Annot <- data.frame(ACCNUM=sapply(contents(clariomshumanhttranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(clariomshumanhttranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(clariomshumanhttranscriptclusterGENENAME), paste, collapse=", "))
+                } else {
+                  if (raw()@annotation=="pd.clariom.s.mouse.ht") {
+                    Annot <- data.frame(ACCNUM=sapply(contents(clariomsmousehttranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(clariomsmousehttranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(clariomsmousehttranscriptclusterGENENAME), paste, collapse=", "))
+                  } else {
+                    if (raw()@annotation=="pd.clariom.s.mouse") {
+                      Annot <- data.frame(ACCNUM=sapply(contents(clariomsmousetranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(clariomsmousetranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(clariomsmousetranscriptclusterGENENAME), paste, collapse=", "))
+                    } else {
+                      if (raw()@annotation=="pd.clariom.s.human") {
+                        Annot <- data.frame(ACCNUM=sapply(contents(clariomshumantranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(clariomshumantranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(clariomshumantranscriptclusterGENENAME), paste, collapse=", "))
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+          
           incProgress(0.25, detail = 'Annotation done')
           mylist=vector("list",nb)
-          
+             
           for (i in 1:nb)
           {
             
             all.genes.con = topTable(ebayes.fit2, coef = i, number=nrow(ebayes.fit2))
-            
-            
             
             # Merge data frames together (like a database table join)
             
             all <- merge(all.genes.con, Annot,by.x=0, by.y=0, all.x=T)
             all=all[order(all$P.Value),]
             colnames(all)[1]="probsetID"
+          
+            #L2P pathway starts here KV
+            
+            iup=which(all$P.Value<0.05 & all$logFC>=0)
+            idw=which(all$P.Value<0.05 & all$logFC<0)
+            fin.up=all[iup,]
+  
+            if (length(iup) > 500)
+            {
+              fin.up=fin.up[order(fin.up$P.Value),]
+              fin.up=fin.up[1:500,]
+            }
+            #x2=rownames(fin.up)
+            #gup=apply(array(as.character(x2)),1,function(z) unlist(strsplit(z, "\\|"))[2])
+            
+            fin.dw=all[idw,]
+            if (length(idw) > 500)
+            {
+              fin.dw=fin.dw[order(fin.dw$P.Value),]
+              fin.dw=fin.dw[1:500,]
+            }
+            #x2=rownames(fin.dw)
+            #gdw=apply(array(as.character(x2)),1,function(z) unlist(strsplit(z, "\\|"))[2])
+            
+                 
+            if (raw()@annotation=="pd.hg.u133.plus.2" | raw()@annotation=="pd.hugene.2.0.st" | raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.human") 
+            {
+              cat(fin.up$SYMBOL,file=(paste0(input$ProjectID,'_Top500_Up.txt')), sep='\n')
+              cat(fin.dw$SYMBOL,file=(paste0(input$ProjectID,'_Top500_Down.txt')),sep='\n')
+            }
+            else
+            {
+              cat(fin.up$SYMBOL,file="Top500temp_Up.txt",sep='\n')
+              cat(fin.dw$SYMBOL,file="Top500temp_Dw.txt",sep='\n')
+            
+            system(paste0("cat Top500temp_Up.txt | grep -v \"^NA\" | ./m2h | grep -v XXXX | cut -f2 -d\" \" >",input$ProjectID,"_Top500_Up.txt"))
+            system(paste0("cat Top500temp_Dw.txt | grep -v \"^NA\" | ./m2h | grep -v XXXX | cut -f2 -d\" \" >",input$ProjectID,"_Top500_Down.txt"))
+            }
+            system(paste0("cat ",input$ProjectID,"_Top500_Up.txt |sort | uniq | ./l2p >",input$ProjectID,"_Pathways_Up.txt"))
+            system(paste0("cat ",input$ProjectID,"_Top500_Down.txt |sort | uniq | ./l2p >",input$ProjectID,"_Pathways_Down.txt"))
+            
+            addUpCol = read.table(paste0(input$ProjectID,"_Pathways_Up.txt"), sep = '\t')
+            addDwCol = read.table(paste0(input$ProjectID,"_Pathways_Down.txt"), sep = '\t')
+            colnames(addUpCol)=c("pval","fdr","ratio","nb.hits","nb.genes.path","nb.user.genes","tot.back.genes","path_id","source","description","type","gene.list")
+            colnames(addDwCol)=c("pval","fdr","ratio","nb.hits","nb.genes.path","nb.user.genes","tot.back.genes","path_id","source","description","type","gene.list")
+            write.table(addUpCol, file = paste0(input$ProjectID,"_Pathways_Up.txt"), sep = '\t', row.names = F)
+            write.table(addDwCol, file = paste0(input$ProjectID,"_Pathways_Down.txt"), sep = '\t', row.names = F)
             
             # Write out to a file:
             write.table(all,file=paste(input$ProjectID,"_",cons[i],"_all_genes.txt",sep=""),sep="\t",row.names=F)
@@ -165,6 +254,7 @@ shinyServer(function(input, output) {
             
             mylist[[i]]=all
             ## end for
+            
           }
           all <- merge(exprs(norm()), Annot,by.x=0, by.y=0, all.x=T)
           write.table(all,file=paste(input$ProjectID,"_normalized_data.txt",sep=""),sep="\t",row.names=F)
@@ -173,10 +263,13 @@ shinyServer(function(input, output) {
           incProgress(0.5, detail = 'DEG done')
           mylist
           
+        
+          
         })
         ##-------------
       }
     )
+  
     
     observeEvent(input$rep, {
        
@@ -354,71 +447,89 @@ shinyServer(function(input, output) {
        #{
          ##
         deg()[[input$NumContrasts]] , caption =paste0("contrast: ",names(deg())[input$NumContrasts])
-         
         # deg()[[1]]
-         ##
        #}
      )
      )
-     output$kegg=DT::renderDataTable(DT::datatable(
+     
+     output$topUp=DT::renderDataTable(DT::datatable(
        {
-         ##
-         
-         dat=deg()[[input$NumContrasts]]
-         ## Hypergeometric Tests
-         ## P value cutoff
-         dat.i <- which(as.numeric(dat[,5]) < input$pval & abs(as.numeric(dat[,2])) >= input$fc)
-         dat.s <- dat[dat.i,]
-         ## get gene list
-         gene  <- as.character(dat.s[,9])
-         # if (input$Platform=="mst2") {
-         if (raw()@annotation=="pd.mogene.2.0.st") {  
-         data(KEGG_mm); mykegg=unique(unlist(GSEA.db$pathway.list)); ngene=intersect(gene,mykegg)
-         xx=doGSEA(db="KEGG_mm", gene=ngene, filter.num=0, fdr=T)
-         
-         } else {
-           # if (input$Platform=="h133p2") {
-           if (raw()@annotation=="pd.hg.u133.plus.2") {  
-             data(KEGG); mykegg=unique(unlist(GSEA.db$pathway.list)); ngene=intersect(gene,mykegg)
-             xx=doGSEA(db="KEGG", gene=ngene, filter.num=0, fdr=T)
-           }
-         }
-         write.table(xx,file=paste(input$ProjectID,"_kegg_results_contrast_",input$NumContrasts,"_",input$pval,"_pvalue_",input$fc,"_logFC.txt",sep=""),sep="\t",row.names=F)
-         xx 
-         ##
-       } , caption =paste0("KEGG for contrast: ",names(deg())[input$NumContrasts])
+        topUp = read.table(paste0(input$ProjectID,"_Pathways_Up.txt"), sep = '\t', header = T)
+        topUp
+       } , caption=paste0("Top Upregulated Pathways:", names(deg())[input$NumContrasts])
+     )
+     )
+     output$topDown=DT::renderDataTable(DT::datatable(
+       {
+        topDw = read.table(paste0(input$ProjectID,"_Pathways_Down.txt"), sep = '\t', header = T)
+        topDw
+       } , caption=paste0("Top Downregulated Pathways:", names(deg())[input$NumContrasts])
      )
      )
      
-     output$go=DT::renderDataTable(DT::datatable(
-       {
+     
+#     output$kegg=DT::renderDataTable(DT::datatable(
+#       {
          ##
          
-         dat=deg()[[input$NumContrasts]]
+#         dat=deg()[[input$NumContrasts]]
          ## Hypergeometric Tests
          ## P value cutoff
-         dat.i <- which(as.numeric(dat[,5]) < input$pval & abs(as.numeric(dat[,2])) >= input$fc)
-         dat.s <- dat[dat.i,]
+#         dat.i <- which(as.numeric(dat[,5]) < input$pval & abs(as.numeric(dat[,2])) >= input$fc)
+#         dat.s <- dat[dat.i,]
          ## get gene list
-         gene  <- as.character(dat.s[,9])
+#         gene  <- as.character(dat.s[,9])
+         # if (input$Platform=="mst2") {
+#         if (raw()@annotation=="pd.mogene.2.0.st" | raw()@annotation=="pd.clariom.s.mouse.ht" | raw()@annotation=="pd.clariom.s.mouse") {  
+#           data(KEGG_mm); mykegg=unique(unlist(GSEA.db$pathway.list)); ngene=intersect(gene,mykegg)
+#           xx=doGSEA(db="KEGG_mm", gene=ngene, filter.num=0, fdr=T)
+           
+#         } else {
+           # if (input$Platform=="h133p2") {
+#           if (raw()@annotation=="pd.hg.u133.plus.2" | raw()@annotation=="pd.hugene.2.0.st" | raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.human") {  
+#             data(KEGG); mykegg=unique(unlist(GSEA.db$pathway.list)); ngene=intersect(gene,mykegg)
+#             xx=doGSEA(db="KEGG", gene=ngene, filter.num=0, fdr=T)
+#           }
+#         }
+#         write.table(xx,file=paste(input$ProjectID,"_kegg_results_contrast_",input$NumContrasts,"_",input$pval,"_pvalue_",input$fc,"_logFC.txt",sep=""),sep="\t",row.names=F)
+#         xx 
+         ##
+     # } , caption =paste0("KEGG for contrast: ",names(deg())[input$NumContrasts])
+     #)
+     #)
+
+#     output$go=DT::renderDataTable(DT::datatable(
+#       {
+         ##
+         
+#         dat=deg()[[input$NumContrasts]]
+         ## Hypergeometric Tests
+         ## P value cutoff
+#         dat.i <- which(as.numeric(dat[,5]) < input$pval & abs(as.numeric(dat[,2])) >= input$fc)
+#         dat.s <- dat[dat.i,]
+         ## get gene list
+#         gene  <- as.character(dat.s[,9])
          # doGSEA(db="GO_mm", gene=gene, filter.num=0, fdr=T);
          # if (input$Platform=="mst2") {
-         if (raw()@annotation=="pd.mogene.2.0.st") {
-           data(GO_mm); mygo=unique(unlist(GSEA.db$pathway.list)); ngene=intersect(gene,mygo)
-           yy=doGSEA(db="GO_mm", gene=ngene, filter.num=0, fdr=T)
-         } else {
+#         if (raw()@annotation=="pd.mogene.2.0.st" | raw()@annotation=="pd.clariom.s.mouse.ht" | raw()@annotation=="pd.clariom.s.mouse") {
+#           data(GO_mm); mygo=unique(unlist(GSEA.db$pathway.list)); ngene=intersect(gene,mygo)
+#           yy=doGSEA(db="GO_mm", gene=ngene, filter.num=0, fdr=T)
+#         } else {
            # if (input$Platform=="h133p2") {
-             if (raw()@annotation=="pd.hg.u133.plus.2") {
-               data(GO); mygo=unique(unlist(GSEA.db$pathway.list)); ngene=intersect(gene,mygo) 
-             yy=doGSEA(db="GO", gene=ngene, filter.num=0, fdr=T)
-           }
-         };
+#           if (raw()@annotation=="pd.hg.u133.plus.2" | raw()@annotation=="pd.hugene.2.0.st" | raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.human") {
+#             data(GO); mygo=unique(unlist(GSEA.db$pathway.list)); ngene=intersect(gene,mygo) 
+#             yy=doGSEA(db="GO", gene=ngene, filter.num=0, fdr=T)
+#           }
+#         };
          ##
-         write.table(yy,file=paste(input$ProjectID,"_go_results_contrast_",input$NumContrasts,"_",input$pval,"_pvalue_",input$fc,"_logFC.txt",sep=""),sep="\t",row.names=F)
-         yy
-       }  , caption =paste0("GO for contrast: ",names(deg())[input$NumContrasts])
-     )
-     )
+#         write.table(yy,file=paste(input$ProjectID,"_go_results_contrast_",input$NumContrasts,"_",input$pval,"_pvalue_",input$fc,"_logFC.txt",sep=""),sep="\t",row.names=F)
+#         yy
+#       }  , caption =paste0("GO for contrast: ",names(deg())[input$NumContrasts])
+#     )
+#     )
+     
+     
+
      
      ##
      output$downloadTables <- downloadHandler(

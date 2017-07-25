@@ -31,8 +31,8 @@ shinyUI(fluidPage(
                                  #sliderInput("fc",label=h6("KEGG/GO Enrichment FC threshold"),min=0.5,max=3.5,value=1.5,step=0.5)
                           ),
                           column(2,
-                                 numericInput("pval", label=h6("KEGG/GO Enrichment Pvalue threshold"),value=0.05, min=0.00001, max=0.05, width="150px"),
-                                 numericInput("fc", label=h6("KEGG/GO Enrichment logFC threshold"),value=1.5, min=0.5, max=3.5, width="150px")
+                                 numericInput("pval", label=h6("Pathway Enrichment Pvalue threshold"),value=0.05, min=0.00001, max=0.05, width="150px"),
+                                 numericInput("fc", label=h6("Pathway Enrichment logFC threshold"),value=1.5, min=0.5, max=3.5, width="150px")
                                  # sliderInput("fc",label=h6("KEGG/GO Enrichment FC threshold"),min=0.5,max=3.5,value=1.5,step=0.5)
                           )
                           #       numericInput("NumContrasts", label=h6("Which contrast to show"),value="1", width="150px"),
@@ -67,8 +67,8 @@ shinyUI(fluidPage(
                   ),
                   navbarMenu (title="DEG-Enrichments-tables",
                               tabPanel("DEG",DT::dataTableOutput("deg")),
-                              tabPanel("KEGG",DT::dataTableOutput("kegg")),
-                              tabPanel("GO",DT::dataTableOutput("go"))
+                              tabPanel("Top Up Pathways",DT::dataTableOutput("topUp")),
+                              tabPanel("Top Down Pathways",DT::dataTableOutput("topDown"))
                   ),
                   navbarMenu (title="Help",
                               tabPanel("Manual",htmlOutput("manu"))
