@@ -297,17 +297,24 @@ shinyServer(function(input, output) {
      output$pca2d=renderPlot(
        {
          withProgress(message = 'Generating PCA', detail = 'starting ...', value = 0, {
-         # myfactor <- factor(pData(norm())$SampleGroup)
-         tedf= t(exprs(norm()))
-         rownames(tedf)=pData(norm())$SampleID
-         # tedf1 = data.frame(tedf)
-         pr1=prcomp(tedf,scale.=T)
-         ff <- factor(pData(norm())$SampleGroup)
-         dd=cbind(tedf,group=as.character(ff))
-         autoplot(pr1,data=dd, colour = 'group', label = T)  
+           # myfactor <- factor(pData(norm())$SampleGroup)
+           tedf= t(exprs(norm()))
+           rownames(tedf)=pData(norm())$SampleID
+           # tedf1 = data.frame(tedf)
+           pr1=prcomp(tedf,scale.=T)
+           ff <- factor(pData(norm())$SampleGroup)
+           dd=cbind(tedf,group=as.character(ff))
+           
+           pc1.var=100*round(((pr1$sdev)**2)[1]/sum((pr1$sdev)**2),digits=2) # %var pc1 
+           pc2.var=100*round(((pr1$sdev)**2)[2]/sum((pr1$sdev)**2),digits=2) # % var pc2
+           
+           xLab=paste("PC1 - ",pc1.var," % of variation",sep="")
+           yLab=paste("PC2 - ",pc2.var," % of variation",sep="")
+           
+           autoplot(pr1,data=dd, colour = 'group', label = T, xlab=xLab, ylab=yLab)  
          })
-         }
-      
+       }
+       
      )
      ##
      ## pca 2
