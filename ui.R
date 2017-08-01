@@ -2,6 +2,22 @@ library(shiny)
 library(shinyjs)
 
 shinyUI(fluidPage(
+  tags$head(
+    tags$style(
+      HTML(".shiny-notification {
+           height: 100px;
+           width: 800px;
+           position:fixed;
+           font-weight: 500;
+           font-size: 20px;
+           background-color: #fff;
+           top: calc(40% - 50px);;
+           left: calc(50% - 400px);;
+           }
+           "
+      )
+      )
+      ),
   useShinyjs(),
   titlePanel("CCBR Microarray analysis workflow", windowTitle="CCBR Microarray analysis workflow"),
   h5("(For Affymetrix human and mouse data)"),

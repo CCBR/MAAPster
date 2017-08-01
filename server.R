@@ -46,7 +46,7 @@ shinyServer(function(input, output) {
     raw=reactive(
       { 
         # system("rm *.txt")
-        withProgress(message = 'Reading Raw data', detail = 'starting ...', value = 0, {
+        withProgress(message = 'Reading Raw data', detail = 'starting ...', value = 1/2, {
         # folder=path.expand(input$ProjectID)
         # dir.create(folder)
         # setwd(folder)
@@ -86,7 +86,7 @@ shinyServer(function(input, output) {
     # norm data
     norm=reactive(
       {
-        withProgress(message = 'Normalization', detail = 'starting ...', value = 0, {
+        withProgress(message = 'Normalization', detail = 'starting ...', value = 1, {
         # if (input$Platform=="h133p2") {
         #if (raw()@annotation=="pd.hg.u133.plus.2") {
         if (raw()@annotation=="pd.hg.u133.plus.2" | raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.human" | raw()@annotation=="pd.clariom.s.mouse.ht" | raw()@annotation=="pd.clariom.s.mouse") {
@@ -100,7 +100,7 @@ shinyServer(function(input, output) {
     # raw qc data
     qc=reactive(
       {
-        withProgress(message = 'Fitting probe level model', detail = 'starting ...', value = 0, {
+        withProgress(message = 'Fitting probe level model', detail = 'starting ...', value = 1, {
           celfiles.qc =fitProbeLevelModel(raw())
         
         })
@@ -227,26 +227,37 @@ shinyServer(function(input, output) {
                  
             if (raw()@annotation=="pd.hg.u133.plus.2" | raw()@annotation=="pd.hugene.2.0.st" | raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.human") 
             {
-              cat(fin.up$SYMBOL,file=(paste0(input$ProjectID,'_Top500_Up.txt')), sep='\n')
-              cat(fin.dw$SYMBOL,file=(paste0(input$ProjectID,'_Top500_Down.txt')),sep='\n')
+              cat(fin.up$SYMBOL,file=(paste0(input$ProjectID,'_',cons[i],'_Top500_Up.txt')), sep='\n')
+              cat(fin.dw$SYMBOL,file=(paste0(input$ProjectID,'_',cons[i],'_Top500_Down.txt')),sep='\n')
             }
             else
             {
-              cat(fin.up$SYMBOL,file="Top500temp_Up.txt",sep='\n')
-              cat(fin.dw$SYMBOL,file="Top500temp_Dw.txt",sep='\n')
+              cat(fin.up$SYMBOL,file=paste0(cons[i],"_Top500temp_Up.txt"),sep='\n')
+              cat(fin.dw$SYMBOL,file=paste0(cons[i],"_Top500temp_Dw.txt"),sep='\n')
             
-            system(paste0("cat Top500temp_Up.txt | grep -v \"^NA\" | ./m2h | grep -v XXXX | cut -f2 -d\" \" >",input$ProjectID,"_Top500_Up.txt"))
-            system(paste0("cat Top500temp_Dw.txt | grep -v \"^NA\" | ./m2h | grep -v XXXX | cut -f2 -d\" \" >",input$ProjectID,"_Top500_Down.txt"))
+            system(paste0("cat ",cons[i],"_Top500temp_Up.txt | grep -v \"^NA\" | ./m2h | grep -v XXXX | cut -f2 -d\" \" >",input$ProjectID,'_',cons[i],"_Top500_Up.txt"))
+            system(paste0("cat ",cons[i],"_Top500temp_Dw.txt | grep -v \"^NA\" | ./m2h | grep -v XXXX | cut -f2 -d\" \" >",input$ProjectID,'_',cons[i],"_Top500_Down.txt"))
             }
-            system(paste0("cat ",input$ProjectID,"_Top500_Up.txt |sort | uniq | ./l2p >",input$ProjectID,"_Pathways_Up.txt"))
-            system(paste0("cat ",input$ProjectID,"_Top500_Down.txt |sort | uniq | ./l2p >",input$ProjectID,"_Pathways_Down.txt"))
+            system(paste0("cat ",input$ProjectID,'_',cons[i],"_Top500_Up.txt |sort | uniq | ./l2p >",input$ProjectID,'_',cons[i],"_Pathways_Up.txt"))
+            system(paste0("cat ",input$ProjectID,'_',cons[i],"_Top500_Down.txt |sort | uniq | ./l2p >",input$ProjectID,'_',cons[i],"_Pathways_Down.txt"))
             
-            addUpCol = read.table(paste0(input$ProjectID,"_Pathways_Up.txt"), sep = '\t')
-            addDwCol = read.table(paste0(input$ProjectID,"_Pathways_Down.txt"), sep = '\t')
+            #testing taking out quotes
+            #system(paste0("sed 's/\"//g' " ,input$ProjectID,'_',cons[i],"_Pathways_Up.txt >",input$ProjectID,'_',cons[i],"_Pathways_Up.txt"))
+            
+            addUpCol = read.table(paste0(input$ProjectID,'_',cons[i],"_Pathways_Up.txt"), sep = '\t', stringsAsFactors = T)
+            addDwCol = read.table(paste0(input$ProjectID,'_',cons[i],"_Pathways_Down.txt"), sep = '\t', stringsAsFactors = T)
+            #testing
+            write.table(addUpCol, file = "testing_testin.txt", sep = '\t')
+            
+            
             colnames(addUpCol)=c("pval","fdr","ratio","nb.hits","nb.genes.path","nb.user.genes","tot.back.genes","path_id","source","description","type","gene.list")
             colnames(addDwCol)=c("pval","fdr","ratio","nb.hits","nb.genes.path","nb.user.genes","tot.back.genes","path_id","source","description","type","gene.list")
-            write.table(addUpCol, file = paste0(input$ProjectID,"_Pathways_Up.txt"), sep = '\t', row.names = F)
-            write.table(addDwCol, file = paste0(input$ProjectID,"_Pathways_Down.txt"), sep = '\t', row.names = F)
+            addUpCol = addUpCol[order(addUpCol$pval),]
+            addDwCol = addDwCol[order(addDwCol$pval),]
+            addUpCol = addUpCol[,c(8,9,10,11,1,2,3,12,4,5,6,7)]
+            addDwCol = addDwCol[,c(8,9,10,11,1,2,3,12,4,5,6,7)]
+            write.table(addUpCol, file = paste0(input$ProjectID,'_',cons[i],"_Pathways_Up.txt"), sep = '\t', row.names = F)
+            write.table(addDwCol, file = paste0(input$ProjectID,'_',cons[i],"_Pathways_Down.txt"), sep = '\t', row.names = F)
             
             # Write out to a file:
             write.table(all,file=paste(input$ProjectID,"_",cons[i],"_all_genes.txt",sep=""),sep="\t",row.names=F)
@@ -273,7 +284,7 @@ shinyServer(function(input, output) {
     
     observeEvent(input$rep, {
        
-      withProgress(message = 'Generating HTML report', detail = 'starting ...', value = 0, {
+      withProgress(message = 'Generating HTML report', detail = 'starting ...', value = 1, {
        # out <- render('../report_ver4.Rmd','html_document',paste(input$ProjectID,"_","report.html",sep=""),getwd(),getwd())
         out <- render('report_ver4.Rmd','html_document',paste(input$ProjectID,"_","report.html",sep=""))
       })
@@ -296,7 +307,7 @@ shinyServer(function(input, output) {
      ## pca 2
      output$pca2d=renderPlot(
        {
-         withProgress(message = 'Generating PCA', detail = 'starting ...', value = 0, {
+         withProgress(message = 'Generating PCA', detail = 'starting ...', value = 1, {
            # myfactor <- factor(pData(norm())$SampleGroup)
            tedf= t(exprs(norm()))
            rownames(tedf)=pData(norm())$SampleID
@@ -387,11 +398,12 @@ shinyServer(function(input, output) {
            # MA plots are then used to visualize intensity-dependent ratio for each group
            igp=which(pData(raw())$SampleGroup==labfacs[i])
            output[[plotname]] <- renderPlot({
-           MAplot(raw()[,igp],pairs=TRUE,plotFun=smoothScatter,main="MVA plot before normalization", labels=raw()[,igp]$SampleID) # 
+              withProgress(message = 'Generating Raw Maplot', detail = paste0('Plot ', my_i, ' starting ...'), value = (my_i/nbfacs), {
+                MAplot(raw()[,igp],pairs=TRUE,plotFun=smoothScatter,main="MVA plot before normalization", labels=raw()[,igp]$SampleID)  
            })
-           
+           })
          })
-         }
+  }
      
          
        ## MVAplot after normalization
@@ -422,10 +434,10 @@ shinyServer(function(input, output) {
              # MA plots are then used to visualize intensity-dependent ratio for each group
              igp=which(pData(norm())$SampleGroup==labfacs2[i])
              output[[plotname2]] <- renderPlot({
+               withProgress(message = 'Generating Raw Maplot', detail = paste0('Plot ', my_i, ' starting ...'), value = (my_i/nbfacs2), {
                MAplot(norm()[,igp],pairs=TRUE,plotFun=smoothScatter,main="MVA plot after RMA Normalization", labels=norm()[,igp]$SampleID) # 
-            
              })
-             
+             })
            })
          }
           
@@ -451,28 +463,45 @@ shinyServer(function(input, output) {
        }
      )
      output$deg=DT::renderDataTable(DT::datatable(
-       #{
-         ##
-        deg()[[input$NumContrasts]] , caption =paste0("contrast: ",names(deg())[input$NumContrasts])
+       {
+        dat = deg()[[input$NumContrasts]]
+        filtered = dat[(as.numeric(dat[,5]) < input$pval & abs(as.numeric(dat[,2])) >= input$fc),]
+         
         # deg()[[1]]
-       #}
+       }, caption =paste0("contrast: ",names(deg())[input$NumContrasts])
      )
      )
      
      output$topUp=DT::renderDataTable(DT::datatable(
        {
-        topUp = read.table(paste0(input$ProjectID,"_Pathways_Up.txt"), sep = '\t', header = T)
+        callDEG = deg()[[input$NumContrasts]]
+        topUp = read.table(paste0(input$ProjectID,'_',names(deg())[input$NumContrasts],"_Pathways_Up.txt"), sep = '\t', header = T)
         topUp
-       } , caption=paste0("Top Upregulated Pathways:", names(deg())[input$NumContrasts])
+       } , caption=paste0("Pathways for the top 500 Upregulated Genes: ", names(deg())[input$NumContrasts]),
+            options = list(columnDefs = list(list(targets = 8, 
+               render = JS("function(data, type, row, meta) {",
+                   "return type === 'display' && data.length > 30 ?",
+                   "'<span title=\"' + data + '\">' + data.substr(0, 30) + '...</span>' : data;",
+                   "}")))), callback = JS('table.page(3).draw(false);')
      )
      )
      output$topDown=DT::renderDataTable(DT::datatable(
        {
-        topDw = read.table(paste0(input$ProjectID,"_Pathways_Down.txt"), sep = '\t', header = T)
+        callDEG = deg()[[input$NumContrasts]]
+        topDw = read.table(paste0(input$ProjectID,'_',names(deg())[input$NumContrasts],"_Pathways_Down.txt"), sep = '\t', header = T)
         topDw
-       } , caption=paste0("Top Downregulated Pathways:", names(deg())[input$NumContrasts])
+       } , caption=paste0("Pathways for the top 500 Downregulated Genes: ", names(deg())[input$NumContrasts]),
+            options = list(columnDefs = list(list(targets = 8, 
+              render = JS("function(data, type, row, meta) {",
+                    "return type === 'display' && data.length > 30 ?",
+                    "'<span title=\"' + data + '\">' + data.substr(0, 30) + '...</span>' : data;",
+                    "}")))), callback = JS('table.page(3).draw(false);')
      )
      )
+
+       
+     
+    
      
      
 #     output$kegg=DT::renderDataTable(DT::datatable(
