@@ -41,6 +41,12 @@ library(ggfortify)
 options(shiny.maxRequestSize = 500*1024^2)
 
 shinyServer(function(input, output) {
+  
+  url <- a("Manual", href="https://bioinformatics.cancer.gov/sites/default/files/course_material/microarray-pipeline-Btep-10032016.pptx")
+  output$manu <- renderUI({
+    tagList("Click to download:", url)
+  })
+  
   observeEvent(input$go, {
     # raw data
     raw=reactive(
@@ -123,9 +129,7 @@ shinyServer(function(input, output) {
             if ((contra[k,1] %in% labfacs) & (contra[k,2] %in% labfacs) )
             { 
               cons=c(cons,paste(contra[k,1],"-",contra[k,2],sep="")) 
-            }
-            else 
-            {
+            } else {
               cat("One of the groups in contrasts file at line :",k+1,"does not match a group in phenotype file..Quitting!!!\n")
               print( contra )
               stopApp(-1)
@@ -187,7 +191,7 @@ shinyServer(function(input, output) {
             }
           }
           
-          incProgress(0.25, detail = 'Annotation done')
+          incProgress(0.25, detail = 'Preparing for pathway analysis')
           mylist=vector("list",nb)
              
           for (i in 1:nb)
@@ -241,14 +245,8 @@ shinyServer(function(input, output) {
             system(paste0("cat ",input$ProjectID,'_',cons[i],"_Top500_Up.txt |sort | uniq | ./l2p >",input$ProjectID,'_',cons[i],"_Pathways_Up.txt"))
             system(paste0("cat ",input$ProjectID,'_',cons[i],"_Top500_Down.txt |sort | uniq | ./l2p >",input$ProjectID,'_',cons[i],"_Pathways_Down.txt"))
             
-            #testing taking out quotes
-            #system(paste0("sed 's/\"//g' " ,input$ProjectID,'_',cons[i],"_Pathways_Up.txt >",input$ProjectID,'_',cons[i],"_Pathways_Up.txt"))
-            
-            addUpCol = read.table(paste0(input$ProjectID,'_',cons[i],"_Pathways_Up.txt"), sep = '\t', stringsAsFactors = T)
-            addDwCol = read.table(paste0(input$ProjectID,'_',cons[i],"_Pathways_Down.txt"), sep = '\t', stringsAsFactors = T)
-            #testing
-            write.table(addUpCol, file = "testing_testin.txt", sep = '\t')
-            
+            addUpCol = read.delim(paste0(input$ProjectID,'_',cons[i],"_Pathways_Up.txt"), sep = '\t')
+            addDwCol = read.delim(paste0(input$ProjectID,'_',cons[i],"_Pathways_Down.txt"), sep = '\t')
             
             colnames(addUpCol)=c("pval","fdr","ratio","nb.hits","nb.genes.path","nb.user.genes","tot.back.genes","path_id","source","description","type","gene.list")
             colnames(addDwCol)=c("pval","fdr","ratio","nb.hits","nb.genes.path","nb.user.genes","tot.back.genes","path_id","source","description","type","gene.list")
@@ -260,6 +258,9 @@ shinyServer(function(input, output) {
             write.table(addDwCol, file = paste0(input$ProjectID,'_',cons[i],"_Pathways_Down.txt"), sep = '\t', row.names = F)
             
             # Write out to a file:
+            all$FC = ifelse(all$logFC<0, -1/(2^all$logFC), 2^all$logFC)
+           
+            all = all[,c(9,1,8,10,11,2,5,6,3,4,7)]
             write.table(all,file=paste(input$ProjectID,"_",cons[i],"_all_genes.txt",sep=""),sep="\t",row.names=F)
             # cat("Contrast: ",i," done \n")
             
@@ -297,19 +298,21 @@ shinyServer(function(input, output) {
          hist(raw(),which="all", main =" Raw Samples distribution")
        }
      )
-     output$manu=renderUI(
-       {
-         "Manual coming soon"
-         
-         
-       }
-     )
+     
+    
+     
      ## pca 2
      output$pca2d=renderPlot(
        {
          withProgress(message = 'Generating PCA', detail = 'starting ...', value = 1, {
            # myfactor <- factor(pData(norm())$SampleGroup)
            tedf= t(exprs(norm()))
+       
+           #removes zero  variances (issue with small sample sizes)
+           if (length(which(apply(tedf, 2, var)==0)) >= 0){
+             tedf = tedf[ , apply(tedf, 2, var) != 0]
+           }
+           
            rownames(tedf)=pData(norm())$SampleID
            # tedf1 = data.frame(tedf)
            pr1=prcomp(tedf,scale.=T)
@@ -465,8 +468,18 @@ shinyServer(function(input, output) {
      output$deg=DT::renderDataTable(DT::datatable(
        {
         dat = deg()[[input$NumContrasts]]
-        filtered = dat[(as.numeric(dat[,5]) < input$pval & abs(as.numeric(dat[,2])) >= input$fc),]
-         
+        dat = dat[,-6]
+        
+        if (is.na(input$pval) & is.na(input$fc)) {   
+          dat
+        } else if (is.na(input$pval))  {
+          dat = dat[(abs(as.numeric(dat[,5])) >= input$fc),]
+        } else if (is.na(input$fc)) {
+          dat = dat[(as.numeric(dat[,6]) <= input$pval),]
+        } else {
+          dat = dat[(as.numeric(dat[,6]) <= input$pval & abs(as.numeric(dat[,5])) >= input$fc),]
+          dat
+        }
         # deg()[[1]]
        }, caption =paste0("contrast: ",names(deg())[input$NumContrasts])
      )
@@ -475,8 +488,13 @@ shinyServer(function(input, output) {
      output$topUp=DT::renderDataTable(DT::datatable(
        {
         callDEG = deg()[[input$NumContrasts]]
-        topUp = read.table(paste0(input$ProjectID,'_',names(deg())[input$NumContrasts],"_Pathways_Up.txt"), sep = '\t', header = T)
+        topUp = read.delim(paste0(input$ProjectID,'_',names(deg())[input$NumContrasts],"_Pathways_Up.txt"), sep = '\t', header = T)
+        
+        if (!is.na(input$pathPval)) {
+        topUp = topUp[(as.numeric(topUp[,5]) <= input$pathPval),]
+        } else {
         topUp
+        }
        } , caption=paste0("Pathways for the top 500 Upregulated Genes: ", names(deg())[input$NumContrasts]),
             options = list(columnDefs = list(list(targets = 8, 
                render = JS("function(data, type, row, meta) {",
@@ -488,8 +506,13 @@ shinyServer(function(input, output) {
      output$topDown=DT::renderDataTable(DT::datatable(
        {
         callDEG = deg()[[input$NumContrasts]]
-        topDw = read.table(paste0(input$ProjectID,'_',names(deg())[input$NumContrasts],"_Pathways_Down.txt"), sep = '\t', header = T)
-        topDw
+        topDw = read.delim(paste0(input$ProjectID,'_',names(deg())[input$NumContrasts],"_Pathways_Down.txt"), sep = '\t', header = T)
+        
+        if (!is.na(input$pathPval)) {
+        topDw = topDw[(as.numeric(topDw[,5]) <= input$pathPval),]
+        } else {
+          topDw
+        }
        } , caption=paste0("Pathways for the top 500 Downregulated Genes: ", names(deg())[input$NumContrasts]),
             options = list(columnDefs = list(list(targets = 8, 
               render = JS("function(data, type, row, meta) {",
@@ -511,7 +534,7 @@ shinyServer(function(input, output) {
 #         dat=deg()[[input$NumContrasts]]
          ## Hypergeometric Tests
          ## P value cutoff
-#         dat.i <- which(as.numeric(dat[,5]) < input$pval & abs(as.numeric(dat[,2])) >= input$fc)
+#         dat.i <- which(umeric(dat[,5]) < input$pval & abs(as.numeric(dat[,2])) >= input$fc)
 #         dat.s <- dat[dat.i,]
          ## get gene list
 #         gene  <- as.character(dat.s[,9])

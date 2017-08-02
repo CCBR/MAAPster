@@ -191,33 +191,56 @@ knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
 
 ```{r}
   #pca
-  pr1=prcomp(t(exprs(norm())),scale=T)
-  summary(pr1)
-  pr1$x # scores for the samples
-  (pr1$sdev)**2 ## variances for all , equiv to eigen values
-  head(pr1$rotation[,1:2]) # loading for pc1 and pc2 (pc vs genes)
+
+tedf= t(exprs(norm()))
+       
+ #removes zero  variances (issue with small sample sizes)
+ if (length(which(apply(tedf, 2, var)==0)) >= 0){
+   tedf = tedf[ , apply(tedf, 2, var) != 0]
+ }
+ 
+ rownames(tedf)=pData(norm())$SampleID
+ # tedf1 = data.frame(tedf)
+ pr1=prcomp(tedf,scale.=T)
+ ff <- factor(pData(norm())$SampleGroup)
+ dd=cbind(tedf,group=as.character(ff))
+ 
+ pc1.var=100*round(((pr1$sdev)**2)[1]/sum((pr1$sdev)**2),digits=2) # %var pc1 
+ pc2.var=100*round(((pr1$sdev)**2)[2]/sum((pr1$sdev)**2),digits=2) # % var pc2
+ 
+ xLab=paste("PC1 - ",pc1.var," % of variation",sep="")
+ yLab=paste("PC2 - ",pc2.var," % of variation",sep="")
+ 
+ autoplot(pr1,data=dd, colour = 'group', label = T, xlab=xLab, ylab=yLab)  
+
+
+#  pr1=prcomp(tedf,scale.=T)
+#  summary(pr1)
+#  pr1$x # scores for the samples
+#  (pr1$sdev)**2 ## variances for all , equiv to eigen values
+#  head(pr1$rotation[,1:2]) # loading for pc1 and pc2 (pc vs genes)
   # pc are the eigen vectors
   
-  igp1=which(pData(norm())$SampleGroup==labfacs[1])
-  xrange=range(pr1$x[,1])
-  yrange=range(pr1$x[,2])
+#  igp1=which(pData(norm())$SampleGroup==labfacs[1])
+#  xrange=range(pr1$x[,1])
+#  yrange=range(pr1$x[,2])
   
-  pc1.var=100*round(((pr1$sdev)**2)[1]/sum((pr1$sdev)**2),digits=2) # %var pc1 
-  pc2.var=100*round(((pr1$sdev)**2)[2]/sum((pr1$sdev)**2),digits=2) # % var pc2
+#  pc1.var=100*round(((pr1$sdev)**2)[1]/sum((pr1$sdev)**2),digits=2) # %var pc1 
+#  pc2.var=100*round(((pr1$sdev)**2)[2]/sum((pr1$sdev)**2),digits=2) # % var pc2
   
-  xlab=paste("PC1 - ",pc1.var," % of variation",sep="")
-  ylab=paste("PC2 - ",pc2.var," % of variation",sep="")
+#  xlab=paste("PC1 - ",pc1.var," % of variation",sep="")
+#  ylab=paste("PC2 - ",pc2.var," % of variation",sep="")
   
   #png(paste(project,"-pca-rma.png",sep=""),width=1000,height=1000)
   
-  plot(pr1$x[igp1,1],pr1$x[igp1,2],col=1,main="prcomp after scaling",ylab=ylab,xlab=xlab,xlim=xrange,ylim=yrange)
-  for (i in 2:nbfacs)
-  {
-    igp=which(pData(norm())$SampleGroup==labfacs[i])
-    points(pr1$x[igp,1],pr1$x[igp,2],col=i)
+#  plot(pr1$x[igp1,1],pr1$x[igp1,2],col=1,main="prcomp after scaling",ylab=ylab,xlab=xlab,xlim=xrange,ylim=yrange)
+#  for (i in 2:nbfacs)
+#  {
+#    igp=which(pData(norm())$SampleGroup==labfacs[i])
+#    points(pr1$x[igp,1],pr1$x[igp,2],col=i)
     
-  }
-  legend('bottom', labfacs,lty=1, col=1:nbfacs, bty='n', cex=.6)
+#  }
+#  legend('bottom', labfacs,lty=1, col=1:nbfacs, bty='n', cex=.6)
 ```
 
 ```{r}
