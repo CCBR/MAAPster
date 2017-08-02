@@ -41,12 +41,18 @@ library(ggfortify)
 options(shiny.maxRequestSize = 500*1024^2)
 
 shinyServer(function(input, output) {
+  
+  url <- a("Manual", href="https://bioinformatics.cancer.gov/sites/default/files/course_material/microarray-pipeline-Btep-10032016.pptx")
+  output$manu <- renderUI({
+    tagList("Click to download:", url)
+  })
+  
   observeEvent(input$go, {
     # raw data
     raw=reactive(
       { 
         # system("rm *.txt")
-        withProgress(message = 'Reading Raw data', detail = 'starting ...', value = 0, {
+        withProgress(message = 'Reading Raw data', detail = 'starting ...', value = 1/2, {
         # folder=path.expand(input$ProjectID)
         # dir.create(folder)
         # setwd(folder)
@@ -86,7 +92,7 @@ shinyServer(function(input, output) {
     # norm data
     norm=reactive(
       {
-        withProgress(message = 'Normalization', detail = 'starting ...', value = 0, {
+        withProgress(message = 'Normalization', detail = 'starting ...', value = 1, {
         # if (input$Platform=="h133p2") {
         #if (raw()@annotation=="pd.hg.u133.plus.2") {
         if (raw()@annotation=="pd.hg.u133.plus.2" | raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.human" | raw()@annotation=="pd.clariom.s.mouse.ht" | raw()@annotation=="pd.clariom.s.mouse") {
@@ -100,7 +106,7 @@ shinyServer(function(input, output) {
     # raw qc data
     qc=reactive(
       {
-        withProgress(message = 'Fitting probe level model', detail = 'starting ...', value = 0, {
+        withProgress(message = 'Fitting probe level model', detail = 'starting ...', value = 1, {
           celfiles.qc =fitProbeLevelModel(raw())
         
         })
@@ -123,9 +129,7 @@ shinyServer(function(input, output) {
             if ((contra[k,1] %in% labfacs) & (contra[k,2] %in% labfacs) )
             { 
               cons=c(cons,paste(contra[k,1],"-",contra[k,2],sep="")) 
-            }
-            else 
-            {
+            } else {
               cat("One of the groups in contrasts file at line :",k+1,"does not match a group in phenotype file..Quitting!!!\n")
               print( contra )
               stopApp(-1)
@@ -187,7 +191,7 @@ shinyServer(function(input, output) {
             }
           }
           
-          incProgress(0.25, detail = 'Annotation done')
+          incProgress(0.25, detail = 'Preparing for pathway analysis')
           mylist=vector("list",nb)
              
           for (i in 1:nb)
@@ -227,28 +231,36 @@ shinyServer(function(input, output) {
                  
             if (raw()@annotation=="pd.hg.u133.plus.2" | raw()@annotation=="pd.hugene.2.0.st" | raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.human") 
             {
-              cat(fin.up$SYMBOL,file=(paste0(input$ProjectID,'_Top500_Up.txt')), sep='\n')
-              cat(fin.dw$SYMBOL,file=(paste0(input$ProjectID,'_Top500_Down.txt')),sep='\n')
+              cat(fin.up$SYMBOL,file=(paste0(input$ProjectID,'_',cons[i],'_Top500_Up.txt')), sep='\n')
+              cat(fin.dw$SYMBOL,file=(paste0(input$ProjectID,'_',cons[i],'_Top500_Down.txt')),sep='\n')
             }
             else
             {
-              cat(fin.up$SYMBOL,file="Top500temp_Up.txt",sep='\n')
-              cat(fin.dw$SYMBOL,file="Top500temp_Dw.txt",sep='\n')
+              cat(fin.up$SYMBOL,file=paste0(cons[i],"_Top500temp_Up.txt"),sep='\n')
+              cat(fin.dw$SYMBOL,file=paste0(cons[i],"_Top500temp_Dw.txt"),sep='\n')
             
-            system(paste0("cat Top500temp_Up.txt | grep -v \"^NA\" | ./m2h | grep -v XXXX | cut -f2 -d\" \" >",input$ProjectID,"_Top500_Up.txt"))
-            system(paste0("cat Top500temp_Dw.txt | grep -v \"^NA\" | ./m2h | grep -v XXXX | cut -f2 -d\" \" >",input$ProjectID,"_Top500_Down.txt"))
+            system(paste0("cat ",cons[i],"_Top500temp_Up.txt | grep -v \"^NA\" | ./m2h | grep -v XXXX | cut -f2 -d\" \" >",input$ProjectID,'_',cons[i],"_Top500_Up.txt"))
+            system(paste0("cat ",cons[i],"_Top500temp_Dw.txt | grep -v \"^NA\" | ./m2h | grep -v XXXX | cut -f2 -d\" \" >",input$ProjectID,'_',cons[i],"_Top500_Down.txt"))
             }
-            system(paste0("cat ",input$ProjectID,"_Top500_Up.txt |sort | uniq | ./l2p >",input$ProjectID,"_Pathways_Up.txt"))
-            system(paste0("cat ",input$ProjectID,"_Top500_Down.txt |sort | uniq | ./l2p >",input$ProjectID,"_Pathways_Down.txt"))
+            system(paste0("cat ",input$ProjectID,'_',cons[i],"_Top500_Up.txt |sort | uniq | ./l2p >",input$ProjectID,'_',cons[i],"_Pathways_Up.txt"))
+            system(paste0("cat ",input$ProjectID,'_',cons[i],"_Top500_Down.txt |sort | uniq | ./l2p >",input$ProjectID,'_',cons[i],"_Pathways_Down.txt"))
             
-            addUpCol = read.table(paste0(input$ProjectID,"_Pathways_Up.txt"), sep = '\t')
-            addDwCol = read.table(paste0(input$ProjectID,"_Pathways_Down.txt"), sep = '\t')
+            addUpCol = read.delim(paste0(input$ProjectID,'_',cons[i],"_Pathways_Up.txt"), sep = '\t')
+            addDwCol = read.delim(paste0(input$ProjectID,'_',cons[i],"_Pathways_Down.txt"), sep = '\t')
+            
             colnames(addUpCol)=c("pval","fdr","ratio","nb.hits","nb.genes.path","nb.user.genes","tot.back.genes","path_id","source","description","type","gene.list")
             colnames(addDwCol)=c("pval","fdr","ratio","nb.hits","nb.genes.path","nb.user.genes","tot.back.genes","path_id","source","description","type","gene.list")
-            write.table(addUpCol, file = paste0(input$ProjectID,"_Pathways_Up.txt"), sep = '\t', row.names = F)
-            write.table(addDwCol, file = paste0(input$ProjectID,"_Pathways_Down.txt"), sep = '\t', row.names = F)
+            addUpCol = addUpCol[order(addUpCol$pval),]
+            addDwCol = addDwCol[order(addDwCol$pval),]
+            addUpCol = addUpCol[,c(8,9,10,11,1,2,3,12,4,5,6,7)]
+            addDwCol = addDwCol[,c(8,9,10,11,1,2,3,12,4,5,6,7)]
+            write.table(addUpCol, file = paste0(input$ProjectID,'_',cons[i],"_Pathways_Up.txt"), sep = '\t', row.names = F)
+            write.table(addDwCol, file = paste0(input$ProjectID,'_',cons[i],"_Pathways_Down.txt"), sep = '\t', row.names = F)
             
             # Write out to a file:
+            all$FC = ifelse(all$logFC<0, -1/(2^all$logFC), 2^all$logFC)
+           
+            all = all[,c(9,1,8,10,11,2,5,6,3,4,7)]
             write.table(all,file=paste(input$ProjectID,"_",cons[i],"_all_genes.txt",sep=""),sep="\t",row.names=F)
             # cat("Contrast: ",i," done \n")
             
@@ -273,7 +285,7 @@ shinyServer(function(input, output) {
     
     observeEvent(input$rep, {
        
-      withProgress(message = 'Generating HTML report', detail = 'starting ...', value = 0, {
+      withProgress(message = 'Generating HTML report', detail = 'starting ...', value = 1, {
        # out <- render('../report_ver4.Rmd','html_document',paste(input$ProjectID,"_","report.html",sep=""),getwd(),getwd())
         out <- render('report_ver4.Rmd','html_document',paste(input$ProjectID,"_","report.html",sep=""))
       })
@@ -286,28 +298,37 @@ shinyServer(function(input, output) {
          hist(raw(),which="all", main =" Raw Samples distribution")
        }
      )
-     output$manu=renderUI(
-       {
-         "Manual coming soon"
-         
-         
-       }
-     )
+     
+    
+     
      ## pca 2
      output$pca2d=renderPlot(
        {
-         withProgress(message = 'Generating PCA', detail = 'starting ...', value = 0, {
-         # myfactor <- factor(pData(norm())$SampleGroup)
-         tedf= t(exprs(norm()))
-         rownames(tedf)=pData(norm())$SampleID
-         # tedf1 = data.frame(tedf)
-         pr1=prcomp(tedf,scale.=T)
-         ff <- factor(pData(norm())$SampleGroup)
-         dd=cbind(tedf,group=as.character(ff))
-         autoplot(pr1,data=dd, colour = 'group', label = T)  
+         withProgress(message = 'Generating PCA', detail = 'starting ...', value = 1, {
+           # myfactor <- factor(pData(norm())$SampleGroup)
+           tedf= t(exprs(norm()))
+       
+           #removes zero  variances (issue with small sample sizes)
+           if (length(which(apply(tedf, 2, var)==0)) >= 0){
+             tedf = tedf[ , apply(tedf, 2, var) != 0]
+           }
+           
+           rownames(tedf)=pData(norm())$SampleID
+           # tedf1 = data.frame(tedf)
+           pr1=prcomp(tedf,scale.=T)
+           ff <- factor(pData(norm())$SampleGroup)
+           dd=cbind(tedf,group=as.character(ff))
+           
+           pc1.var=100*round(((pr1$sdev)**2)[1]/sum((pr1$sdev)**2),digits=2) # %var pc1 
+           pc2.var=100*round(((pr1$sdev)**2)[2]/sum((pr1$sdev)**2),digits=2) # % var pc2
+           
+           xLab=paste("PC1 - ",pc1.var," % of variation",sep="")
+           yLab=paste("PC2 - ",pc2.var," % of variation",sep="")
+           
+           autoplot(pr1,data=dd, colour = 'group', label = T, xlab=xLab, ylab=yLab)  
          })
-         }
-      
+       }
+       
      )
      ##
      ## pca 2
@@ -380,11 +401,12 @@ shinyServer(function(input, output) {
            # MA plots are then used to visualize intensity-dependent ratio for each group
            igp=which(pData(raw())$SampleGroup==labfacs[i])
            output[[plotname]] <- renderPlot({
-           MAplot(raw()[,igp],pairs=TRUE,plotFun=smoothScatter,main="MVA plot before normalization", labels=raw()[,igp]$SampleID) # 
+              withProgress(message = 'Generating Raw Maplot', detail = paste0('Plot ', my_i, ' starting ...'), value = (my_i/nbfacs), {
+                MAplot(raw()[,igp],pairs=TRUE,plotFun=smoothScatter,main="MVA plot before normalization", labels=raw()[,igp]$SampleID)  
            })
-           
+           })
          })
-         }
+  }
      
          
        ## MVAplot after normalization
@@ -415,10 +437,10 @@ shinyServer(function(input, output) {
              # MA plots are then used to visualize intensity-dependent ratio for each group
              igp=which(pData(norm())$SampleGroup==labfacs2[i])
              output[[plotname2]] <- renderPlot({
+               withProgress(message = 'Generating Raw Maplot', detail = paste0('Plot ', my_i, ' starting ...'), value = (my_i/nbfacs2), {
                MAplot(norm()[,igp],pairs=TRUE,plotFun=smoothScatter,main="MVA plot after RMA Normalization", labels=norm()[,igp]$SampleID) # 
-            
              })
-             
+             })
            })
          }
           
@@ -444,28 +466,65 @@ shinyServer(function(input, output) {
        }
      )
      output$deg=DT::renderDataTable(DT::datatable(
-       #{
-         ##
-        deg()[[input$NumContrasts]] , caption =paste0("contrast: ",names(deg())[input$NumContrasts])
+       {
+        dat = deg()[[input$NumContrasts]]
+        dat = dat[,-6]
+        
+        if (is.na(input$pval) & is.na(input$fc)) {   
+          dat
+        } else if (is.na(input$pval))  {
+          dat = dat[(abs(as.numeric(dat[,5])) >= input$fc),]
+        } else if (is.na(input$fc)) {
+          dat = dat[(as.numeric(dat[,6]) <= input$pval),]
+        } else {
+          dat = dat[(as.numeric(dat[,6]) <= input$pval & abs(as.numeric(dat[,5])) >= input$fc),]
+          dat
+        }
         # deg()[[1]]
-       #}
+       }, caption =paste0("contrast: ",names(deg())[input$NumContrasts])
      )
      )
      
      output$topUp=DT::renderDataTable(DT::datatable(
        {
-        topUp = read.table(paste0(input$ProjectID,"_Pathways_Up.txt"), sep = '\t', header = T)
+        callDEG = deg()[[input$NumContrasts]]
+        topUp = read.delim(paste0(input$ProjectID,'_',names(deg())[input$NumContrasts],"_Pathways_Up.txt"), sep = '\t', header = T)
+        
+        if (!is.na(input$pathPval)) {
+        topUp = topUp[(as.numeric(topUp[,5]) <= input$pathPval),]
+        } else {
         topUp
-       } , caption=paste0("Top Upregulated Pathways:", names(deg())[input$NumContrasts])
+        }
+       } , caption=paste0("Pathways for the top 500 Upregulated Genes: ", names(deg())[input$NumContrasts]),
+            options = list(columnDefs = list(list(targets = 8, 
+               render = JS("function(data, type, row, meta) {",
+                   "return type === 'display' && data.length > 30 ?",
+                   "'<span title=\"' + data + '\">' + data.substr(0, 30) + '...</span>' : data;",
+                   "}")))), callback = JS('table.page(3).draw(false);')
      )
      )
      output$topDown=DT::renderDataTable(DT::datatable(
        {
-        topDw = read.table(paste0(input$ProjectID,"_Pathways_Down.txt"), sep = '\t', header = T)
-        topDw
-       } , caption=paste0("Top Downregulated Pathways:", names(deg())[input$NumContrasts])
+        callDEG = deg()[[input$NumContrasts]]
+        topDw = read.delim(paste0(input$ProjectID,'_',names(deg())[input$NumContrasts],"_Pathways_Down.txt"), sep = '\t', header = T)
+        
+        if (!is.na(input$pathPval)) {
+        topDw = topDw[(as.numeric(topDw[,5]) <= input$pathPval),]
+        } else {
+          topDw
+        }
+       } , caption=paste0("Pathways for the top 500 Downregulated Genes: ", names(deg())[input$NumContrasts]),
+            options = list(columnDefs = list(list(targets = 8, 
+              render = JS("function(data, type, row, meta) {",
+                    "return type === 'display' && data.length > 30 ?",
+                    "'<span title=\"' + data + '\">' + data.substr(0, 30) + '...</span>' : data;",
+                    "}")))), callback = JS('table.page(3).draw(false);')
      )
      )
+
+       
+     
+    
      
      
 #     output$kegg=DT::renderDataTable(DT::datatable(
@@ -475,7 +534,7 @@ shinyServer(function(input, output) {
 #         dat=deg()[[input$NumContrasts]]
          ## Hypergeometric Tests
          ## P value cutoff
-#         dat.i <- which(as.numeric(dat[,5]) < input$pval & abs(as.numeric(dat[,2])) >= input$fc)
+#         dat.i <- which(umeric(dat[,5]) < input$pval & abs(as.numeric(dat[,2])) >= input$fc)
 #         dat.s <- dat[dat.i,]
          ## get gene list
 #         gene  <- as.character(dat.s[,9])
