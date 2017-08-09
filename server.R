@@ -42,9 +42,16 @@ options(shiny.maxRequestSize = 500*1024^2)
 
 shinyServer(function(input, output) {
   
-  url <- a("Manual", href="https://bioinformatics.cancer.gov/sites/default/files/course_material/microarray-pipeline-Btep-10032016.pptx")
-  output$manu <- renderUI({
-    tagList("Click to download:", url)
+#  url <- a("Manual", href="https://bioinformatics.cancer.gov/sites/default/files/course_material/microarray-pipeline-Btep-10032016.pptx")
+#  output$manu <- renderUI({
+#    tagList("Click to download:", url)
+#  })
+  
+  output$manual <- renderUI({
+    tags$iframe(
+      src="App_quick_start.pdf",
+      width="100%",
+      height="800px")
   })
   
   observeEvent(input$go, {
@@ -469,6 +476,7 @@ shinyServer(function(input, output) {
        {
         dat = deg()[[input$NumContrasts]]
         dat = dat[,-6]
+        dat[,6:7] = format(dat[,6:7], scientific = TRUE)
         
         if (is.na(input$pval) & is.na(input$fc)) {   
           dat
