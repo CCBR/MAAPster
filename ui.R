@@ -41,14 +41,14 @@ shinyUI(fluidPage(
                           ),
                           column(2,
                                  fileInput("const", label=h6("Choose contrast file")),
-                                 numericInput("NumContrasts", label=h6("Which contrast to show"),value="1", width="150px")
+                                 numericInput("NumContrasts", label=h6("Choose contrast to show"),value="1", width="150px")
                                  #numericInput("pval", label=h6("KEGG/GO Enrichment Pvalue threshold"),value="0.05", width="150px"),
                                  #sliderInput("fc",label=h6("KEGG/GO Enrichment FC threshold"),min=0.5,max=3.5,value=1.5,step=0.5)
                           ),
                           column(2,
-                                 numericInput("pval", label=h6("Pvalue threshold for DEGs"),value=0.05, min=0.00001, max=0.05, width="150px"),
+                                 numericInput("pval", label=h6("P-value threshold for DEGs"),value=0.05, min=0.00001, max=0.05, width="150px"),
                                  numericInput("fc", label=h6("FC threshold for DEGs"),value=1.5, min=0.5, max=3.5, width="150px"),
-                                 numericInput("pathPval", label=h6("Pvalue threshold for pathways"),value=0.05, min=0.00001, max=0.05, width="150px")
+                                 numericInput("pathPval", label=h6("P-value threshold for pathways"),value=0.05, min=0.00001, max=0.05, width="150px")
                                  # sliderInput("fc",label=h6("KEGG/GO Enrichment FC threshold"),min=0.5,max=3.5,value=1.5,step=0.5)
                           )
                           #       numericInput("NumContrasts", label=h6("Which contrast to show"),value="1", width="150px"),
@@ -83,12 +83,12 @@ shinyUI(fluidPage(
                               
                   ),
                   navbarMenu (title="DEG-Enrichments-tables",
-                              tabPanel("DEG",DT::dataTableOutput("deg")),
-                              tabPanel("Top Up Pathways",DT::dataTableOutput("topUp")),
-                              tabPanel("Top Down Pathways",DT::dataTableOutput("topDown"))
+                              tabPanel("Differentially Expressed Genes",DT::dataTableOutput("deg")),
+                              tabPanel("Pathways for Upregulated Genes",DT::dataTableOutput("topUp")),
+                              tabPanel("Pathways for Downregulated Genes",DT::dataTableOutput("topDown"))
                   ),
                   navbarMenu (title="Help",
-                              tabPanel("Download Manual",htmlOutput("manu"))
+                              tabPanel("Download Manual",uiOutput("manual"))
                   )
                   
       )
