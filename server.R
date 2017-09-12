@@ -33,7 +33,8 @@ library(calibrate)
 library(rmarkdown)
 library(ggplot2)
 library(ggfortify)
-
+library(shinyRGL)
+library(plotly)
 
 #setwd("/Users/valdezkm/Documents/MicroarrayPipeline/CodeInProgress/MicroArrayPipeline")
 # 500 MB max upload size
@@ -41,11 +42,6 @@ library(ggfortify)
 options(shiny.maxRequestSize = 500*1024^2)
 
 shinyServer(function(input, output) {
-  
-#  url <- a("Manual", href="https://bioinformatics.cancer.gov/sites/default/files/course_material/microarray-pipeline-Btep-10032016.pptx")
-#  output$manu <- renderUI({
-#    tagList("Click to download:", url)
-#  })
   
   output$manual <- renderUI({
     tags$iframe(
@@ -59,28 +55,40 @@ shinyServer(function(input, output) {
     raw=reactive(
       { 
         # system("rm *.txt")
-        withProgress(message = 'Reading Raw data', detail = 'starting ...', value = 1/2, {
+        withProgress(message = 'Reading Raw data', detail = 'starting ...', value = 0.25, {
         # folder=path.expand(input$ProjectID)
         # dir.create(folder)
         # setwd(folder)
         myfiles=input$Indir
+        validate(
+          need(input$Indir != "", "Please upload CEL files.")
+        )
         # sort list by name
         # write.table(myfiles,"mycels.txt",sep="\t",row.names = F)
+        incProgress(0.25)
         myfiles=myfiles[order(myfiles$name),]
         write.table(myfiles,"mycels2.txt",sep="\t",row.names = F)
+        incProgress(0.25)
         cels = myfiles$datapath
         #print( cels )
         file1=input$pheno
+        validate(
+          need(input$pheno != "", "Please upload a phenotype file.")
+        )
         pd<-read.AnnotatedDataFrame(file1$datapath,header=TRUE,row.name="SampleName" ,sep="\t")
         celfiles <- read.celfiles(cels, phenoData=pd)
+        incProgress(0.25)
         # write.table(pData(celfiles),"celfiles2.txt",sep="\t",col.names=NA)
         # write.table(myfiles,"celfrominput.txt",sep="\t")
         cat(celfiles@annotation,file="annotation.txt")
-        if (length(which(myfiles$name != rownames(pData(celfiles)))) > 0 ) {
+        validate(
+          need(length(which(myfiles$name != rownames(pData(celfiles)))) == 0,"Please sort your phenotype file alphabetically by sample name and upload it again." )
+        )
+#        if (length(which(myfiles$name != rownames(pData(celfiles)))) > 0 ) {
           #cat("Please sort your phenotype on sample name and upload it again. \n")
-          info("Please sort your phenotype on sample name and upload it again. Leaving...")
-          stopApp(-1)
-        }
+#          info("Please sort your phenotype on sample name and upload it again. Leaving...")
+#          stopApp(-1)
+#        }
         if (celfiles@annotation!="pd.hg.u133.plus.2" & celfiles@annotation!="pd.mogene.2.0.st" & celfiles@annotation!="pd.hugene.2.0.st" & celfiles@annotation!="pd.clariom.s.human.ht" & celfiles@annotation!="pd.clariom.s.human" & celfiles@annotation!="pd.clariom.s.mouse.ht" & celfiles@annotation!="pd.clariom.s.mouse") {
         #if (celfiles@annotation!="pd.hg.u133.plus.2" & celfiles@annotation!="pd.mogene.2.0.st") {
         #  if (celfiles@annotation!="pd.hg.u133.plus.2") {
@@ -99,13 +107,15 @@ shinyServer(function(input, output) {
     # norm data
     norm=reactive(
       {
-        withProgress(message = 'Normalization', detail = 'starting ...', value = 1, {
+        withProgress(message = 'Normalization', detail = 'starting ...', value = 0, {
         # if (input$Platform=="h133p2") {
         #if (raw()@annotation=="pd.hg.u133.plus.2") {
         if (raw()@annotation=="pd.hg.u133.plus.2" | raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.human" | raw()@annotation=="pd.clariom.s.mouse.ht" | raw()@annotation=="pd.clariom.s.mouse") {
-        celfiles.rma =rma(raw(), background=TRUE, normalize=TRUE, subset=NULL)
+          incProgress(0.5)
+          celfiles.rma =rma(raw(), background=TRUE, normalize=TRUE, subset=NULL)
         } else {
-          celfiles.rma =rma(raw(), background=TRUE, normalize=TRUE, subset=NULL, target="core")  
+          incProgress(0.5)
+          celfiles.rma =rma(raw(), background=TRUE, normalize=TRUE, subset=NULL, target="core")
         }
         })
       }
@@ -113,7 +123,7 @@ shinyServer(function(input, output) {
     # raw qc data
     qc=reactive(
       {
-        withProgress(message = 'Fitting probe level model', detail = 'starting ...', value = 1, {
+        withProgress(message = 'Fitting probe level model', detail = 'starting ...', value = 0.75, {
           celfiles.qc =fitProbeLevelModel(raw())
         
         })
@@ -129,19 +139,32 @@ shinyServer(function(input, output) {
           labfacs=levels(facs)
           nbfacs=length(labfacs)
           file1=input$const
+          validate(
+            need(input$const != "", "Please upload a contrast file.")
+          )
           contra=read.delim(file1$datapath)
           nb=dim(contra)[1]
           cons=c()
-          for (k in 1:nb) {
-            if ((contra[k,1] %in% labfacs) & (contra[k,2] %in% labfacs) )
-            { 
-              cons=c(cons,paste(contra[k,1],"-",contra[k,2],sep="")) 
-            } else {
-              cat("One of the groups in contrasts file at line :",k+1,"does not match a group in phenotype file..Quitting!!!\n")
-              print( contra )
-              stopApp(-1)
+            for (k in 1:nb) {
+              validate(
+                need((contra[k,1] %in% labfacs) & (contra[k,2] %in% labfacs), "One of the groups in contrast file does not match a group in phenotype file. Make sure names match and upload again. 
+
+Once correct file is entered, 'Computing differentially expressed genes' message will display.")
+              )
+                cons=c(cons,paste(contra[k,1],"-",contra[k,2],sep=""))
             }
-          }
+     
+          
+#          for (k in 1:nb) {
+#            if ((contra[k,1] %in% labfacs) & (contra[k,2] %in% labfacs) )
+#            { 
+#              cons=c(cons,paste(contra[k,1],"-",contra[k,2],sep="")) 
+#            } else {
+#              cat("One of the groups in contrasts file at line :",k+1,"does not match a group in phenotype file..Quitting!!!\n")
+#              print( contra )
+#              stopApp(-1)
+#            }
+#          }
           
           myfactor <- factor(pData(norm())$SampleGroup)
           design1 <- model.matrix(~0+myfactor)
@@ -198,7 +221,7 @@ shinyServer(function(input, output) {
             }
           }
           
-          incProgress(0.25, detail = 'Preparing for pathway analysis')
+          incProgress(0.25, detail = 'preparing for pathway analysis ...')
           mylist=vector("list",nb)
              
           for (i in 1:nb)
@@ -292,9 +315,9 @@ shinyServer(function(input, output) {
     
     observeEvent(input$rep, {
        
-      withProgress(message = 'Generating HTML report', detail = 'starting ...', value = 1, {
+      withProgress(message = 'Generating HTML report', detail = 'starting ...', value = 0.5, {
        # out <- render('../report_ver4.Rmd','html_document',paste(input$ProjectID,"_","report.html",sep=""),getwd(),getwd())
-        out <- render('report_ver4.Rmd','html_document',paste(input$ProjectID,"_","report.html",sep=""))
+        out <- rmarkdown::render('report_ver4.Rmd','html_document',paste(input$ProjectID,"_","report.html",sep=""))
       })
       
     })
@@ -309,9 +332,9 @@ shinyServer(function(input, output) {
     
      
      ## pca 2
-     output$pca2d=renderPlot(
+     output$pca3d=renderRglwidget(
        {
-         withProgress(message = 'Generating PCA', detail = 'starting ...', value = 1, {
+         withProgress(message = 'Generating PCA', detail = 'starting ...', value = 0.5, {
            # myfactor <- factor(pData(norm())$SampleGroup)
            tedf= t(exprs(norm()))
        
@@ -320,19 +343,30 @@ shinyServer(function(input, output) {
              tedf = tedf[ , apply(tedf, 2, var) != 0]
            }
            
-           rownames(tedf)=pData(norm())$SampleID
+           pca=prcomp(tedf, scale. = T)
+           incProgress(amount = 0.25, detail = 'determining variance ...')
+           rgl.open(useNULL=T)
+           bg3d('white')
+           plot3d(pca$x[,1:3],col=colors, type='s',size=2)
+           group.v=as.vector(pData(norm())$SampleID)
+           text3d(pca$x, pca$y, pca$z, group.v, cex=0.6, adj=1.5)
+           par3d(mouseMode = "trackball")
+           rglwidget()
+#           rownames(tedf)=pData(norm())$SampleID
            # tedf1 = data.frame(tedf)
-           pr1=prcomp(tedf,scale.=T)
-           ff <- factor(pData(norm())$SampleGroup)
-           dd=cbind(tedf,group=as.character(ff))
+#           pr1=prcomp(tedf,scale.=T)
+#           ff <- factor(pData(norm())$SampleGroup)
+#           dd=cbind(tedf,group=as.character(ff))
            
-           pc1.var=100*round(((pr1$sdev)**2)[1]/sum((pr1$sdev)**2),digits=2) # %var pc1 
-           pc2.var=100*round(((pr1$sdev)**2)[2]/sum((pr1$sdev)**2),digits=2) # % var pc2
            
-           xLab=paste("PC1 - ",pc1.var," % of variation",sep="")
-           yLab=paste("PC2 - ",pc2.var," % of variation",sep="")
            
-           autoplot(pr1,data=dd, colour = 'group', label = T, xlab=xLab, ylab=yLab)  
+#           pc1.var=100*round(((pr1$sdev)**2)[1]/sum((pr1$sdev)**2),digits=2) # %var pc1 
+#           pc2.var=100*round(((pr1$sdev)**2)[2]/sum((pr1$sdev)**2),digits=2) # % var pc2
+           
+#           xLab=paste("PC1 - ",pc1.var," % of variation",sep="")
+#           yLab=paste("PC2 - ",pc2.var," % of variation",sep="")
+           
+#           autoplot(pr1,data=dd, colour = 'group', label = T, xlab=xLab, ylab=yLab)  
          })
        }
        
@@ -365,26 +399,60 @@ shinyServer(function(input, output) {
 #       }
 #     )
      ##
+     
+     #creates a list of colors specific to each group
+     fs = factor(pData(raw())$SampleGroup)
+     lFs=levels(fs)
+     numFs=length(lFs)
+     colors = list()
+     
+     for (i in 1:numFs){
+       colors[which(fs==lFs[i])] = i*4
+     }
+     colors = unlist(colors)
+     
+     
      output$rawbox=renderPlot(
        {
-         boxplot(raw(), col=c(3,2),which="all", main="Boxplots before normalization",las=2,names=pData(raw())$SampleID)
+         boxplot(raw(), col=colors, which="all", main="Boxplots before normalization",las=2,names=pData(raw())$SampleID)
         }
      )
      output$rle=renderPlot(
        {
-         RLE(qc(), main="RLE plot",names=pData(raw())$SampleID)
+         RLE(qc(), main="RLE plot",names=pData(raw())$SampleID, col=colors)
        }
      )
      output$nuse=renderPlot(
        {
-         NUSE(qc(), main="NUSE plot",names=pData(raw())$SampleID)
+         NUSE(qc(), main="NUSE plot",names=pData(raw())$SampleID, col=colors)
        }
      )
+#     output$rawmaplot <- renderPlot({
+#      withProgress(message = 'Generating Raw Maplot', detail = 'starting ...', value = 0.5, {
+#        for (i in 1:length(fs)) {
+#          incProgress(1/(length(fs)*2))
+#        }
+#      })
+        #MAplot(raw(),pairs=TRUE,plotFun=smoothScatter,main="MVA plot before normalization", labels=raw()$SampleID)
+#       MAplot(raw(),plotFun=smoothScatter,main="MVA plot before normalization", summaryFun=rowMedians)
+#     })
+#     })
+#     output$normaplot <- renderPlot({
+#      withProgress(message = 'Generating Normalized Maplot', detail = 'starting ...', value = 0.5, {
+#        MAplot(norm(),pairs=TRUE,plotFun=smoothScatter,main="MVA plot after RMA Normalization", labels=norm()$SampleID) 
+#        incProgress(amount=.25,message='complete')
+#      })
+#     })
+
+     
+     
      output$rawmaplot=renderUI({
       #withProgress(message = 'Generating Raw Maplot', detail = 'starting ...', value = 0, {
-       facs <- factor(pData(raw())$SampleGroup)
-       labfacs=levels(facs)
-       nbfacs=length(labfacs)
+       facs <- pData(raw())$SampleID
+       #facs <- factor(pData(raw())$SampleGroup)
+       #labfacs=levels(facs)
+       nbfacs=length(facs)
+       #nbfacs=length(labfacs)
        plot_output_list <- lapply(1:nbfacs, function(i) {
          plotname <- paste("plot", i, sep="")
          plotOutput(plotname, height = 800, width = 800)
@@ -394,11 +462,12 @@ shinyServer(function(input, output) {
        do.call(tagList, plot_output_list)
        #})
      })
-     
-     
-         facs <- factor(pData(raw())$SampleGroup)
-         labfacs=levels(facs)
-         nbfacs=length(labfacs)
+         
+         facs <- pData(raw())$SampleID
+         #facs <- factor(pData(raw())$SampleGroup)
+         #labfacs=levels(facs)
+         nbfacs=length(facs)
+         #nbfacs=length(labfacs)
          #par(mfrow=c(1,nbfacs))
          
          for (i in 1:nbfacs) {
@@ -406,10 +475,11 @@ shinyServer(function(input, output) {
              my_i <- i
              plotname <- paste("plot", my_i, sep="")
            # MA plots are then used to visualize intensity-dependent ratio for each group
-           igp=which(pData(raw())$SampleGroup==labfacs[i])
+           #igp=which(pData(raw())$SampleGroup==labfacs[i])
            output[[plotname]] <- renderPlot({
-              withProgress(message = 'Generating Raw Maplot', detail = paste0('Plot ', my_i, ' starting ...'), value = (my_i/nbfacs), {
-                MAplot(raw()[,igp],pairs=TRUE,plotFun=smoothScatter,main="MVA plot before normalization", labels=raw()[,igp]$SampleID)  
+              withProgress(message = 'Generating Raw Maplot', detail = paste0('Plot ', my_i, ' ...'), value = (my_i/nbfacs), {
+                MAplot(raw(),which=my_i,plotFun=smoothScatter,refSamples=c(1:nbfacs),main=' versus median of all samples')
+                #MAplot(raw()[,igp],pairs=TRUE,plotFun=smoothScatter,main="MVA plot before normalization", labels=raw()[,igp]$SampleID)  
            })
            })
          })
@@ -418,10 +488,12 @@ shinyServer(function(input, output) {
          
        ## MVAplot after normalization
          output$normaplot=renderUI({
-           # withProgress(message = 'Generating Normalized Maplot', detail = 'starting ...', value = 0, {
-           facs2 <- factor(pData(norm())$SampleGroup)
-           labfacs2=levels(facs2)
-           nbfacs2=length(labfacs2)
+           #withProgress(message = 'Generating Normalized Maplot', detail = 'starting ...', value = 0, {
+           facs2 <- pData(norm())$SampleID
+           #facs2 <- factor(pData(norm())$SampleGroup)
+           #labfacs2=levels(facs2)
+           nbfacs2=length(facs2)
+           #nbfacs2=length(labfacs2)
            plot_output_list2 <- lapply(1:nbfacs2, function(i) {
              plotname2 <- paste("plota", i, sep="")
              plotOutput(plotname2, height = 800, width = 800)
@@ -429,33 +501,43 @@ shinyServer(function(input, output) {
            # Convert the list to a tagList - this is necessary for the list of items
            # to display properly.
            do.call(tagList, plot_output_list2)
-          # })
+           #})
          })
          
-         
-         facs2 <- factor(pData(norm())$SampleGroup)
-         labfacs2=levels(facs2)
-         nbfacs2=length(labfacs2)
+         facs2 <- pData(norm())$SampleID
+         #facs2 <- factor(pData(norm())$SampleGroup)
+         #labfacs2=levels(facs2)
+         nbfacs2=length(facs2)
+         #nbfacs2=length(labfacs2)
          #par(mfrow=c(1,nbfacs))
+         
+         
+         progress <- shiny::Progress$new()
+         progress$set(message = "Making plot", value = 0)
+
          for (i in 1:nbfacs2) {
            local({
              my_i <- i
              plotname2 <- paste("plota", my_i, sep="")
              # MA plots are then used to visualize intensity-dependent ratio for each group
-             igp=which(pData(norm())$SampleGroup==labfacs2[i])
+             #igp=which(pData(norm())$SampleGroup==labfacs2[i])
              output[[plotname2]] <- renderPlot({
-               withProgress(message = 'Generating Raw Maplot', detail = paste0('Plot ', my_i, ' starting ...'), value = (my_i/nbfacs2), {
-               MAplot(norm()[,igp],pairs=TRUE,plotFun=smoothScatter,main="MVA plot after RMA Normalization", labels=norm()[,igp]$SampleID) # 
+               withProgress(message = 'Generating Normalized Maplot', detail = paste0('Plot ', my_i, ' ...'), value = my_i/nbfacs2, {
+               MAplot(norm(),which=my_i,plotFun=smoothScatter,refSamples=c(1:nbfacs2),main=' versus median of other samples')
+                #MAplot(norm()[,igp],pairs=TRUE,plotFun=smoothScatter,main="MVA plot after RMA Normalization", labels=norm()[,igp]$SampleID) #
              })
              })
-           })
+          })
          }
+         on.exit(progress$close())
           
          
        ## end mvaplat after normalization
+     
+     
      output$rmabox=renderPlot(
        {
-         boxplot(norm(),col=c(3,2), main="Boxplots after RMA normalization",las=2,names=pData(norm())$SampleID)
+         boxplot(norm(),col=colors, main="Boxplots after RMA normalization",las=2,names=pData(norm())$SampleID)
        }
      )
      output$heatmap=renderPlot(

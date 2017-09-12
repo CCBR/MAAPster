@@ -1,5 +1,6 @@
 library(shiny)
 library(shinyjs)
+library(shinyRGL)
 
 shinyUI(fluidPage(
   tags$head(
@@ -13,11 +14,17 @@ shinyUI(fluidPage(
            background-color: #c1cdcd;
            top: calc(40% - 50px);;
            left: calc(50% - 400px);;
-           }
-           "
-      )
+      }"
       )
       ),
+    tags$style(
+      HTML(".shiny-output-error-validation {
+            color: red;
+            font-size: 20px;
+      }"
+    )
+    )
+    ),
   useShinyjs(),
   titlePanel("CCBR Microarray analysis workflow", windowTitle="CCBR Microarray analysis workflow"),
   h5("(For Affymetrix human and mouse data)"),
@@ -78,7 +85,7 @@ shinyUI(fluidPage(
                               tabPanel("Histogram",plotOutput("rmahist")),
                               tabPanel("Maplots",uiOutput("normaplot")),
                               tabPanel("Boxplots",plotOutput("rmabox")),
-                              tabPanel("PCA2D",plotOutput("pca2d")),
+                              tabPanel("3D-PCA",rglwidgetOutput("pca3d")),
                               tabPanel("Heatmap",plotOutput("heatmap"))
                               
                   ),
@@ -88,7 +95,7 @@ shinyUI(fluidPage(
                               tabPanel("Pathways for Downregulated Genes",DT::dataTableOutput("topDown"))
                   ),
                   navbarMenu (title="Help",
-                              tabPanel("Download Manual",uiOutput("manual"))
+                              tabPanel("Manual",uiOutput("manual"))
                   )
                   
       )
