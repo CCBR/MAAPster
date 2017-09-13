@@ -1,6 +1,7 @@
 library(shiny)
 library(shinyjs)
 library(shinyRGL)
+library(rglwidget)
 
 shinyUI(fluidPage(
   tags$head(
