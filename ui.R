@@ -1,7 +1,8 @@
 library(shiny)
 library(shinyjs)
 library(shinyRGL)
-library(rglwidget)
+library(rgl)
+library(plotly)
 
 shinyUI(fluidPage(
   tags$head(
