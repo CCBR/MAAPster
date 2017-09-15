@@ -88,10 +88,10 @@ shinyUI(fluidPage(
                               tabPanel("Maplots",uiOutput("normaplot")),
                               tabPanel("Boxplots",plotOutput("rmabox")),
                               tabPanel("3D-PCA",rglwidgetOutput("pca3d")),
-                              tabPanel("Heatmap",plotOutput("heatmap"))
-                              
+                              tabPanel("Interactive Heatmap",plotlyOutput("heatmap"))
                   ),
                   navbarMenu (title="DEG-Enrichments-tables",
+                              tabPanel("Interactive Volcano Plot",plotlyOutput('volcano')),
                               tabPanel("Differentially Expressed Genes",DT::dataTableOutput("deg")),
                               tabPanel("Pathways for Upregulated Genes",DT::dataTableOutput("topUp")),
                               tabPanel("Pathways for Downregulated Genes",DT::dataTableOutput("topDown"))
