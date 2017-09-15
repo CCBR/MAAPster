@@ -35,6 +35,8 @@ library(ggplot2)
 library(ggfortify)
 library(shinyRGL)
 library(plotly)
+library(htmltools)
+library(heatmaply)
 
 #setwd("/Users/valdezkm/Documents/MicroarrayPipeline/CodeInProgress/MicroArrayPipeline")
 # 500 MB max upload size
@@ -258,7 +260,6 @@ Once correct file is entered, 'Computing differentially expressed genes' message
             #x2=rownames(fin.dw)
             #gdw=apply(array(as.character(x2)),1,function(z) unlist(strsplit(z, "\\|"))[2])
             
-                 
             if (raw()@annotation=="pd.hg.u133.plus.2" | raw()@annotation=="pd.hugene.2.0.st" | raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.human") 
             {
               cat(fin.up$SYMBOL,file=(paste0(input$ProjectID,'_',cons[i],'_Top500_Up.txt')), sep='\n')
@@ -304,15 +305,11 @@ Once correct file is entered, 'Computing differentially expressed genes' message
           names(mylist)=cons
           incProgress(0.5, detail = 'DEG done')
           mylist
-          
-        
-          
         })
         ##-------------
       }
     )
   
-    
     observeEvent(input$rep, {
        
       withProgress(message = 'Generating HTML report', detail = 'starting ...', value = 0.5, {
@@ -329,9 +326,7 @@ Once correct file is entered, 'Computing differentially expressed genes' message
        }
      )
      
-    
-     
-     ## pca 2
+     ## pca 3D
      output$pca3d=renderRglwidget(
        {
          withProgress(message = 'Generating PCA', detail = 'starting ...', value = 0.5, {
@@ -349,27 +344,11 @@ Once correct file is entered, 'Computing differentially expressed genes' message
            bg3d('white')
            plot3d(pca$x[,1:3],col=colors, type='s',size=2)
            group.v=as.vector(pData(norm())$SampleID)
-           text3d(pca$x, pca$y, pca$z, group.v, cex=0.6, adj=1.5)
+           text3d(pca$x, pca$y, pca$z, group.v, cex=0.6, adj=2)
            par3d(mouseMode = "trackball")
            rglwidget()
-#           rownames(tedf)=pData(norm())$SampleID
-           # tedf1 = data.frame(tedf)
-#           pr1=prcomp(tedf,scale.=T)
-#           ff <- factor(pData(norm())$SampleGroup)
-#           dd=cbind(tedf,group=as.character(ff))
-           
-           
-           
-#           pc1.var=100*round(((pr1$sdev)**2)[1]/sum((pr1$sdev)**2),digits=2) # %var pc1 
-#           pc2.var=100*round(((pr1$sdev)**2)[2]/sum((pr1$sdev)**2),digits=2) # % var pc2
-           
-#           xLab=paste("PC1 - ",pc1.var," % of variation",sep="")
-#           yLab=paste("PC2 - ",pc2.var," % of variation",sep="")
-           
-#           autoplot(pr1,data=dd, colour = 'group', label = T, xlab=xLab, ylab=yLab)  
          })
        }
-       
      )
      ##
      ## pca 2
@@ -512,8 +491,9 @@ Once correct file is entered, 'Computing differentially expressed genes' message
          #par(mfrow=c(1,nbfacs))
          
          
-         progress <- shiny::Progress$new()
-         progress$set(message = "Making plot", value = 0)
+         #progress <- shiny::Progress$new()
+         #progress$set(message = "Making plot", value = 0)
+         #on.exit(progress$close())
 
          for (i in 1:nbfacs2) {
            local({
@@ -529,7 +509,7 @@ Once correct file is entered, 'Computing differentially expressed genes' message
              })
           })
          }
-         on.exit(progress$close())
+     
           
          
        ## end mvaplat after normalization
@@ -540,13 +520,15 @@ Once correct file is entered, 'Computing differentially expressed genes' message
          boxplot(norm(),col=colors, main="Boxplots after RMA normalization",las=2,names=pData(norm())$SampleID)
        }
      )
-     output$heatmap=renderPlot(
+     output$heatmap=renderPlotly(
        {
          # no std
+
          mat=as.matrix(dist(t(exprs(norm()))))
          rownames(mat)=pData(norm())$SampleID
          colnames(mat)=rownames(mat)
-         heatmap.2(mat, trace="none", margin=c(10,10))
+         #heatmap.2(mat, trace="none", margin=c(10,10))
+         heatmaply(mat,margins = c(80,120,60,40),colorRampPalette(colors = c("red", "yellow")))
        }
      )
      output$rmahist=renderPlot(
@@ -554,6 +536,25 @@ Once correct file is entered, 'Computing differentially expressed genes' message
          hist(norm(), main ="Distribution after Normalization")
        }
      )
+     output$volcano=renderPlotly(
+       {
+         withProgress(message = 'Generating Volcano Plot', detail = 'starting ...', value = 0, {
+         dat=deg()[[input$NumContrasts]]
+         dat = dat[dat$SYMBOL!='NA',]
+         log_FC=dat$logFC
+         log_pval=-log10(dat$P.Value)
+         Significant=rep("NotSignificant",length(log_FC))
+         Significant[which(dat$P.Value<0.05 & abs(dat$logFC)>=1)]="Significant&LogFoldChange"
+         Significant[which(dat$P.Value<0.05 & abs(dat$logFC)<1)]="Significant"
+         Significant[which(dat$P.Value>=0.05 & abs(dat$logFC)>=1)]="LogFoldChange"
+         gene=dat$SYMBOL
+         volcano_data=as.data.frame(cbind(gene,log_FC,log_pval,Significant))
+         incProgress(0.50)
+         plot_ly(type='scatter', data = volcano_data, x = log_FC, y = log_pval, text = gene, mode = "markers", color = Significant) %>% layout(title=paste0('Volcano plot for: ',names(deg())[input$NumContrasts]),xaxis=list(title="Fold Change",range =c(-5,5),tickvals=c(-5,-4,-3,-2,-1,0,1,2,3,4,5),ticktext=c('-32','-16','-8','-4','-2','1','2','4','8','16','32')),yaxis=list(title="-Log10 pvalue",range =c(0,15)))
+         })
+         }
+     )
+     
      output$deg=DT::renderDataTable(DT::datatable(
        {
         dat = deg()[[input$NumContrasts]]
@@ -574,7 +575,6 @@ Once correct file is entered, 'Computing differentially expressed genes' message
        }, caption =paste0("contrast: ",names(deg())[input$NumContrasts])
      )
      )
-     
      output$topUp=DT::renderDataTable(DT::datatable(
        {
         callDEG = deg()[[input$NumContrasts]]
