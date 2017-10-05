@@ -3,7 +3,7 @@ library(shinyjs)
 library(shinyRGL)
 library(rgl)
 library(plotly)
- 
+
 shinyUI(fluidPage(
   tags$head(
     tags$style(
