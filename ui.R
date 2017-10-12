@@ -24,7 +24,7 @@ shinyUI(fluidPage(
             color: red;
             font-size: 20px;
       }"
-    )
+      )
     )
     ),
   useShinyjs(),
@@ -55,9 +55,9 @@ shinyUI(fluidPage(
                                  #sliderInput("fc",label=h6("KEGG/GO Enrichment FC threshold"),min=0.5,max=3.5,value=1.5,step=0.5)
                           ),
                           column(2,
-                                 numericInput("pval", label=h6("P-value threshold for DEGs"),value=0.05, min=0.00001, max=0.05, width="150px"),
-                                 numericInput("fc", label=h6("FC threshold for DEGs"),value=1.5, min=0.5, max=3.5, width="150px"),
-                                 numericInput("pathPval", label=h6("P-value threshold for pathways"),value=0.05, min=0.00001, max=0.05, width="150px")
+                                 numericInput("pval", label=h6("P-value threshold for DEGs"),value=0.05, width="150px"),
+                                 numericInput("fc", label=h6("FC threshold for DEGs"),value=1.5, width="150px"),
+                                 numericInput("pathPval", label=h6("P-value threshold for pathways"),value=0.05, width="150px")
                                  # sliderInput("fc",label=h6("KEGG/GO Enrichment FC threshold"),min=0.5,max=3.5,value=1.5,step=0.5)
                           )
                           #       numericInput("NumContrasts", label=h6("Which contrast to show"),value="1", width="150px"),
@@ -78,7 +78,7 @@ shinyUI(fluidPage(
                   #tabPanel("Results"," "),
                   navbarMenu (title="Pre-normalization QC plots",
                     tabPanel("Histogram",plotOutput("rawhist")),
-                    tabPanel("Maplots",uiOutput("rawmaplot")),
+                    tabPanel("Maplots", uiOutput("rawmaplot")),
                     tabPanel("Boxplots", plotOutput("rawbox")),
                     tabPanel("RLE",plotOutput("rle")),
                     tabPanel("NUSE",plotOutput("nuse"))
@@ -91,10 +91,10 @@ shinyUI(fluidPage(
                               tabPanel("Interactive Heatmap",plotlyOutput("heatmap"))
                   ),
                   navbarMenu (title="DEG-Enrichments-tables",
-                              tabPanel("Interactive Volcano Plot",plotlyOutput('volcano')),
                               tabPanel("Differentially Expressed Genes",DT::dataTableOutput("deg")),
                               tabPanel("Pathways for Upregulated Genes",DT::dataTableOutput("topUp")),
-                              tabPanel("Pathways for Downregulated Genes",DT::dataTableOutput("topDown"))
+                              tabPanel("Pathways for Downregulated Genes",DT::dataTableOutput("topDown")),
+                              tabPanel("Interactive Volcano Plot",plotly::plotlyOutput('volcano'))
                   ),
                   navbarMenu (title="Help",
                               tabPanel("Manual",uiOutput("manual"))

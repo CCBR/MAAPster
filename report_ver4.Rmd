@@ -35,10 +35,10 @@ knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
 ```
 
 
-####**A) Generate QC plots on raw data**
-
+####**A) Generate QC plots on raw data before normalization**
+<center> <h4> MA Plots before normalization </h4> </center>
 ```{r}  
-
+  par(mfrow = c(1,2))
   #MAplot(raw(),pairs=TRUE,plotFun=smoothScatter,main="MVA plot before normalization", labels=raw()$SampleID)
 
 
@@ -49,7 +49,7 @@ knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
     # MA plots are then used to visualize intensity-dependent ratio for each group
     #igp=which(pData(raw())$SampleGroup==labfacs[i])
     #png(paste(project,"-MAplot-",labfacs[i],"-rawdata.png",sep=""),width=1000,height=1000)
-    MAplot(raw(),which=i,plotFun=smoothScatter,refSamples=c(1:nbfacs),main=' versus median of all samples')
+    MAplot(raw(),which=i,plotFun=smoothScatter,refSamples=c(1:nbfacs),cex=1.5, cex.main=1, main='')
     #MAplot(raw()[,igp],pairs=TRUE,plotFun=smoothScatter,main="MVA plot",labels=raw()[,igp]$SampleID)
    # dev.off()
     cat("group : ",i, "plot done\n")
@@ -76,14 +76,18 @@ knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
   
   #png(paste(project,"-rle-plot.png",sep=""),width=1000,height=700)
   par(mar=c(8, 4, 4, 8) + 0.1,las=2, cex.axis=0.8)
-  RLE(qc(), main="RLE", names = raw()$SampleID, col=colors)
+  if (raw()@annotation!='pd.mogene.1.0.st.v1') {
+    RLE(qc(), main="RLE", names = raw()$SampleID, col=colors)
+  }
 ```
 
 ```{r}
  # (NUSE) represents normalized standard error (SE) estimates from the PLM fit. The SE estimates are normalized such that for each probe set, the median standard error across all arrays is equal to 1. A box plot of NUSE values is drawn for each array. On the NUSE plot, arrays with lower quality will have boxes that are centered higher and/or have a larger spread than the other good quality arrays from the same experiment. Typically, boxes centered above 1.1 represent arrays that have quality problems which are often detected in several of the other QC measures
   #png(paste(project,"-nuse-plot.png",sep=""),width=1000,height=700)
   par(mar=c(8, 4, 4, 8) + 0.1,las=2,cex.axis=0.8)
-  NUSE(qc(), main="NUSE", names = raw()$SampleID, col=colors)
+    if (raw()@annotation!='pd.mogene.1.0.st.v1') {
+      NUSE(qc(), main="NUSE", names = raw()$SampleID, col=colors)
+    }
 ```
 
 ```{r}
@@ -181,22 +185,26 @@ knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
   ## some plots
   #png(paste(project,"-boxplot-rma.png",sep=""),width=1000,height=1000)
   par(mar=c(8, 4, 4, 8) + 0.1)
+
   boxplot(norm(),col=colors, main="Boxplots after RMA normalization",las=2, cex.axis=0.8,names=pData(norm())$SampleID)
 ```
-
+<center> <h4> MA Plots after normalization </h4> </center>
 ```{r}
-  # MA plots for groups after RMA
 
+  # MA plots for groups after RMA
+  par(mfrow = c(1,2))
 #  MAplot(norm(),pairs=TRUE,plotFun=smoothScatter,main="MVA plot after RMA Normalization", labels=norm()$SampleID) 
-  
+  #par(mar=c(4, 2, 2, 4))
   for (i in 1:nbfacs2)
   {
     #  MAplot
     #igp=which(pData(norm())$SampleGroup==labfacs[i])
     #png(paste(project,"-MAplot-",labfacs[i],"-rma.png",sep=""),width=1000,height=1000)
     #MAplot(norm()[,igp],pairs=TRUE,plotFun=smoothScatter,main="MVA plot",labels=norm()[,igp]$SampleID) # 
-    MAplot(norm(),which=i,plotFun=smoothScatter,refSamples=c(1:nbfacs2),main=' versus median of other samples')
+    
+    MAplot(norm(),which=i,plotFun=smoothScatter,refSamples=c(1:nbfacs2), cex=1.5, cex.main=1, main='')
   }
+
 ``` 
 
 ```{r, messsage=FALSE, warning=FALSE}  
@@ -208,7 +216,7 @@ knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
   #png(paste(project,"-Histo-rma.png",sep=""),width=1000,height=1000)
   hist(norm(), main="Intensity distribution after Normalization")
   # Add the sample names to the legend
-  legend("topright",c("sdf","dfsd"))
+  #legend("topright",c("sdf","dfsd"))
 ```
 
 
@@ -235,28 +243,7 @@ rglwidget()
 
 
 #---------
-#3D PCA code using shiny language
 
-#renderRglwidget(
-#       {
-           # myfactor <- factor(pData(norm())$SampleGroup)
-#           tedf= t(exprs(norm()))
-       
-           #removes zero  variances (issue with small sample sizes)
- #          if (length(which(apply(tedf, 2, var)==0)) >= 0){
-#             tedf = tedf[ , apply(tedf, 2, var) != 0]
-#           }
-           
-#           pca=prcomp(tedf, scale. = T)
-#           rgl.open(useNULL=T)
-#           bg3d('white')
-#           plot3d(pca$x[,1:3],col=colors, type='s',size=2)
-#           group.v=as.vector(pData(norm())$SampleID)
-#           text3d(pca$x, pca$y, pca$z, group.v, cex=0.6, adj=1.5)
-           #par3d(mouseMode = "trackball")
-#           rglwidget()
-#         }
-#         )
 
 
 ```
@@ -362,17 +349,17 @@ rglwidget()
 ```
 
 ```{r}
-  nb=length(deg())
+  nb=length(deg()$mylist)
   for (i in 1:nb)
   {
     
-    all.genes.con = deg()[[i]]
+    all.genes.con = deg()$mylist[[i]]
     
     ## generate plotMA from geneplotter
     
     dataf=data.frame("m"=all.genes.con$AveExpr,"fc"=all.genes.con$logFC,"sig"=all.genes.con$adj.P.Val<0.05)
     #png(paste(project,"-MAplot-",cons[i],".png",sep=""),width=1000,height=700)
-    plotMA(dataf,main=names(deg())[i],ylim=c(-2,2))
+    plotMA(dataf,main=names(deg()$mylist)[i],ylim=c(-2,2))
     # name=paste("all.genes.con",i,sep="")
   
   }
@@ -387,15 +374,11 @@ library(htmltools)
   
   k <- htmltools::tagList()
   #k = data.frame(matrix(ncol = ncol(deg()), nrow = 100))
-  lngth = length(deg())
+  lngth = length(deg()$mylist)
   for (i in 1:lngth) {
     #myi = i
-    dat = deg()[[i]]
+    dat = deg()$mylist[[i]]
     dat = dat[dat$SYMBOL!='NA',]
-    
-    write.csv(names(dat),file='/Users/valdezkm/Desktop/namesDat.csv')
-
-    
     log_FC=dat$logFC
     log_pval=-log10(dat$P.Value)
     Significant=rep("NotSignificant",length(log_FC))
@@ -404,7 +387,7 @@ library(htmltools)
     Significant[which(dat$P.Value>=0.05 & abs(dat$logFC)>=1)]="LogFoldChange"
     gene=dat$SYMBOL
     volcano_data=as.data.frame(cbind(gene,log_FC,log_pval,Significant))
-    k[[i]] = plot_ly(type='scatter',data = volcano_data, x = log_FC, y = log_pval, text = gene, mode = "markers", color = Significant) %>% layout(title =paste0('Volcano plot for: ',names(deg())[[i]]), xaxis=list(title="Fold Change",range =c(-5,5),tickvals=c(-5,-4,-3,-2,-1,0,1,2,3,4,5),ticktext=c('-32','-16','-8','-4','-2','1','2','4','8','16','32')), yaxis=list(title="-Log10 pvalue",range =c(0,15)))
+    k[[i]] = plot_ly(type='scatter',data = volcano_data, x = log_FC, y = log_pval, text = gene, mode = "markers", color = Significant) %>% layout(title =paste0('Volcano plot for: ',names(deg()$mylist)[[i]]), xaxis=list(title="Fold Change",range =c(-5,5),tickvals=c(-5,-4,-3,-2,-1,0,1,2,3,4,5),ticktext=c('-32','-16','-8','-4','-2','1','2','4','8','16','32')), yaxis=list(title="-Log10 pvalue",range =c(0,15)))
   }
   k
 ```
