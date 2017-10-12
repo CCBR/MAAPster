@@ -9,4 +9,4 @@ Main workflow:
 - Plotting Post-normalization QC plots
 - PCA & clustering
 - Limma call for Differentially Expressed Genes DEG 
-- KEGG/GO Enrichment analysis 
+- Pathway enrichment analysis 
