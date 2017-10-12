@@ -14,10 +14,34 @@ library(pd.clariom.s.mouse.ht)
 library(clariomsmousehttranscriptcluster.db)
 library(pd.clariom.s.mouse)
 library(clariomsmousetranscriptcluster.db)
-library(mouse4302.db)
 library(pd.mouse430.2)
-library(hgu133a.db)
+library(mouse4302.db)
 library(pd.hg.u133a)
+library(hgu133a.db)
+library(pd.hugene.1.0.st.v1)
+library(hugene10sttranscriptcluster.db)
+library(pd.mogene.1.0.st.v1)
+library(mogene10sttranscriptcluster.db)
+library(pd.hg.u133a.2)
+library(hgu133a2.db)
+library(pd.huex.1.0.st.v2)
+library(huex10sttranscriptcluster.db)
+library(pd.hg.u219)
+library(hgu219.db)
+library(pd.mg.u74av2)
+library(mgu74av2.db)
+library(pd.mouse430a.2)
+library(mouse430a2.db)
+library(pd.moe430a)
+library(moe430a.db)
+library(pd.hg.u95av2)
+library(hgu95av2.db)
+library(pd.hta.2.0)
+library(hta20transcriptcluster.db)
+library(pd.moex.1.0.st.v1)
+library(moex10sttranscriptcluster.db)
+library(pd.hg.u133b)
+library(hgu133b.db)
 #library(GSEA)
 library(limma)
 library(oligo)
@@ -41,6 +65,7 @@ library(shinyRGL)
 library(plotly)
 library(htmltools)
 library(heatmaply)
+library(Biobase)
 
 #setwd("/Users/valdezkm/Documents/MicroarrayPipeline/CodeInProgress/MicroArrayPipeline")
 # 500 MB max upload size
@@ -97,10 +122,12 @@ shinyServer(function(input, output) {
         # )
         pd<-read.AnnotatedDataFrame(file1$datapath,header=TRUE,row.name="SampleName" ,sep="\t")
         celfiles <- read.celfiles(cels, phenoData=pd)
+        
         incProgress(0.25)
         # write.table(pData(celfiles),"celfiles2.txt",sep="\t",col.names=NA)
         # write.table(myfiles,"celfrominput.txt",sep="\t")
         cat(celfiles@annotation,file="annotation.txt")
+        
         # validate(
         #   need(length(which(myfiles$name != rownames(pData(celfiles)))) == 0,"Please sort your phenotype file alphabetically by sample name and upload it again." )
         # )
@@ -109,14 +136,12 @@ shinyServer(function(input, output) {
          info("Please sort your phenotype file alphabetically by sample name and upload it again.")
          stopApp(-1)
        }
-        if (celfiles@annotation!="pd.hg.u133.plus.2" & celfiles@annotation!="pd.mogene.2.0.st" & celfiles@annotation!="pd.hugene.2.0.st" & celfiles@annotation!="pd.clariom.s.human.ht" & celfiles@annotation!="pd.clariom.s.human" & celfiles@annotation!="pd.clariom.s.mouse.ht" & celfiles@annotation!="pd.clariom.s.mouse" & celfiles@annotation!='pd.mouse430.2' & celfiles@annotation!='pd.hg.u133a') {
-        #if (celfiles@annotation!="pd.hg.u133.plus.2" & celfiles@annotation!="pd.mogene.2.0.st") {
-        #  if (celfiles@annotation!="pd.hg.u133.plus.2") {
+        if (celfiles@annotation!="pd.hg.u133.plus.2" & celfiles@annotation!="pd.mogene.2.0.st" & celfiles@annotation!="pd.hugene.2.0.st" & celfiles@annotation!="pd.clariom.s.human.ht" & celfiles@annotation!="pd.clariom.s.human" & celfiles@annotation!="pd.clariom.s.mouse.ht" & celfiles@annotation!="pd.clariom.s.mouse" & celfiles@annotation!='pd.mouse430.2' & celfiles@annotation!='pd.hg.u133a' & celfiles@annotation!='pd.hugene.1.0.st.v1' & celfiles@annotation!='pd.mogene.1.0.st.v1' & celfiles@annotation!='pd.hg.u133a.2' & celfiles@annotation!='pd.huex.1.0.st.v2' & celfiles@annotation!='pd.hg.u219' & celfiles@annotation!='pd.mg.u74av2' & celfiles@annotation!='pd.mouse430a.2' & celfiles@annotation!='pd.moe430a' & celfiles@annotation!='pd.hg.u95av2' & celfiles@annotation!='pd.hta.2.0' & celfiles@annotation!='pd.moex.1.0.st.v1' & celfiles@annotation!='pd.hg.u133b') {
                #cat("Please sort your phenotype on sample name and upload it again. \n")
           info(paste0("Affymetrix platform: ",celfiles@annotation," NOT supported. Leaving..."))
           stopApp(-1)
         }
-        
+
         #validate(
         #  need(length(which(myfiles$name != rownames(pData(celfiles)))) == 0, "Please sort your phenotype on sample name and upload it again")
         #)
@@ -130,7 +155,7 @@ shinyServer(function(input, output) {
         withProgress(message = 'Normalization', detail = 'starting ...', value = 0, {
         # if (input$Platform=="h133p2") {
         #if (raw()@annotation=="pd.hg.u133.plus.2") {
-        if (raw()@annotation=="pd.hg.u133.plus.2" | raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.human" | raw()@annotation=="pd.clariom.s.mouse.ht" | raw()@annotation=="pd.clariom.s.mouse" | raw()@annotation=='pd.mouse430.2' | raw()@annotation=='pd.hg.u133a') {
+        if (raw()@annotation=="pd.hg.u133.plus.2" | raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.human" | raw()@annotation=="pd.clariom.s.mouse.ht" | raw()@annotation=="pd.clariom.s.mouse" | raw()@annotation=='pd.mouse430.2' | raw()@annotation=='pd.hg.u133a' | raw()@annotation=='pd.hg.u133a.2' | raw()@annotation=='pd.hg.u219' | raw()@annotation=='pd.mg.u74av2' | raw()@annotation=='pd.mouse430a.2' | raw()@annotation=='pd.moe430a' | raw()@annotation=='pd.hg.u95av2' | raw()@annotation=='pd.hg.u133b') {
           incProgress(0.5)
           celfiles.rma =rma(raw(), background=TRUE, normalize=TRUE, subset=NULL)
         } else {
@@ -138,16 +163,16 @@ shinyServer(function(input, output) {
           celfiles.rma =rma(raw(), background=TRUE, normalize=TRUE, subset=NULL, target="core")
         }
         })
-      }
-    )
+      })
     # raw qc data
     qc=reactive(
       {
         withProgress(message = 'Fitting probe level model', detail = 'starting ...', value = 0.75, {
-          celfiles.qc =fitProbeLevelModel(raw())
-        
+          validate(
+            need(raw()@annotation!= "pd.mogene.1.0.st.v1", 'NUSE and RLE plots unavailable for this platform.')
+          )
+          celfiles.qc=fitProbeLevelModel(raw())
         })
-         
       }
     )
     # list of DEG
@@ -188,6 +213,7 @@ shinyServer(function(input, output) {
              stopApp(-1)
            }
          }
+          
           
           myfactor <- factor(pData(norm())$SampleGroup)
           design1 <- model.matrix(~0+myfactor)
@@ -242,6 +268,58 @@ shinyServer(function(input, output) {
                         } else {
                           if (raw()@annotation=='pd.hg.u133a') {
                             Annot <- data.frame(ACCNUM=sapply(contents(hgu133aACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(hgu133aSYMBOL), paste, collapse=", "), DESC=sapply(contents(hgu133aGENENAME), paste, collapse=", "))
+                          } else {
+                            if (raw()@annotation=='pd.hugene.1.0.st.v1') {
+                              Annot <- data.frame(ACCNUM=sapply(contents(hugene10sttranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(hugene10sttranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(hugene10sttranscriptclusterGENENAME), paste, collapse=", "))
+                            } else {
+                              if (raw()@annotation=='pd.mogene.1.0.st.v1') {
+                                Annot <- data.frame(ACCNUM=sapply(contents(mogene10sttranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(mogene10sttranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(mogene10sttranscriptclusterGENENAME), paste, collapse=", "))
+                              } else {
+                                if (raw()@annotation=='pd.hg.u133a.2') {
+                                  Annot <- data.frame(ACCNUM=sapply(contents(hgu133a2ACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(hgu133a2SYMBOL), paste, collapse=", "), DESC=sapply(contents(hgu133a2GENENAME), paste, collapse=", "))
+                                } else {
+                                  if (raw()@annotation=='pd.huex.1.0.st.v2') {
+                                    Annot <- data.frame(ACCNUM=sapply(contents(huex10sttranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(huex10sttranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(huex10sttranscriptclusterGENENAME), paste, collapse=", "))
+                                  } else {
+                                    if (raw()@annotation=='pd.hg.u219') {
+                                      Annot <- data.frame(ACCNUM=sapply(contents(hgu219ACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(hgu219SYMBOL), paste, collapse=", "), DESC=sapply(contents(hgu219GENENAME), paste, collapse=", "))
+                                    } else {
+                                      if (raw()@annotation=='pd.ht.hg.u133.plus.pm') {
+                                        Annot <- data.frame(ACCNUM=sapply(contents(hgu133plus2ACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(hgu133plus2SYMBOL), paste, collapse=", "), DESC=sapply(contents(hgu133plus2GENENAME), paste, collapse=", "))
+                                      } else {
+                                        if (raw()@annotation=='pd.mg.u74av2') {
+                                          Annot <- data.frame(ACCNUM=sapply(contents(mgu74av2ACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(mgu74av2SYMBOL), paste, collapse=", "), DESC=sapply(contents(mgu74av2GENENAME), paste, collapse=", "))
+                                        } else {
+                                          if (raw()@annotation=='pd.mouse430a.2') {
+                                            Annot <- data.frame(ACCNUM=sapply(contents(mouse430a2ACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(mouse430a2SYMBOL), paste, collapse=", "), DESC=sapply(contents(mouse430a2GENENAME), paste, collapse=", "))
+                                          } else {
+                                            if (raw()@annotation=='pd.moe430a') {
+                                              Annot <- data.frame(ACCNUM=sapply(contents(moe430aACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(moe430aSYMBOL), paste, collapse=", "), DESC=sapply(contents(moe430aGENENAME), paste, collapse=", "))
+                                            } else {
+                                              if (raw()@annotation=='pd.hg.u95av2') {
+                                                Annot <- data.frame(ACCNUM=sapply(contents(hgu95av2ACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(hgu95av2SYMBOL), paste, collapse=", "), DESC=sapply(contents(hgu95av2GENENAME), paste, collapse=", "))
+                                              } else {
+                                                if (raw()@annotation=='pd.hta.2.0') {
+                                                  Annot <- data.frame(ACCNUM=sapply(contents(hta20transcriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(hta20transcriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(hta20transcriptclusterGENENAME), paste, collapse=", "))
+                                                } else {
+                                                  if (raw()@annotation=='pd.moex.1.0.st.v1') {
+                                                    Annot <- data.frame(ACCNUM=sapply(contents(moex10sttranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(moex10sttranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(moex10sttranscriptclusterGENENAME), paste, collapse=", "))
+                                                  } else {
+                                                    if (raw()@annotation=='pd.hg.u133b') {
+                                                      Annot <- data.frame(ACCNUM=sapply(contents(hgu133bACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(hgu133bSYMBOL), paste, collapse=", "), DESC=sapply(contents(hgu133bGENENAME), paste, collapse=", "))
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
                           }
                         }
                       }
@@ -317,14 +395,14 @@ shinyServer(function(input, output) {
         fin.dw=fin.dw[1:500,]
       }
     
-      #running volcano plot prior to pathways turns SYMBOL into a factor so:
+      #running volcano plot prior to pathways inexplicably turns SYMBOL into a factor so:
       fin.up$SYMBOL = as.character(fin.up$SYMBOL)
       fin.dw$SYMBOL = as.character(fin.dw$SYMBOL)
       
       #x2=rownames(fin.dw)
       #gdw=apply(array(as.character(x2)),1,function(z) unlist(strsplit(z, "\\|"))[2])
       
-      if (raw()@annotation=="pd.hg.u133.plus.2" | raw()@annotation=="pd.hugene.2.0.st" | raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.human" | raw()@annotation=='pd.hg.u133a') 
+      if (raw()@annotation=="pd.hg.u133.plus.2" | raw()@annotation=="pd.hugene.2.0.st" | raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.human" | raw()@annotation=='pd.hg.u133a' | raw()@annotation=='pd.hugene.1.0.st.v1' | raw()@annotation=='pd.hg.u133a.2' | raw()@annotation=='pd.huex.1.0.st.v2' | raw()@annotation=='pd.hg.u219' | raw()@annotation=='pd.ht.hg.u133.plus.pm' | raw()@annotation=='pd.hg.u95av2' | raw()@annotation=='pd.hta.2.0' | raw()@annotation=='pd.hg.u133b') 
       {
         cat(fin.up$SYMBOL,file=(paste0(input$ProjectID,'_',names(deg()$mylist[input$NumContrasts]),'_Top500_Up.txt')), sep='\n')
         cat(fin.dw$SYMBOL,file=(paste0(input$ProjectID,'_',names(deg()$mylist[input$NumContrasts]),'_Top500_Down.txt')),sep='\n')
@@ -432,7 +510,7 @@ shinyServer(function(input, output) {
      colors = list()
      
      for (i in 1:numFs){
-       colors[which(fs==lFs[i])] = i*4
+       colors[which(fs==lFs[i])] = i*5
      }
      colors = unlist(colors)
      
@@ -481,7 +559,7 @@ shinyServer(function(input, output) {
        #nbfacs=length(labfacs)
        plot_output_list <- lapply(1:nbfacs, function(i) {
          plotname <- paste("plot", i, sep="")
-         plotOutput(plotname, height = 600, width = 600)
+         plotOutput(plotname, height = 400, width = 600)
      })
        # Convert the list to a tagList - this is necessary for the list of items
        # to display properly.
@@ -495,7 +573,7 @@ shinyServer(function(input, output) {
          nbfacs=length(facs)
          #nbfacs=length(labfacs)
          #par(mfrow=c(1,nbfacs))
-         
+
          for (i in 1:nbfacs) {
            local({
              my_i <- i
@@ -504,7 +582,7 @@ shinyServer(function(input, output) {
            #igp=which(pData(raw())$SampleGroup==labfacs[i])
            output[[plotname]] <- renderPlot({
               withProgress(message = 'Generating Raw Maplot', detail = paste0('Plot ', my_i, ' ...'), value = (my_i/nbfacs), {
-                MAplot(raw(),which=my_i,plotFun=smoothScatter,refSamples=c(1:nbfacs),main=' versus median of all samples', cex=2, cex.main=1)
+                MAplot(raw(),which=my_i,plotFun=smoothScatter,refSamples=c(1:nbfacs), main='', cex=2)
                 #MAplot(raw()[,igp],pairs=TRUE,plotFun=smoothScatter,main="MVA plot before normalization", labels=raw()[,igp]$SampleID)  
            })
            })
@@ -522,7 +600,7 @@ shinyServer(function(input, output) {
            #nbfacs2=length(labfacs2)
            plot_output_list2 <- lapply(1:nbfacs2, function(i) {
              plotname2 <- paste("plota", i, sep="")
-             plotOutput(plotname2, height = 800, width = 800)
+             plotOutput(plotname2, height = 400, width = 600)
            })
            # Convert the list to a tagList - this is necessary for the list of items
            # to display properly.
@@ -550,7 +628,7 @@ shinyServer(function(input, output) {
              #igp=which(pData(norm())$SampleGroup==labfacs2[i])
              output[[plotname2]] <- renderPlot({
                withProgress(message = 'Generating Normalized Maplot', detail = paste0('Plot ', my_i, ' ...'), value = my_i/nbfacs2, {
-               MAplot(norm(),which=my_i,plotFun=smoothScatter,refSamples=c(1:nbfacs2),main=' versus median of other samples')
+               MAplot(norm(),which=my_i,plotFun=smoothScatter,refSamples=c(1:nbfacs2),main='', cex=2)
                 #MAplot(norm()[,igp],pairs=TRUE,plotFun=smoothScatter,main="MVA plot after RMA Normalization", labels=norm()[,igp]$SampleID) #
              })
              })
@@ -623,8 +701,6 @@ shinyServer(function(input, output) {
      )
      output$topDown=DT::renderDataTable(DT::datatable(
        {
-         graphics.off()
-         pdf(NULL)
         #callDEG = deg()[[input$NumContrasts]]
         #topDw = read.delim(paste0(input$ProjectID,'_',names(deg())[input$NumContrasts],"_Pathways_Down.txt"), sep = '\t', header = T)
         
@@ -772,12 +848,9 @@ shinyServer(function(input, output) {
          
          
          zip(file, mytables, flags = "-r9X", extras = "", zip = Sys.getenv("R_ZIPCMD", "zip"))
-         
        }
      )
-     
   })
-  
 })
 
 

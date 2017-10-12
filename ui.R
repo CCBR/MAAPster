@@ -78,7 +78,7 @@ shinyUI(fluidPage(
                   #tabPanel("Results"," "),
                   navbarMenu (title="Pre-normalization QC plots",
                     tabPanel("Histogram",plotOutput("rawhist")),
-                    tabPanel("Maplots",uiOutput("rawmaplot")),
+                    tabPanel("Maplots", uiOutput("rawmaplot")),
                     tabPanel("Boxplots", plotOutput("rawbox")),
                     tabPanel("RLE",plotOutput("rle")),
                     tabPanel("NUSE",plotOutput("nuse"))

@@ -76,14 +76,18 @@ knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
   
   #png(paste(project,"-rle-plot.png",sep=""),width=1000,height=700)
   par(mar=c(8, 4, 4, 8) + 0.1,las=2, cex.axis=0.8)
-  RLE(qc(), main="RLE", names = raw()$SampleID, col=colors)
+  if (raw()@annotation!='pd.mogene.1.0.st.v1') {
+    RLE(qc(), main="RLE", names = raw()$SampleID, col=colors)
+  }
 ```
 
 ```{r}
  # (NUSE) represents normalized standard error (SE) estimates from the PLM fit. The SE estimates are normalized such that for each probe set, the median standard error across all arrays is equal to 1. A box plot of NUSE values is drawn for each array. On the NUSE plot, arrays with lower quality will have boxes that are centered higher and/or have a larger spread than the other good quality arrays from the same experiment. Typically, boxes centered above 1.1 represent arrays that have quality problems which are often detected in several of the other QC measures
   #png(paste(project,"-nuse-plot.png",sep=""),width=1000,height=700)
   par(mar=c(8, 4, 4, 8) + 0.1,las=2,cex.axis=0.8)
-  NUSE(qc(), main="NUSE", names = raw()$SampleID, col=colors)
+    if (raw()@annotation!='pd.mogene.1.0.st.v1') {
+      NUSE(qc(), main="NUSE", names = raw()$SampleID, col=colors)
+    }
 ```
 
 ```{r}
