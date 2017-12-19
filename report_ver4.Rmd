@@ -357,11 +357,11 @@ rglwidget()
     
     ## generate plotMA from geneplotter
     
-    dataf=data.frame("m"=all.genes.con$AveExpr,"fc"=all.genes.con$logFC,"sig"=all.genes.con$adj.P.Val<0.05)
+    dataf=data.frame("m"=all.genes.con$AveExpr,"fc"=all.genes.con$logFC,"sig"=all.genes.con$P.Value<0.05)
     #png(paste(project,"-MAplot-",cons[i],".png",sep=""),width=1000,height=700)
-    plotMA(dataf,main=names(deg()$mylist)[i],ylim=c(-2,2))
+    geneplotter::plotMA(dataf,main=names(deg()$mylist)[i],ylim=c(-2,2))
+    legend("topright",legend=c("P-Value < 0.05","Not significant"),col=c('red3','gray32'),pch=16)
     # name=paste("all.genes.con",i,sep="")
-  
   }
  
 ```
@@ -382,9 +382,9 @@ library(htmltools)
     log_FC=dat$logFC
     log_pval=-log10(dat$P.Value)
     Significant=rep("NotSignificant",length(log_FC))
-    Significant[which(dat$P.Value<0.05 & abs(dat$logFC)>=1)]="Significant&LogFoldChange"
-    Significant[which(dat$P.Value<0.05 & abs(dat$logFC)<1)]="Significant"
-    Significant[which(dat$P.Value>=0.05 & abs(dat$logFC)>=1)]="LogFoldChange"
+    Significant[which(dat$P.Value<0.05 & abs(dat$logFC)>=1)]="AbsLogFoldChange>1 & PValue<0.05"
+    Significant[which(dat$P.Value<0.05 & abs(dat$logFC)<1)]="PValue<0.05"
+    Significant[which(dat$P.Value>=0.05 & abs(dat$logFC)>=1)]="AbsLogFoldChange>1"
     gene=dat$SYMBOL
     volcano_data=as.data.frame(cbind(gene,log_FC,log_pval,Significant))
     k[[i]] = plot_ly(type='scatter',data = volcano_data, x = log_FC, y = log_pval, text = gene, mode = "markers", color = Significant) %>% layout(title =paste0('Volcano plot for: ',names(deg()$mylist)[[i]]), xaxis=list(title="Fold Change",range =c(-5,5),tickvals=c(-5,-4,-3,-2,-1,0,1,2,3,4,5),ticktext=c('-32','-16','-8','-4','-2','1','2','4','8','16','32')), yaxis=list(title="-Log10 pvalue",range =c(0,15)))
