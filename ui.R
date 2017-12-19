@@ -1,108 +1,272 @@
 library(shiny)
+library(DT)
+library(Biobase)
 library(shinyjs)
-library(shinyRGL)
-library(rgl)
+library(rglwidget)
 library(plotly)
 
-shinyUI(fluidPage(
-  tags$head(
-    tags$style(
-      HTML(".shiny-notification {
-           height: 100px;
-           width: 800px;
-           position:fixed;
-           font-weight: 500;
-           font-size: 20px;
-           background-color: #c1cdcd;
-           top: calc(40% - 50px);;
-           left: calc(50% - 400px);;
-      }"
+options(shiny.maxRequestSize = 500*1024^2)
+
+shinyUI(
+  fluidPage(
+    tags$head(
+      tags$style(
+        HTML(".shiny-notification {
+             height: 100px;
+             width: 800px;
+             position:fixed;
+             font-weight: 500;
+             font-size: 20px;
+             background-color: #c1cdcd;
+             top: calc(40% - 50px);;
+             left: calc(50% - 400px);;
+             }"
+        )
       )
-      ),
-    tags$style(
-      HTML(".shiny-output-error-validation {
-            color: red;
-            font-size: 20px;
-      }"
-      )
-    )
     ),
-  useShinyjs(),
-  titlePanel("CCBR Microarray analysis workflow", windowTitle="CCBR Microarray analysis workflow"),
-  h5("(For Affymetrix human and mouse data)"),
-  sidebarLayout(
+    useShinyjs(),
+    
+    titlePanel("CCBR Microarray analysis workflow", windowTitle="CCBR Microarray analysis workflow"),
+    h5("(For Affymetrix human and mouse data)"),
+    
     sidebarPanel(
-      # tags$link(rel = 'stylesheet', type = 'text/css', href = 'styles.css'),
-                width=12,
-                 fluidRow(align="Top",
-                          
-                          column(2,
-                                 textInput("ProjectID", label=h6("Project ID:"), value="ccbr", width="150px")
-                                 # radioButtons("Platform", label=h6("Select platform"), choices=c("hgu133plus2" = "h133p2", "Mouse.gene.2.0.st" = "mst2"),selected="mst2")
-                          ),
-                          column(3,
-                                 # textInput("Indir", label=h6("Path to input directory"), value="/Users/elloumif/Documents/cels6/cels",width="300px")
-                                 fileInput("Indir", label=h6("Select CEL files"),multiple =T)
-                          ),
-                          
-                          column(3,
-                                 fileInput("pheno", label=h6("Choose phenotype file"))
-                          ),
-                          column(2,
-                                 fileInput("const", label=h6("Choose contrast file")),
-                                 numericInput("NumContrasts", label=h6("Choose contrast to show"),value="1", width="150px")
-                                 #numericInput("pval", label=h6("KEGG/GO Enrichment Pvalue threshold"),value="0.05", width="150px"),
-                                 #sliderInput("fc",label=h6("KEGG/GO Enrichment FC threshold"),min=0.5,max=3.5,value=1.5,step=0.5)
-                          ),
-                          column(2,
-                                 numericInput("pval", label=h6("P-value threshold for DEGs"),value=0.05, width="150px"),
-                                 numericInput("fc", label=h6("FC threshold for DEGs"),value=1.5, width="150px"),
-                                 numericInput("pathPval", label=h6("P-value threshold for pathways"),value=0.05, width="150px")
-                                 # sliderInput("fc",label=h6("KEGG/GO Enrichment FC threshold"),min=0.5,max=3.5,value=1.5,step=0.5)
-                          )
-                          #       numericInput("NumContrasts", label=h6("Which contrast to show"),value="1", width="150px"),
-                           #      numericInput("fdr", label=h6("FDR for Pathway enrichment"),value="0.05", width="150px")
-                          #)
-                 ),
-                
-            
-                # submitButton(text="Click to assign samples to groups and create contrasts")
-                actionButton(inputId="go",label="Start"),
-                actionButton(inputId="rep",label="Generate Report"),
-                downloadButton('downloadReport', label = 'Download Report'),
-                downloadButton('downloadTables', label = 'Download Tables')
-    ),
-    mainPanel(
-      navbarPage(title = "Results",
-                  #title = "Microarray",
-                  #tabPanel("Results"," "),
-                  navbarMenu (title="Pre-normalization QC plots",
-                    tabPanel("Histogram",plotOutput("rawhist")),
-                    tabPanel("Maplots", uiOutput("rawmaplot")),
-                    tabPanel("Boxplots", plotOutput("rawbox")),
-                    tabPanel("RLE",plotOutput("rle")),
-                    tabPanel("NUSE",plotOutput("nuse"))
-                  ),
-                  navbarMenu (title="Post-normalization plots",
-                              tabPanel("Histogram",plotOutput("rmahist")),
-                              tabPanel("Maplots",uiOutput("normaplot")),
-                              tabPanel("Boxplots",plotOutput("rmabox")),
-                              tabPanel("3D-PCA",rglwidgetOutput("pca3d")),
-                              tabPanel("Interactive Heatmap",plotlyOutput("heatmap"))
-                  ),
-                  navbarMenu (title="DEG-Enrichments-tables",
-                              tabPanel("Differentially Expressed Genes",DT::dataTableOutput("deg")),
-                              tabPanel("Pathways for Upregulated Genes",DT::dataTableOutput("topUp")),
-                              tabPanel("Pathways for Downregulated Genes",DT::dataTableOutput("topDown")),
-                              tabPanel("Interactive Volcano Plot",plotly::plotlyOutput('volcano'))
-                  ),
-                  navbarMenu (title="Help",
-                              tabPanel("Manual",uiOutput("manual"))
-                  )
-                  
+      selectInput('analysisType', "Choose type of analysis",
+                  c('Upload CEL files' = "CEL", 'Analyze GEO data' = 'GEO', ""),
+                  selected = ''
       )
-      # end solution2
+    ),
+      
+    conditionalPanel(
+      condition = "input.analysisType == 'CEL'",
+      fluidRow(),
+      column(2,
+        textInput("ProjectID", label=h6("Project ID:"), value="CCBR", width="150px")
+      ),
+      column(3,
+        fileInput("Indir", label=h6("Select CEL files"),multiple =T),
+        h5("Choose short descriptive file names with no spaces (eg Ctl1.CEL, KO1.CEL)")
+      ),
+      br(),
+      br(),
+      actionButton(inputId="CELbutton", label="Display"),
+      br(),
+      br()
+    ),
+    
+    br(),
+    br(),
+    
+    conditionalPanel(
+      condition = "input.analysisType == 'GEO'",
+      fluidRow(),
+      column(2,
+        textInput("ProjectID", label=h6("Project ID:"), value="CCBR", width="150px")
+      ),
+      column(2,
+        textInput("gseid", label= h6("Accession Code"), value="8 digit GSE code", width="150px")
+        ),
+      br(),
+      br(),
+      actionButton(inputId="button", label="Display")
+    ),
+    
+    
+    br(),
+    br(),
+    br(),
+    br(),
+    
+    
+
+
+    shinyjs::hidden(
+      div(id= "hide1",
+          # fluidRow(
+          #   column(3,
+          #          selectInput("number", "Number of groups:",
+          #                      c("1"="1", "2"="2", "3"="3", "4"="4", "5"="5", "6"="6", "7"="7", "8"="8", "9"="9", "10"="10", ""),
+          #                      selected=""
+          #          )
+          #          #actionButton("button3", "Enter")
+          #   )),
+          column(3, 
+                 uiOutput("ui"),
+                 h6("(Name may be changed for compatibility with R)"),
+                 br(),
+                 h5("Select samples below and click \"Define\" to add to group"),
+                 actionButton("button2", "Define")
+      ))
+    ),
+    br(),
+    
+    
+    #shinyjs::hidden(
+    #  div(id='hide1',
+      # conditionalPanel(
+      # condition = 'input.number == 1',
+      #     fluidRow(),
+      #       column(2,
+      #         #lapply(1:input$number, function(i) {     
+      #         selectInput("group1", "Please select a group",
+      #                     #choices = paste0('Group', i),
+      #                     choices = c("Group_1" = "Group_1"),
+      #                     selected = "Group_1"
+      #         #)}
+      #       ),
+      #       actionButton("button2", "Define")
+      # )
+      # ),
+      # 
+    #   conditionalPanel(
+    #   condition = 'input.number == 2',
+    #   fluidRow(),
+    #   column(2,
+    #          #lapply(1:input$number, function(i) {     
+    #          selectInput("group1", "Please select a group",
+    #                      #choices = paste0('Group', i),
+    #                      choices = c("Group_1" = "Group_1", "Group_2" = "Group_2"),
+    #                      selected = "Group_1"
+    #                      #)}
+    #          ),
+    #          actionButton("button2", "Define")
+    #   )
+    # ),
+    
+      
+    br(),
+    shinyjs::hidden(
+      div(id= "hide2",
+          br(),
+          br(),
+          fluidRow(column(10, wellPanel(DT:: dataTableOutput("mytable"))))
+        )),
+    
+    shinyjs::hidden(
+      div(id="hideCEL",
+          br(),
+          br(),
+          fluidRow(column(10, wellPanel(DT:: dataTableOutput("mytableCEL"))))
+      )),
+    
+    # shinyjs:: hidden(
+    #   div(id= "hide3",
+    #       mainPanel(
+    #         actionButton("test","Contrast"))
+    #   )),
+    
+   shinyjs:: hidden(
+     div(id= "hide3",
+         mainPanel(
+           h4("Contrasts: "),
+           uiOutput("choice1"),
+           uiOutput("choice2"),
+         mainPanel(
+           fluidRow(align='Top',
+                    column(2,
+                           actionButton("addrow","Add Contrast")
+                    )),
+           mainPanel(
+             tableOutput("contrastTable"))
+         ))),
+     
+ 
+     # div(id= "hide3",
+     #      # conditionalPanel(
+     #      #   condition = "input.number == '1'",
+     #        mainPanel(
+     #          h4("Contrasts: "),
+     #          selectizeInput("selectIn1", "Select", 
+     #                         choices = c("Group_1" = "Group_1",
+     #                                     "Group_2" = "Group_2",
+     #                                     "Group_3" = "Group_3",
+     #                                     "Group_4" = "Group_4",
+     #                                     "Group_5" = "Group_5",
+     #                                     "Group_6" = "Group_6",
+     #                                     "Group_7" = "Group_7",
+     #                                     "Group_8" = "Group_8",
+     #                                     "Group_9" = "Group_9",
+     #                                     "Group_10" = "Group_10")),
+     #          selectizeInput("selectIn2", "Versus",
+     #                         choices = c("Group_1" = "Group_1",
+     #                                     "Group_2" = "Group_2",
+     #                                     "Group_3" = "Group_3",
+     #                                     "Group_4" = "Group_4",
+     #                                     "Group_5" = "Group_5",
+     #                                     "Group_6" = "Group_6",
+     #                                     "Group_7" = "Group_7",
+     #                                     "Group_8" = "Group_8",
+     #                                     "Group_9" = "Group_9",
+     #                                     "Group_10" = "Group_10"))),
+     #     mainPanel(
+     #         fluidRow(align='Top',
+     #                  column(2,
+     #                         actionButton("addrow","Add Contrast")
+     #                  )),
+     #          
+     #    mainPanel(
+     #        tableOutput("contrastTable"))
+     # )),
+    
+    shinyjs::hidden(
+      div(id='hideAnalysis',
+        sidebarLayout(position = 'left',
+          sidebarPanel(
+            width=12,
+            fluidRow(align='Top',
+              # column(3,
+              #        numericInput("NumContrasts", label=h6("Choose contrast to show"),value="1", width="150px")),
+              column(3,
+                     uiOutput("displayContrast")),
+              column(3,
+                     numericInput("pval", label=h6("P-value threshold for DEGs"),value=0.05, width="200px")),
+              column(3,
+                     numericInput("fc", label=h6("FC threshold for DEGs"),value=1.5, width="150px")),
+              column(3, 
+                     numericInput("pathPval", label=h6("P-value threshold for pathways"),value=0.05, width="200px"))
+            ),
+            actionButton(inputId="analyze",label="Start")),
+        mainPanel(
+          br(),br(),br(),
+          navbarPage(title = "Results",
+                     navbarMenu (title="Pre-normalization QC plots",
+                                 tabPanel("Histogram",plotOutput("rawhist")),
+                                 tabPanel("Maplots", uiOutput("rawmaplot")),
+                                 tabPanel("Boxplots", plotOutput("rawbox")),
+                                 tabPanel("RLE",plotOutput("rle")),
+                                 tabPanel("NUSE",plotOutput("nuse"))
+                     ),
+                    navbarMenu (title="Post-normalization plots",
+                                tabPanel("Histogram",plotOutput("rmahist")),
+                                tabPanel("Maplots",uiOutput("normaplot")),
+                                tabPanel("Boxplots",plotOutput("rmabox")),
+                                tabPanel("3D-PCA",rglwidgetOutput("pca3d")),
+                                tabPanel("Interactive Heatmap",plotlyOutput("heatmap"))
+                    ),
+                    navbarMenu (title="DEG-Enrichments-tables",
+                                tabPanel("Differentially Expressed Genes",DT::dataTableOutput("deg")),
+                                tabPanel("Pathways for Upregulated Genes",DT::dataTableOutput("topUp")),
+                                tabPanel("Pathways for Downregulated Genes",DT::dataTableOutput("topDown")),
+                                tabPanel("Interactive Volcano Plot",plotly::plotlyOutput('volcano'))
+                    )
+          ),br(),br(),br(),br()
+        )
+        )
+      )
+    ),
+    shinyjs::hidden(
+      div(id='hideDownloads',
+          mainPanel(
+            #actionButton(inputId="rep",label="Generate Report"),
+            downloadButton('downloadReport', label = 'Download Report'),
+            downloadButton('downloadTables', label = 'Download Tables')
+          )
+      )
     )
+   )
   )
-  ## div(style="display:inline-block",submitButton("Generate PDF report"), style="float:center")
-))
+)
+ 
+ 
+
+  
+  
