@@ -70,7 +70,7 @@ library(htmltools)
 library(heatmaply)
 library(Biobase)
 
-setwd('/Users/valdezkm/Documents/MicroarrayPipeline/CodeInProgress/MicroArrayPipeline')
+#setwd('/Users/valdezkm/Documents/MicroarrayPipeline/CodeInProgress/MicroArrayPipeline')
 
 shinyServer(function(input, output) {
   
