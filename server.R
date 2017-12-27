@@ -69,6 +69,11 @@ library(plotly)
 library(htmltools)
 library(heatmaply)
 library(Biobase)
+library(GSVA)
+library(GSEABase)
+library(pheatmap)
+library(viridis)
+library(dendsort)
 
 #setwd('/Users/valdezkm/Documents/MicroarrayPipeline/CodeInProgress/MicroArrayPipeline')
 
@@ -473,7 +478,7 @@ shinyServer(function(input, output) {
       deg=reactive(
         {
           ##-------------
-          withProgress(message = 'Computing differentially expressed genes', value = 0, {
+          withProgress(message = 'Analysis starting...', value = 0, {
             facs <- factor(pData(raw())$group)
             labfacs=levels(facs)
             nbfacs=length(labfacs)
@@ -507,7 +512,7 @@ shinyServer(function(input, output) {
             
             fit2 <- contrasts.fit(fit1, contrast.matrix)
             ebayes.fit2=eBayes(fit2) # smooths the std error
-            incProgress(0.25, detail = 'Limma model fitted')
+            incProgress(0.25)
             # #EXTRACTING ALL GENES FOR EACH CONTRAST
             
             ##ANNOTATE PROBESET IDS FROM ANNOTATION PACKAGE FROM BIOCONDUCTOR
@@ -617,7 +622,7 @@ shinyServer(function(input, output) {
               }
             }
             
-            incProgress(0.25, detail = 'preparing for pathway analysis ...')
+            incProgress(0.25)
             mylist=vector("list",nb)
             
             for (i in 1:nb)
@@ -650,11 +655,11 @@ shinyServer(function(input, output) {
             incProgress(0.5, detail = 'DEG done')
             
             #mylist
-            list(mylist=mylist)
+            list(mylist=mylist, Annot=Annot, cons=cons, design1=design1, nb=nb)
           })
           ##-------------
         }
-      )
+      ) #end DEG
       
       pathways=reactive(
         {
@@ -722,6 +727,41 @@ shinyServer(function(input, output) {
           
           list(up=addUpCol,dw=addDwCol)
         } 
+      ) #end pathways
+      
+      ssGSEA=reactive(
+        {
+          withProgress(message = 'Performing ssGSEA', detail = 'may take a couple of minutes ...', value = 0, {
+          ssgs =  merge(exprs(norm()),deg()$Annot,by.x=0, by.y=0, all.x=T)
+          ssgs = ssgs[ssgs$SYMBOL!='NA',]
+          ssgs = subset(ssgs, select=-c(ACCNUM,DESC,Row.names))
+          ssgs = aggregate(.~SYMBOL,data=ssgs,mean)                               #aggregate duplicate probes by mean
+          rownames(ssgs) = ssgs$SYMBOL
+          ssgs = subset(ssgs, select=-c(SYMBOL))
+          ssgs = as.matrix(ssgs)
+    
+          gset = getGmt(input$geneSet)                                            #input gene set 
+          ssgsResults = gsva(ssgs, gset, method='ssgsea')                         #run GSVA
+          
+          incProgress(amount = 0.50, detail = 'Performing differential expression analysis of pathways...')
+          
+          fit1 = lmFit(ssgsResults,deg()$design1)
+          contrast.matrix = makeContrasts(contrasts=deg()$cons,levels=deg()$design1)
+          fit2 = contrasts.fit(fit1,contrast.matrix)
+          ebayes.fit2 = eBayes(fit2)
+          
+          myPathways=vector("list",deg()$nb)
+          for (i in 1:deg()$nb)
+          {
+            all.pathways = topTable(ebayes.fit2, coef=i, number=nrow(ebayes.fit2))
+            all.pathways = all.pathways[order(abs(all.pathways$logFC),decreasing=T),]
+            colnames(all.pathways)[2] = 'EnrichmentScore'
+            myPathways[[i]] = all.pathways
+          }
+          names(myPathways)=deg()$cons
+          list(myPathways=myPathways,ssgsResults=ssgsResults)
+          })
+        }
       )
       
       
@@ -905,7 +945,7 @@ shinyServer(function(input, output) {
       if(is.na(input$pathPval)) {
         topUp
       } else {
-        topUp = topUp[(as.numeric(topUp[,5]) <= input$pathPval),]
+        topUp = topUp[(fas.numeric(topUp[,5]) <= input$pathPval),]
       }
       topUp
     } , caption=paste0("Pathways for the top 500 Upregulated Genes: ", names(deg()$mylist)[num]),
@@ -963,6 +1003,33 @@ shinyServer(function(input, output) {
         plot_ly(type='scatter', data = volcano_data, x = log_FC, y = log_pval, text = gene, mode = "markers", color = Significant) %>% layout(title=paste0('Volcano plot for: ',names(deg()$mylist)[num]),xaxis=list(title="Fold Change",range =c(-5,5),tickvals=c(-5,-4,-3,-2,-1,0,1,2,3,4,5),ticktext=c('-32','-16','-8','-4','-2','1','2','4','8','16','32')),yaxis=list(title="-Log10 pvalue",range =c(0,15)))
       })
     })
+  output$ssgsea=DT::renderDataTable(DT::datatable(
+    {
+      k$all = cbind(paste0(k$k1, ' vs ', k$k2))
+      num = which(input$NumContrasts==k$all[,1])
+      
+      ssGSEA()$myPathways[[num]]
+    }
+  ))
+  output$ssHeatmap=renderPlot(
+    {
+      k$all = cbind(paste0(k$k1, ' vs ', k$k2))
+      num = which(input$NumContrasts==k$all[,1])
+      each = ssGSEA()$myPathways[[num]]
+
+      sampleColumns = c(which(v$data$group==k$k2[num]),which(v$data$group==k$k1[num]))          #subset columns (samples) for user input contrast
+      paths = ssGSEA()$ssgsResults[rownames(ssGSEA()$ssgsResults) %in% rownames(each)[1:50],]   #subset diff exprs pathways for user input contrast
+      paths = paths[,sampleColumns]
+      
+      matCol = data.frame(group=v$data[sampleColumns,2])
+      rownames(matCol) = v$data[sampleColumns,1]
+      matColors = list(group = unique(colors[sampleColumns]))
+      names(matColors$group) = unique(v$data[sampleColumns,2])
+      
+      pheatmap(paths,color=inferno(10),annotation_col=matCol,annotation_colors=matColors,drop_levels=TRUE,fontsize=7, main='Enrichment Scores for Top 50 Differentially Expressed ssGSEA Pathways')
+     
+    }
+  )
   #observeEvent(input$rep, {
     # withProgress(message = 'Generating HTML report', detail = 'starting ...', value = 0.5, {
     #   # out <- render('../report_ver4.Rmd','html_document',paste(input$ProjectID,"_","report.html",sep=""),getwd(),getwd())

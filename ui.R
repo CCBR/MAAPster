@@ -215,14 +215,19 @@ shinyUI(
             fluidRow(align='Top',
               # column(3,
               #        numericInput("NumContrasts", label=h6("Choose contrast to show"),value="1", width="150px")),
-              column(3,
+              column(2,
                      uiOutput("displayContrast")),
-              column(3,
+              column(2,
                      numericInput("pval", label=h6("P-value threshold for DEGs"),value=0.05, width="200px")),
-              column(3,
+              column(2,
                      numericInput("fc", label=h6("FC threshold for DEGs"),value=1.5, width="150px")),
-              column(3, 
-                     numericInput("pathPval", label=h6("P-value threshold for pathways"),value=0.05, width="200px"))
+              column(2, 
+                     numericInput("pathPval", label=h6("P-value threshold for pathways"),value=0.05, width="200px")),
+              column(4,
+                     selectInput('geneSet', label=h6("Choose Gene Set for ssGSEA"),
+                                 c("H: Hallmark Gene Sets"="h.all.v6.1.symbols.gmt", "C1: Positional Gene Sets"="c1.all.v6.1.symbols.gmt", "C2: Curated Gene Sets"="c2.all.v6.1.symbols.gmt", 
+                                   "C3: Motif Gene Sets"="c3.all.v6.1.symbols.gmt", "C4: Computational Gene Sets"="c4.all.v6.1.symbols.gmt","C5: GO gene sets"="c5.all.v6.1.symbols.gmt", 
+                                   "C6: Oncogenic Signatures"="c6.all.v6.1.symbols.gmt", "C7: Immunologic Signatures"="c7.all.v6.1.symbols.gmt"), selected="h.all.v6.1.symbols.gmt"))
             ),
             actionButton(inputId="analyze",label="Start")),
         mainPanel(
@@ -247,7 +252,11 @@ shinyUI(
                                 tabPanel("Pathways for Upregulated Genes",DT::dataTableOutput("topUp")),
                                 tabPanel("Pathways for Downregulated Genes",DT::dataTableOutput("topDown")),
                                 tabPanel("Interactive Volcano Plot",plotly::plotlyOutput('volcano'))
-                    )
+                    ),
+                    navbarMenu (title='Single Sample GSEA',
+                                tabPanel("Enriched Pathways",DT::dataTableOutput('ssgsea')),
+                                tabPanel("Pathway Heatmap",plotOutput("ssHeatmap", width='100%', height='800px'))
+                                )
           ),br(),br(),br(),br()
         )
         )
