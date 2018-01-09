@@ -945,7 +945,7 @@ shinyServer(function(input, output) {
       if(is.na(input$pathPval)) {
         topUp
       } else {
-        topUp = topUp[(fas.numeric(topUp[,5]) <= input$pathPval),]
+        topUp = topUp[(as.numeric(topUp[,5]) <= input$pathPval),]
       }
       topUp
     } , caption=paste0("Pathways for the top 500 Upregulated Genes: ", names(deg()$mylist)[num]),
