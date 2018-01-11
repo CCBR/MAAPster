@@ -45,6 +45,8 @@ library(pd.hg.u133b)
 library(hgu133b.db)
 library(pd.hugene.1.1.st.v1)
 library(hugene11sttranscriptcluster.db)
+library(pd.mogene.1.1.st.v1)
+library(mogene11sttranscriptcluster.db)
 #library(GSEA)
 library(limma)
 library(oligo)
@@ -146,7 +148,7 @@ shinyServer(function(input, output) {
       cels = myfiles$name
     
       mytableCEL=matrix("",length(cels),1)
-      colnames(mytableCEL)=c("file name")
+      colnames(mytableCEL)=c("title")
 
       for (k in 1:length(cels))
       {
@@ -154,7 +156,7 @@ shinyServer(function(input, output) {
       }
       mytableCEL <- data.frame(mytableCEL)
       
-      mytableCEL$group <- ""
+      mytableCEL$group <- "..."
       v$data <- mytableCEL
       
       output$mytableCEL = DT::renderDataTable({
@@ -168,18 +170,17 @@ shinyServer(function(input, output) {
   observeEvent(
     input$button, 
     isolate({
+      #GSE input
       withProgress(message = 'Loading files...', value = 0.25, {
         if (input$gseid=="8 digit GSE code") return()
         id=input$gseid
         id = gsub(" ","",id,fixed=TRUE)       
         
         incProgress(0.25)
-        
-
+      
         #gds <- getGEO(input$gseid, GSEMatrix = F,getGPL=T,AnnotGPL=T)
         gds <- getGEO(id, GSEMatrix = F,getGPL=T,AnnotGPL=T)
-        
-        gds
+        #gds
         
         mytable=matrix("",length(GSMList(gds)),3)
         colnames(mytable)=c("gsm","title","description")
@@ -197,7 +198,7 @@ shinyServer(function(input, output) {
         
         mytable <- data.frame(mytable)
         
-        mytable$group <- ""
+        mytable$group <- "..."
         v$data <- mytable
         
         incProgress(0.25)
@@ -240,6 +241,7 @@ shinyServer(function(input, output) {
         
         if (is.null(v$data)) return()
         if (is.null(v$platform)) warning()
+        
         DT::datatable(v$data, options = list(lengthMenu = c(2,4,6,8,10), pageLength = 8))
       })
     })
@@ -441,7 +443,7 @@ shinyServer(function(input, output) {
       
       cat(celfiles@annotation,file="annotation.txt")
       
-      if (celfiles@annotation!="pd.hg.u133.plus.2" & celfiles@annotation!="pd.mogene.2.0.st" & celfiles@annotation!="pd.hugene.2.0.st" & celfiles@annotation!="pd.clariom.s.human.ht" & celfiles@annotation!="pd.clariom.s.human" & celfiles@annotation!="pd.clariom.s.mouse.ht" & celfiles@annotation!="pd.clariom.s.mouse" & celfiles@annotation!='pd.mouse430.2' & celfiles@annotation!='pd.hg.u133a' & celfiles@annotation!='pd.hugene.1.0.st.v1' & celfiles@annotation!='pd.mogene.1.0.st.v1' & celfiles@annotation!='pd.hg.u133a.2' & celfiles@annotation!='pd.huex.1.0.st.v2' & celfiles@annotation!='pd.hg.u219' & celfiles@annotation!='pd.mg.u74av2' & celfiles@annotation!='pd.mouse430a.2' & celfiles@annotation!='pd.moe430a' & celfiles@annotation!='pd.hg.u95av2' & celfiles@annotation!='pd.hta.2.0' & celfiles@annotation!='pd.moex.1.0.st.v1' & celfiles@annotation!='pd.hg.u133b' & celfiles@annotation!='pd.hugene.1.1.st.v1') {
+      if (celfiles@annotation!="pd.hg.u133.plus.2" & celfiles@annotation!="pd.mogene.2.0.st" & celfiles@annotation!="pd.hugene.2.0.st" & celfiles@annotation!="pd.clariom.s.human.ht" & celfiles@annotation!="pd.clariom.s.human" & celfiles@annotation!="pd.clariom.s.mouse.ht" & celfiles@annotation!="pd.clariom.s.mouse" & celfiles@annotation!='pd.mouse430.2' & celfiles@annotation!='pd.hg.u133a' & celfiles@annotation!='pd.hugene.1.0.st.v1' & celfiles@annotation!='pd.mogene.1.0.st.v1' & celfiles@annotation!='pd.hg.u133a.2' & celfiles@annotation!='pd.huex.1.0.st.v2' & celfiles@annotation!='pd.hg.u219' & celfiles@annotation!='pd.mg.u74av2' & celfiles@annotation!='pd.mouse430a.2' & celfiles@annotation!='pd.moe430a' & celfiles@annotation!='pd.hg.u95av2' & celfiles@annotation!='pd.hta.2.0' & celfiles@annotation!='pd.moex.1.0.st.v1' & celfiles@annotation!='pd.hg.u133b' & celfiles@annotation!='pd.hugene.1.1.st.v1' & celfiles@annotation!='pd.mogene.1.1.st.v1') {
         #cat("Please sort your phenotype on sample name and upload it again. \n")
         info(paste0("Affymetrix platform: ",celfiles@annotation," NOT supported. Leaving..."))
         stopApp(-1)
@@ -468,7 +470,7 @@ shinyServer(function(input, output) {
         {
           withProgress(message = 'Fitting probe level model', detail = 'starting ...', value = 0.75, {
             validate(
-              need(raw()@annotation!= "pd.mogene.1.0.st.v1", 'NUSE and RLE plots unavailable for this platform.')
+              need(raw()@annotation!= "pd.mogene.1.0.st.v1" && raw()@annotation!='pd.mogene.1.1.st.v1', 'NUSE and RLE plots unavailable for this platform.')
             )
             celfiles.qc=fitProbeLevelModel(raw())
           })
@@ -482,8 +484,8 @@ shinyServer(function(input, output) {
             facs <- factor(pData(raw())$group)
             labfacs=levels(facs)
             nbfacs=length(labfacs)
-
             contra=data.frame(k$k1,k$k2)
+            
             nb=dim(contra)[1]
             cons=c()
             #validate(
@@ -598,6 +600,10 @@ shinyServer(function(input, output) {
                                                       } else {
                                                         if (raw()@annotation=='pd.hugene.1.1.st.v1') {
                                                           Annot <- data.frame(ACCNUM=sapply(contents(hugene11sttranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(hugene11sttranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(hugene11sttranscriptclusterGENENAME), paste, collapse=", "))
+                                                        } else {
+                                                          if (raw()@annotation=='pd.mogene.1.1.st.v1') {
+                                                            Annot <- data.frame(ACCNUM=sapply(contents(mogene11sttranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(mogene11sttranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(mogene11sttranscriptclusterGENENAME), paste, collapse=", "))
+                                                          }
                                                         }
                                                       }
                                                     }
@@ -1021,10 +1027,10 @@ shinyServer(function(input, output) {
       paths = ssGSEA()$ssgsResults[rownames(ssGSEA()$ssgsResults) %in% rownames(each)[1:50],]   #subset diff exprs pathways for user input contrast
       paths = paths[,sampleColumns]
       
-      matCol = data.frame(group=v$data[sampleColumns,2])
-      rownames(matCol) = v$data[sampleColumns,1]
+      matCol = data.frame(group=v$data$group[sampleColumns])
+      rownames(matCol) = v$data$title[sampleColumns]
       matColors = list(group = unique(colors[sampleColumns]))
-      names(matColors$group) = unique(v$data[sampleColumns,2])
+      names(matColors$group) = unique(v$data$group[sampleColumns])
       
       pheatmap(paths,color=inferno(10),annotation_col=matCol,annotation_colors=matColors,drop_levels=TRUE,fontsize=7, main='Enrichment Scores for Top 50 Differentially Expressed ssGSEA Pathways')
      
