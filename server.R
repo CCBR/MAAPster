@@ -760,11 +760,13 @@ shinyServer(function(input, output) {
           for (i in 1:deg()$nb)
           {
             all.pathways = topTable(ebayes.fit2, coef=i, number=nrow(ebayes.fit2))
-            all.pathways = all.pathways[order(abs(all.pathways$logFC),decreasing=T),]
-            colnames(all.pathways)[2] = 'EnrichmentScore'
+            all.pathways = all.pathways[order(abs(all.pathways$P.Value)),]
+            colnames(all.pathways)[2] = 'Avg.Enrichment.Score'
+            write.table(all.pathways,file=paste0(input$ProjectID,"_",deg()$cons[i],"_ssGSEA_pathways.txt"),sep="\t",row.names=T,col.names=NA)
             myPathways[[i]] = all.pathways
           }
           names(myPathways)=deg()$cons
+          
           list(myPathways=myPathways,ssgsResults=ssgsResults)
           })
         }
@@ -1014,7 +1016,18 @@ shinyServer(function(input, output) {
       k$all = cbind(paste0(k$k1, ' vs ', k$k2))
       num = which(input$NumContrasts==k$all[,1])
       
-      ssGSEA()$myPathways[[num]]
+      dat = ssGSEA()$myPathways[[num]]
+      
+      if (is.na(input$pvalSS) & is.na(input$fcSS)) {   
+        dat
+      } else if (is.na(input$pvalSS))  {
+        dat = dat[(abs(as.numeric(dat[,1])) >= input$fcSS),]
+      } else if (is.na(input$fcSS)) {
+        dat = dat[(as.numeric(dat[,4]) <= input$pvalSS),]
+      } else {
+        dat = dat[(as.numeric(dat[,4]) <= input$pvalSS & abs(as.numeric(dat[,1])) >= input$fcSS),]
+        dat
+      }
     }
   ))
   output$ssHeatmap=renderPlot(
@@ -1022,6 +1035,17 @@ shinyServer(function(input, output) {
       k$all = cbind(paste0(k$k1, ' vs ', k$k2))
       num = which(input$NumContrasts==k$all[,1])
       each = ssGSEA()$myPathways[[num]]
+      
+      if (is.na(input$pvalSS) & is.na(input$fcSS)) {   
+        each
+      } else if (is.na(input$pvalSS))  {
+        each = each[(abs(as.numeric(each[,1])) >= input$fcSS),]
+      } else if (is.na(input$fcSS)) {
+        each = each[(as.numeric(each[,4]) <= input$pvalSS),]
+      } else {
+        each = each[(as.numeric(each[,4]) <= input$pvalSS & abs(as.numeric(each[,1])) >= input$fcSS),]
+        each
+      }
 
       sampleColumns = c(which(v$data$group==k$k2[num]),which(v$data$group==k$k1[num]))          #subset columns (samples) for user input contrast
       paths = ssGSEA()$ssgsResults[rownames(ssGSEA()$ssgsResults) %in% rownames(each)[1:50],]   #subset diff exprs pathways for user input contrast
