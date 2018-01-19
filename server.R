@@ -26,7 +26,7 @@ library(mogene10sttranscriptcluster.db)
 library(pd.hg.u133a.2)
 library(hgu133a2.db)
 library(pd.huex.1.0.st.v2)
-library(huex10sttranscriptcluster.db)
+library(huex10sttranscriptcluster.db)   
 library(pd.hg.u219)
 library(hgu219.db)
 library(pd.mg.u74av2)
@@ -417,7 +417,7 @@ shinyServer(function(input, output) {
       } else {
         
       id = gsub(" ","",id,fixed=TRUE) 
-      system(paste0('rm *.CEL.gz'))        #removes previous CEL files
+      system(paste0('rm *.[cC][eE][lL].gz'))        #removes previous CEL files
       getGEOSuppFiles(id, makeDirectory = T, baseDir = getwd())
       fileID = paste0(id, '_RAW.tar')
       #system(paste0('tar -xvf', fileID))
@@ -426,7 +426,7 @@ shinyServer(function(input, output) {
       
       #cels = paste0(Pheno$gsm,'_',Pheno$title,'.CEL.gz')   #adds filename
       Pheno = v$data
-      SampleName = list.files(pattern = '/*CEL.gz')    #list contents of new directory with zipped CEL files
+      SampleName = list.files(pattern = '/*CEL.gz', ignore.case = T)    #list contents of new directory with zipped CEL files
       
       if (length(grep('*CEL*',SampleName,ignore.case = T)) == 0) {
         info("Raw files must be CEL files")
@@ -441,7 +441,8 @@ shinyServer(function(input, output) {
       colnames(pData(celfiles))[2] = 'SampleID'    
       }
       
-      cat(celfiles@annotation,file="annotation.txt")
+      tAnnot = tempfile(pattern = "annotation", tmpdir = getwd(), fileext = ".txt")
+      cat(celfiles@annotation,file=tAnnot)
       
       if (celfiles@annotation!="pd.hg.u133.plus.2" & celfiles@annotation!="pd.mogene.2.0.st" & celfiles@annotation!="pd.hugene.2.0.st" & celfiles@annotation!="pd.clariom.s.human.ht" & celfiles@annotation!="pd.clariom.s.human" & celfiles@annotation!="pd.clariom.s.mouse.ht" & celfiles@annotation!="pd.clariom.s.mouse" & celfiles@annotation!='pd.mouse430.2' & celfiles@annotation!='pd.hg.u133a' & celfiles@annotation!='pd.hugene.1.0.st.v1' & celfiles@annotation!='pd.mogene.1.0.st.v1' & celfiles@annotation!='pd.hg.u133a.2' & celfiles@annotation!='pd.huex.1.0.st.v2' & celfiles@annotation!='pd.hg.u219' & celfiles@annotation!='pd.mg.u74av2' & celfiles@annotation!='pd.mouse430a.2' & celfiles@annotation!='pd.moe430a' & celfiles@annotation!='pd.hg.u95av2' & celfiles@annotation!='pd.hta.2.0' & celfiles@annotation!='pd.moex.1.0.st.v1' & celfiles@annotation!='pd.hg.u133b' & celfiles@annotation!='pd.hugene.1.1.st.v1' & celfiles@annotation!='pd.mogene.1.1.st.v1') {
         #cat("Please sort your phenotype on sample name and upload it again. \n")
@@ -532,7 +533,8 @@ shinyServer(function(input, output) {
             #} 
             
             if (raw()@annotation=="pd.mogene.2.0.st") {  
-              Annot <- data.frame(ACCNUM=sapply(contents(mogene20sttranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(mogene20sttranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(mogene20sttranscriptclusterGENENAME), paste, collapse=", "))
+              #Annot <- data.frame(ACCNUM=sapply(contents(mogene20sttranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(mogene20sttranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(mogene20sttranscriptclusterGENENAME), paste, collapse=", "), ENTREZ=sapply(contents(mogene20sttranscriptclusterENTREZID), paste, collapse=", "))     #entrez added to test mouse ssGSEA
+              Annot <- data.frame(ACCNUM=sapply(contents(mogene20sttranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(mogene20sttranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(mogene20sttranscriptclusterGENENAME), paste, collapse=", "))   
             } else {
               # if (input$Platform=="h133p2") {
               if (raw()@annotation=="pd.hg.u133.plus.2") {
@@ -661,7 +663,7 @@ shinyServer(function(input, output) {
             incProgress(0.5, detail = 'DEG done')
             
             #mylist
-            list(mylist=mylist, Annot=Annot, cons=cons, design1=design1, nb=nb)
+            list(mylist=mylist, all=all, cons=cons, design1=design1, nb=nb)
           })
           ##-------------
         }
@@ -738,7 +740,7 @@ shinyServer(function(input, output) {
       ssGSEA=reactive(
         {
           withProgress(message = 'Performing ssGSEA', detail = 'may take a couple of minutes ...', value = 0, {
-          ssgs =  merge(exprs(norm()),deg()$Annot,by.x=0, by.y=0, all.x=T)
+          ssgs =  deg()$all
           ssgs = ssgs[ssgs$SYMBOL!='NA',]
           ssgs = subset(ssgs, select=-c(ACCNUM,DESC,Row.names))
           ssgs = aggregate(.~SYMBOL,data=ssgs,mean)                               #aggregate duplicate probes by mean
