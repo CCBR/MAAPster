@@ -11,7 +11,7 @@ shinyUI(
   fluidPage(
     tags$head(
       tags$style(
-        HTML(".shiny-notication {
+        HTML(".shiny-notification {
              height: 100px;
              width: 800px;
              position:fixed;
