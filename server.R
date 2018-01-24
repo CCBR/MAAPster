@@ -1072,6 +1072,7 @@ shinyServer(function(input, output) {
             sampleColumns = c(which(v$data$group==k$k2[num]),which(v$data$group==k$k1[num]))          #subset columns (samples) for user input contrast
             paths = ssGSEA()$ssgsResults[rownames(ssGSEA()$ssgsResults) %in% rownames(each)[1:50],]   #subset diff exprs pathways for user input contrast
             paths = paths[,sampleColumns]
+            colnames(paths) = v$data$title[sampleColumns]
             
             matCol = data.frame(group=v$data$group[sampleColumns])
             rownames(matCol) = v$data$title[sampleColumns]

@@ -245,7 +245,7 @@ shinyUI(
                             ),
                             actionButton(inputId="analyze",label="Start")),
                           mainPanel(
-                            br(),br(),br(),
+                            br(),br(),br(),br(),br(),br(),
                             navbarPage(title = "Results",
                                        navbarMenu (title="Pre-normalization QC plots",
                                                    tabPanel("Histogram",plotOutput("rawhist")),
