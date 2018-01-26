@@ -696,7 +696,11 @@ shinyServer(function(input, output) {
                 mylist[[i]]=all
                 ## end for
               }
-              all <- merge(exprs(norm()), Annot,by.x=0, by.y=0, all.x=T)
+              
+              e = exprs(norm())
+              colnames(e) = pData(norm())$SampleID
+              
+              all <- merge(e, Annot,by.x=0, by.y=0, all.x=T)
               
               y<-paste("_",input$ProjectID, sep="")
               tNorm = tempfile(pattern = "normalized_data_", tmpdir = getwd(), fileext = paste0(y,'.txt'))
