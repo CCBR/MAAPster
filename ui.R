@@ -244,7 +244,7 @@ shinyUI(
                                             numericInput("pvalSS", label=h6("P-value threshold for ssGSEA"), value=1)),
                                      column(3,
                                             numericInput("fcSS", label=h6("Fold Change threshold for ssGSEA"), value=0))
-                            ),
+                            ),   
                             actionButton(inputId="analyze",label="Start")),
                           mainPanel(
                             br(),br(),br(),br(),br(),br(),

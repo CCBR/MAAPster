@@ -1002,7 +1002,7 @@ shinyServer(function(input, output) {
             withProgress(message = 'Processing...', value = 0.75, {
               dat$ENTREZ <- sapply(dat$ENTREZ, function(x) 
               toString(tags$a(href=paste0("https://www.ncbi.nlm.nih.gov/gene/", x), x)))
-              
+
               dat
             })
             
