@@ -47,6 +47,7 @@ library(pd.hugene.1.1.st.v1)
 library(hugene11sttranscriptcluster.db)
 library(pd.mogene.1.1.st.v1)
 library(mogene11sttranscriptcluster.db)
+#library(primeviewprobe)
 #library(GSEA)
 library(limma)
 library(oligo)
@@ -424,7 +425,7 @@ shinyServer(function(input, output) {
                 myfiles = input$Indir
                 cels = myfiles$datapath
                 Pheno = v$data
-                row.names(Pheno) = Pheno$file.name
+                rownames(Pheno) = Pheno$title
                 SampleName = myfiles$name
                 pd = AnnotatedDataFrame(Pheno)
                 celfiles = read.celfiles(cels, phenoData = pd)
@@ -697,10 +698,7 @@ shinyServer(function(input, output) {
                 ## end for
               }
               
-              e = exprs(norm())
-              colnames(e) = pData(norm())$SampleID
-              
-              all <- merge(e, Annot,by.x=0, by.y=0, all.x=T)
+              all <- merge(exprs(norm()), Annot,by.x=0, by.y=0, all.x=T)
               
               y<-paste("_",input$ProjectID, sep="")
               tNorm = tempfile(pattern = "normalized_data_", tmpdir = getwd(), fileext = paste0(y,'.txt'))
