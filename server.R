@@ -91,7 +91,6 @@ shinyServer(function(input, output) {
       shinyjs::show("hideEverything")
     })
   )
-  
   observeEvent(
     input$button, 
     isolate({
@@ -146,7 +145,6 @@ shinyServer(function(input, output) {
       shinyjs:: show("hideDownloads")
     })
   )
-  
   observeEvent(
     input$GObutton,
     isolate({
@@ -156,7 +154,6 @@ shinyServer(function(input, output) {
       }
     })
   )
-  
   observeEvent(
     input$CELbutton,
     isolate({
@@ -410,8 +407,6 @@ shinyServer(function(input, output) {
     })
   })
   
-  
-  
   observeEvent(
     input$analyze, {
       isolate({
@@ -551,7 +546,7 @@ shinyServer(function(input, output) {
               #} 
               
               if (raw()@annotation=="pd.mogene.2.0.st") {  
-                Annot <- data.frame(ACCNUM=sapply(contents(mogene20sttranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(mogene20sttranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(mogene20sttranscriptclusterGENENAME), paste, collapse=", "), ENTREZ=sapply(contents(mogene20sttranscriptclusterENTREZID), paste, collapse=", "))     #entrez added to test mouse ssGSEA
+                Annot <- data.frame(ACCNUM=sapply(contents(mogene20sttranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(mogene20sttranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(mogene20sttranscriptclusterGENENAME), paste, collapse=", "), ENTREZ=sapply(contents(mogene20sttranscriptclusterENTREZID), paste, collapse=", "))     
                 #Annot <- data.frame(ACCNUM=sapply(contents(mogene20sttranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(mogene20sttranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(mogene20sttranscriptclusterGENENAME), paste, collapse=", "))   
               } else {
                 # if (input$Platform=="h133p2") {
@@ -1001,8 +996,9 @@ shinyServer(function(input, output) {
               dat
             }
             
+            #ENTREZ link (slows down DEG output)
             withProgress(message = 'Processing...', value = 0.75, {
-              dat$ENTREZ <- sapply(dat$ENTREZ, function(x) 
+              dat$ENTREZ <- sapply(dat$ENTREZ, function(x)
               toString(tags$a(href=paste0("https://www.ncbi.nlm.nih.gov/gene/", x), x)))
 
               dat
@@ -1034,7 +1030,7 @@ shinyServer(function(input, output) {
                                                             "return type === 'display' && data.length > 30 ?",
                                                             "'<span title=\"' + data + '\">' + data.substr(0, 30) + '...</span>' : data;",
                                                             "}")))), callback = JS('table.page(3).draw(false);')
-        )
+        ,selection='single')
         )
         output$topDown=DT::renderDataTable(DT::datatable(
           {
@@ -1059,7 +1055,95 @@ shinyServer(function(input, output) {
                                                             "return type === 'display' && data.length > 30 ?",
                                                             "'<span title=\"' + data + '\">' + data.substr(0, 30) + '...</span>' : data;",
                                                             "}")))), callback = JS('table.page(3).draw(false);')
+        ,selection='single')
         )
+        output$geneHeatmapUp=renderPlot(
+          {
+            if (length(pathways()$up[input$topUp_rows_selected, 'gene.list'])==0){
+              showNotification('Select a pathway to see heatmap below', duration = NULL)
+            } else {
+              #select user input pathway, extract genes
+              genes = pathways()$up[input$topUp_rows_selected, 'gene.list']
+              genes = strsplit(as.character(genes),' ')
+              genes = unlist(genes)
+              
+              #extract normalized expression, subset by genes, filter columns, aggregate duplicate symbols with means
+              exp = deg()$all
+              exp = exp[exp$SYMBOL %in% genes,]
+              exp = subset(exp, select = -c(ACCNUM,DESC,ENTREZ,Row.names))
+              exp = aggregate(.~SYMBOL,data=exp,mean)
+              
+              #extract user input contrasts (columns)
+              k$all = cbind(paste0(k$k1, ' vs ', k$k2))
+              num = which(input$NumContrasts==k$all[,1])
+              sampleColumns = c(which(v$data$group==k$k2[num]),which(v$data$group==k$k1[num])) 
+              rownames(exp) = exp$SYMBOL
+              exp = subset(exp, select = -c(SYMBOL))
+              exp = exp[,sampleColumns]
+              #limit to 100 genes
+              if(nrow(exp)>100){
+                exp = exp[1:100,]
+              }
+              #set heatmap parameters
+              matCol = data.frame(group=v$data$group[sampleColumns])
+              rownames(matCol) = v$data$title[sampleColumns]
+              matColors = list(group = unique(colors[sampleColumns]))
+              names(matColors$group) = unique(v$data$group[sampleColumns])
+              path_name = paste0(toupper(pathways()$up[input$topUp_rows_selected, 'description']),' PATHWAY (max 100 genes)')
+              #get z-scores by row
+              exp = t(scale(t(exp)))  
+              
+              if (nrow(exp) > 30){
+                pheatmap(exp, color=inferno(10), main=path_name, annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 6)
+                } else {
+                  pheatmap(exp, color=inferno(10), main=path_name, annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 10)
+                }
+            }
+          }
+        )
+        output$geneHeatmapDw=renderPlot(
+          {
+            if (length(pathways()$dw[input$topDown_rows_selected, 'gene.list'])==0){
+              showNotification('Select a pathway to see heatmap below')
+            } else {
+              #select user input pathway, extract genes
+              genes = pathways()$dw[input$topDown_rows_selected, 'gene.list']
+              genes = strsplit(as.character(genes),' ')
+              genes = unlist(genes)
+              
+              #extract normalized expression, subset by genes, filter columns, aggregate duplicate symbols with means
+              exp = deg()$all
+              exp = exp[exp$SYMBOL %in% genes,]
+              exp = subset(exp, select = -c(ACCNUM,DESC,ENTREZ,Row.names))
+              exp = aggregate(.~SYMBOL,data=exp,mean)
+              
+              #extract user input contrasts (columns)
+              k$all = cbind(paste0(k$k1, ' vs ', k$k2))
+              num = which(input$NumContrasts==k$all[,1])
+              sampleColumns = c(which(v$data$group==k$k2[num]),which(v$data$group==k$k1[num])) 
+              rownames(exp) = exp$SYMBOL
+              exp = subset(exp, select = -c(SYMBOL))
+              exp = exp[,sampleColumns]
+              #limit to 100 genes
+              if(nrow(exp)>100){
+                exp = exp[1:100,]
+              }
+              #set heatmap parameters
+              matCol = data.frame(group=v$data$group[sampleColumns])
+              rownames(matCol) = v$data$title[sampleColumns]
+              matColors = list(group = unique(colors[sampleColumns]))
+              names(matColors$group) = unique(v$data$group[sampleColumns])
+              path_name = paste0(toupper(pathways()$dw[input$topDown_rows_selected, 'description']),' PATHWAY (max 100 genes)')
+              #get z-scores by row
+              exp = t(scale(t(exp)))  
+              
+              if (nrow(exp) > 30){
+                pheatmap(exp, color=inferno(10), main=path_name, annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 6)
+              } else {
+                pheatmap(exp, color=inferno(10), main=path_name, annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 10)
+              }
+            }
+          }
         )
         output$volcano=renderPlotly(
           {
@@ -1122,15 +1206,16 @@ shinyServer(function(input, output) {
             sampleColumns = c(which(v$data$group==k$k2[num]),which(v$data$group==k$k1[num]))          #subset columns (samples) for user input contrast
             paths = ssGSEA()$ssgsResults[rownames(ssGSEA()$ssgsResults) %in% rownames(each)[1:50],]   #subset diff exprs pathways for user input contrast
             paths = paths[,sampleColumns]
-            colnames(paths) = v$data$title[sampleColumns]
+            #colnames(paths) = v$data$title[sampleColumns]
             
             matCol = data.frame(group=v$data$group[sampleColumns])
             rownames(matCol) = v$data$title[sampleColumns]
             matColors = list(group = unique(colors[sampleColumns]))
             names(matColors$group) = unique(v$data$group[sampleColumns])
+            #calculate z scores for rows
+            paths = t(scale(t(paths)))  
             
             pheatmap(paths,color=inferno(10),annotation_col=matCol,annotation_colors=matColors,drop_levels=TRUE,fontsize=7, main='Enrichment Scores for Top 50 Differentially Expressed ssGSEA Pathways')
-            
           }
         )
         #observeEvent(input$rep, {

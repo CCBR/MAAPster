@@ -265,8 +265,8 @@ shinyUI(
                                        ),
                                        navbarMenu (title="DEG-Enrichments-tables",
                                                    tabPanel("Differentially Expressed Genes",DT::dataTableOutput("deg")),
-                                                   tabPanel("Pathways for Upregulated Genes",DT::dataTableOutput("topUp")),
-                                                   tabPanel("Pathways for Downregulated Genes",DT::dataTableOutput("topDown")),
+                                                   tabPanel("Pathways for Upregulated Genes",DT::dataTableOutput("topUp"),br(),br(),plotOutput('geneHeatmapUp', width='100%', height='800px')),
+                                                   tabPanel("Pathways for Downregulated Genes",DT::dataTableOutput("topDown"),br(),br(),plotOutput('geneHeatmapDw', width='100%', height='800px')),
                                                    tabPanel("Interactive Volcano Plot",plotly::plotlyOutput('volcano'))
                                        ),
                                        navbarMenu (title='Single Sample GSEA',
