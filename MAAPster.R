@@ -106,6 +106,15 @@ for (k in 1:length(GSMList(gds)))
   }
 }
 
+#example of a way to process CEL files once they're uploaded:
+# cels = upload_cel_files_here
+# for (k in 1:length(cels))
+# {
+#   mytable[k,]<-c(cels[k])
+# }
+# mytable <- data.frame(mytableCEL)
+
+
 # a group column will be populated by the user by clicking on the samples and assigning them to groups
 mytable = data.frame(mytable)
 mytable$group = '...'
