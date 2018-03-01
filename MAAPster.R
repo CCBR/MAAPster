@@ -47,6 +47,8 @@ library(pd.hugene.1.1.st.v1)
 library(hugene11sttranscriptcluster.db)
 library(pd.mogene.1.1.st.v1)
 library(mogene11sttranscriptcluster.db)
+library(pd.clariom.s.rat)
+library(clariomsrattranscriptcluster.db)
 #library(primeviewprobe)
 #library(GSEA)
 library(limma)
@@ -146,14 +148,14 @@ tAnnot = tempfile(pattern = "annotation_", tmpdir = getwd(), fileext = paste0(y,
 cat(celfiles@annotation,file=tAnnot)    
 
 #if platform is not supported display error message
-if (celfiles@annotation!="pd.hg.u133.plus.2" & celfiles@annotation!="pd.mogene.2.0.st" & celfiles@annotation!="pd.hugene.2.0.st" & celfiles@annotation!="pd.clariom.s.human.ht" & celfiles@annotation!="pd.clariom.s.human" & celfiles@annotation!="pd.clariom.s.mouse.ht" & celfiles@annotation!="pd.clariom.s.mouse" & celfiles@annotation!='pd.mouse430.2' & celfiles@annotation!='pd.hg.u133a' & celfiles@annotation!='pd.hugene.1.0.st.v1' & celfiles@annotation!='pd.mogene.1.0.st.v1' & celfiles@annotation!='pd.hg.u133a.2' & celfiles@annotation!='pd.huex.1.0.st.v2' & celfiles@annotation!='pd.hg.u219' & celfiles@annotation!='pd.mg.u74av2' & celfiles@annotation!='pd.mouse430a.2' & celfiles@annotation!='pd.moe430a' & celfiles@annotation!='pd.hg.u95av2' & celfiles@annotation!='pd.hta.2.0' & celfiles@annotation!='pd.moex.1.0.st.v1' & celfiles@annotation!='pd.hg.u133b' & celfiles@annotation!='pd.hugene.1.1.st.v1' & celfiles@annotation!='pd.mogene.1.1.st.v1') {
+if (celfiles@annotation!="pd.hg.u133.plus.2" & celfiles@annotation!="pd.mogene.2.0.st" & celfiles@annotation!="pd.hugene.2.0.st" & celfiles@annotation!="pd.clariom.s.human.ht" & celfiles@annotation!="pd.clariom.s.human" & celfiles@annotation!="pd.clariom.s.mouse.ht" & celfiles@annotation!="pd.clariom.s.mouse" & celfiles@annotation!='pd.mouse430.2' & celfiles@annotation!='pd.hg.u133a' & celfiles@annotation!='pd.hugene.1.0.st.v1' & celfiles@annotation!='pd.mogene.1.0.st.v1' & celfiles@annotation!='pd.hg.u133a.2' & celfiles@annotation!='pd.huex.1.0.st.v2' & celfiles@annotation!='pd.hg.u219' & celfiles@annotation!='pd.mg.u74av2' & celfiles@annotation!='pd.mouse430a.2' & celfiles@annotation!='pd.moe430a' & celfiles@annotation!='pd.hg.u95av2' & celfiles@annotation!='pd.hta.2.0' & celfiles@annotation!='pd.moex.1.0.st.v1' & celfiles@annotation!='pd.hg.u133b' & celfiles@annotation!='pd.hugene.1.1.st.v1' & celfiles@annotation!='pd.mogene.1.1.st.v1' & celfiles@annotation!='pd.clariom.s.rat') {
   #cat("Please sort your phenotype on sample name and upload it again. \n")
   info(paste0("Affymetrix platform: ",celfiles@annotation," NOT supported. Leaving..."))
   stopApp(-1)
 }
 
 #normalization
-if (celfiles@annotation=="pd.hg.u133.plus.2" | celfiles@annotation=="pd.clariom.s.human.ht" | celfiles@annotation=="pd.clariom.s.human" | celfiles@annotation=="pd.clariom.s.mouse.ht" | celfiles@annotation=="pd.clariom.s.mouse" | celfiles@annotation=='pd.mouse430.2' | celfiles@annotation=='pd.hg.u133a' | celfiles@annotation=='pd.hg.u133a.2' | celfiles@annotation=='pd.hg.u219' | celfiles@annotation=='pd.mg.u74av2' | celfiles@annotation=='pd.mouse430a.2' | celfiles@annotation=='pd.moe430a' | celfiles@annotation=='pd.hg.u95av2' | celfiles@annotation=='pd.hg.u133b') {
+if (celfiles@annotation=="pd.hg.u133.plus.2" | celfiles@annotation=="pd.clariom.s.human.ht" | celfiles@annotation=="pd.clariom.s.human" | celfiles@annotation=="pd.clariom.s.mouse.ht" | celfiles@annotation=="pd.clariom.s.mouse" | celfiles@annotation=='pd.mouse430.2' | celfiles@annotation=='pd.hg.u133a' | celfiles@annotation=='pd.hg.u133a.2' | celfiles@annotation=='pd.hg.u219' | celfiles@annotation=='pd.mg.u74av2' | celfiles@annotation=='pd.mouse430a.2' | celfiles@annotation=='pd.moe430a' | celfiles@annotation=='pd.hg.u95av2' | celfiles@annotation=='pd.hg.u133b' | raw()@annotation=='pd.clariom.s.rat') {
   celfiles.rma =rma(celfiles, background=TRUE, normalize=TRUE, subset=NULL)
 } else {
   celfiles.rma =rma(celfiles, background=TRUE, normalize=TRUE, subset=NULL, target="core")
@@ -282,6 +284,10 @@ if (celfiles@annotation=="pd.mogene.2.0.st") {
                                               if (celfiles@annotation=='pd.mogene.1.1.st.v1') {
                                                 #Annot <- data.frame(ACCNUM=sapply(contents(mogene11sttranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(mogene11sttranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(mogene11sttranscriptclusterGENENAME), paste, collapse=", "))
                                                 Annot <- data.frame(ACCNUM=sapply(contents(mogene11sttranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(mogene11sttranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(mogene11sttranscriptclusterGENENAME), paste, collapse=", "), ENTREZ=sapply(contents(mogene11sttranscriptclusterENTREZID), paste, collapse=", "))
+                                              } else{
+                                                if (raw()@annotation=='pd.clariom.s.rat'){
+                                                  Annot <- data.frame(ACCNUM=sapply(contents(clariomsrattranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(clariomsrattranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(clariomsrattranscriptclusterGENENAME), paste, collapse=", "), ENTREZ=sapply(contents(clariomsrattranscriptclusterENTREZID), paste, collapse=", "))
+                                                }
                                               }
                                             }
                                           }
