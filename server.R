@@ -807,6 +807,10 @@ shinyServer(function(input, output) {
               gset = getGmt(input$geneSet) 
               ssgsResults = gsva(ssgs, gset, method='ssgsea')                           #run GSVA
               }
+
+              y<-paste("_",input$ProjectID, sep="")
+              tSS = tempfile(pattern = "ssGSEA_enrichmentScores_", tmpdir = getwd(), fileext = paste0(y,'.txt'))
+              write.table(ssgsResults,file=tSS,sep="\t",col.names=NA)
               
               incProgress(amount = 0.50, detail = 'Performing differential expression analysis of pathways...')
               
@@ -1062,6 +1066,7 @@ shinyServer(function(input, output) {
             if (length(pathways()$up[input$topUp_rows_selected, 'gene.list'])==0){
               showNotification('Select a pathway to see heatmap below', duration = NULL)
             } else {
+              human2mouse = read.delim('human2mouse.csv',sep=',')
               #select user input pathway, extract genes
               genes = pathways()$up[input$topUp_rows_selected, 'gene.list']
               genes = strsplit(as.character(genes),' ')
@@ -1070,6 +1075,13 @@ shinyServer(function(input, output) {
               #extract normalized expression, subset by genes, filter columns, aggregate duplicate symbols with means
               exp = deg()$all
               exp = exp[exp$SYMBOL %in% genes,]
+              #if mouse data, convert from human to mouse gene orthologs
+              if (nrow(exp)==0) {
+                genes = human2mouse$mouse[human2mouse$human %in% genes]
+                genes = as.character(genes)
+                exp = deg()$all
+                exp = exp[exp$SYMBOL %in% genes,]
+              }
               exp = subset(exp, select = -c(ACCNUM,DESC,ENTREZ,Row.names))
               exp = aggregate(.~SYMBOL,data=exp,mean)
               
@@ -1094,9 +1106,9 @@ shinyServer(function(input, output) {
               exp = t(scale(t(exp)))  
               
               if (nrow(exp) > 30){
-                pheatmap(exp, color=inferno(10), main=path_name, annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 6)
+                pheatmap(exp, main=path_name, annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 6)
                 } else {
-                  pheatmap(exp, color=inferno(10), main=path_name, annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 10)
+                  pheatmap(exp, main=path_name, annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 10)
                 }
             }
           }
@@ -1138,9 +1150,9 @@ shinyServer(function(input, output) {
               exp = t(scale(t(exp)))  
               
               if (nrow(exp) > 30){
-                pheatmap(exp, color=inferno(10), main=path_name, annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 6)
+                pheatmap(exp, main=path_name, annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 6)
               } else {
-                pheatmap(exp, color=inferno(10), main=path_name, annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 10)
+                pheatmap(exp, main=path_name, annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 10)
               }
             }
           }
@@ -1215,7 +1227,8 @@ shinyServer(function(input, output) {
             #calculate z scores for rows
             paths = t(scale(t(paths)))  
             
-            pheatmap(paths,color=inferno(10),annotation_col=matCol,annotation_colors=matColors,drop_levels=TRUE,fontsize=7, main='Enrichment Scores for Top 50 Differentially Expressed ssGSEA Pathways')
+            pheatmap(paths,annotation_col=matCol,annotation_colors=matColors,drop_levels=TRUE,fontsize=7, main='Enrichment Scores for Top 50 Differentially Expressed ssGSEA Pathways')
+            
           }
         )
         #observeEvent(input$rep, {
