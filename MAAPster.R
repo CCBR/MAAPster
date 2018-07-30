@@ -155,7 +155,7 @@ if (celfiles@annotation!="pd.hg.u133.plus.2" & celfiles@annotation!="pd.mogene.2
 }
 
 #normalization
-if (celfiles@annotation=="pd.hg.u133.plus.2" | celfiles@annotation=="pd.clariom.s.human.ht" | celfiles@annotation=="pd.clariom.s.human" | celfiles@annotation=="pd.clariom.s.mouse.ht" | celfiles@annotation=="pd.clariom.s.mouse" | celfiles@annotation=='pd.mouse430.2' | celfiles@annotation=='pd.hg.u133a' | celfiles@annotation=='pd.hg.u133a.2' | celfiles@annotation=='pd.hg.u219' | celfiles@annotation=='pd.mg.u74av2' | celfiles@annotation=='pd.mouse430a.2' | celfiles@annotation=='pd.moe430a' | celfiles@annotation=='pd.hg.u95av2' | celfiles@annotation=='pd.hg.u133b' | raw()@annotation=='pd.clariom.s.rat') {
+if (celfiles@annotation=="pd.hg.u133.plus.2" | celfiles@annotation=="pd.clariom.s.human.ht" | celfiles@annotation=="pd.clariom.s.human" | celfiles@annotation=="pd.clariom.s.mouse.ht" | celfiles@annotation=="pd.clariom.s.mouse" | celfiles@annotation=='pd.mouse430.2' | celfiles@annotation=='pd.hg.u133a' | celfiles@annotation=='pd.hg.u133a.2' | celfiles@annotation=='pd.hg.u219' | celfiles@annotation=='pd.mg.u74av2' | celfiles@annotation=='pd.mouse430a.2' | celfiles@annotation=='pd.moe430a' | celfiles@annotation=='pd.hg.u95av2' | celfiles@annotation=='pd.hg.u133b' | celfiles@annotation=='pd.clariom.s.rat') {
   celfiles.rma =rma(celfiles, background=TRUE, normalize=TRUE, subset=NULL)
 } else {
   celfiles.rma =rma(celfiles, background=TRUE, normalize=TRUE, subset=NULL, target="core")
