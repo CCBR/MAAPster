@@ -1,4 +1,4 @@
-projectId = 'testing'
+# projectId = 'testing'
 #### 1) Process GEO files function takes gseid and returns ExpressionFeatureSet object  ####
 processGEOfiles <- function(id,listGroups){
   library(GEOquery)
@@ -277,12 +277,12 @@ deg = function(norm, listContrasts) {
     all$FC = ifelse(all$logFC<0, -1/(2^all$logFC), 2^all$logFC)                     #add fold change and rearrange columns
     all = all[,c(9,12,2,5,6,3,8,10,11,1,4,7)]
     # Write out to a file
-    write.table(all,file=paste(projectId,"_",cons[i],"_all_genes.txt",sep=""),sep="\t",row.names=F)
+    write.table(all,file=paste(cons[i],"_all_genes.txt",sep=""),sep="\t",row.names=F)
     listDEGs[[i]]=all
   }
   names(listDEGs)=cons
   norm_annotated <- merge(exprs(norm), Annot,by.x=0, by.y=0, all.x=T)               #write out normalized annotated data
-  y<-paste("_",projectId, sep="")
+  y<-paste("_", sep="")
   tNorm = tempfile(pattern = "normalized_data_", tmpdir = getwd(), fileext = paste0(y,'.txt'))
   write.table(norm_annotated,file=tNorm,sep="\t",row.names=F)  
   for (i in 1:length(listDEGs)) {                                                   #Volcano plots
@@ -332,22 +332,22 @@ pathways = function(degs,species) {
     fin.dw$SYMBOL = as.character(fin.dw$SYMBOL)
     if (species=='human') 
     {
-      cat(fin.up$SYMBOL,file=(paste0(projectId,'_',names(degs$listDEGs[i]),'_Top500_Up.txt')), sep='\n')
-      cat(fin.dw$SYMBOL,file=(paste0(projectId,'_',names(degs$listDEGs[i]),'_Top500_Down.txt')),sep='\n')
+      cat(fin.up$SYMBOL,file=(paste0('_',names(degs$listDEGs[i]),'_Top500_Up.txt')), sep='\n')
+      cat(fin.dw$SYMBOL,file=(paste0('_',names(degs$listDEGs[i]),'_Top500_Down.txt')),sep='\n')
     }
     else
     {
       cat(fin.up$SYMBOL,file=paste0(names(degs$listDEGs[i]),"_Top500temp_Up.txt"),sep='\n')
       cat(fin.dw$SYMBOL,file=paste0(names(degs$listDEGs[i]),"_Top500temp_Dw.txt"),sep='\n')
       
-      system(paste0("cat ",names(degs$listDEGs[i]),"_Top500temp_Up.txt | grep -v \"^NA\" | ./m2h | grep -v XXXX | cut -f2 -d\" \" >",projectId,'_',names(degs$listDEGs[i]),"_Top500_Up.txt"))
-      system(paste0("cat ",names(degs$listDEGs[i]),"_Top500temp_Dw.txt | grep -v \"^NA\" | ./m2h | grep -v XXXX | cut -f2 -d\" \" >",projectId,'_',names(degs$listDEGs[i]),"_Top500_Down.txt"))
+      system(paste0("cat ",names(degs$listDEGs[i]),"_Top500temp_Up.txt | grep -v \"^NA\" | ./m2h | grep -v XXXX | cut -f2 -d\" \" >",'_',names(degs$listDEGs[i]),"_Top500_Up.txt"))
+      system(paste0("cat ",names(degs$listDEGs[i]),"_Top500temp_Dw.txt | grep -v \"^NA\" | ./m2h | grep -v XXXX | cut -f2 -d\" \" >",'_',names(degs$listDEGs[i]),"_Top500_Down.txt"))
     }
-    system(paste0("cat ",projectId,'_',names(degs$listDEGs[i]),"_Top500_Up.txt |sort | uniq | ./l2p >",projectId,'_',names(degs$listDEGs[i]),"_Pathways_Up.txt"))
-    system(paste0("cat ",projectId,'_',names(degs$listDEGs[i]),"_Top500_Down.txt |sort | uniq | ./l2p >",projectId,'_',names(degs$listDEGs[i]),"_Pathways_Down.txt"))
+    system(paste0("cat ",'_',names(degs$listDEGs[i]),"_Top500_Up.txt |sort | uniq | ./l2p >",'_',names(degs$listDEGs[i]),"_Pathways_Up.txt"))
+    system(paste0("cat ",'_',names(degs$listDEGs[i]),"_Top500_Down.txt |sort | uniq | ./l2p >",'_',names(degs$listDEGs[i]),"_Pathways_Down.txt"))
     
-    addUpCol = read.delim(paste0(projectId,'_',names(degs$listDEGs[i]),"_Pathways_Up.txt"), sep = '\t')
-    addDwCol = read.delim(paste0(projectId,'_',names(degs$listDEGs[i]),"_Pathways_Down.txt"), sep = '\t')
+    addUpCol = read.delim(paste0('_',names(degs$listDEGs[i]),"_Pathways_Up.txt"), sep = '\t')
+    addDwCol = read.delim(paste0('_',names(degs$listDEGs[i]),"_Pathways_Down.txt"), sep = '\t')
     
     colnames(addUpCol)=c("pval","fdr","ratio","nb.hits","nb.genes.path","nb.user.genes","tot.back.genes","path_id","source","description","type","gene.list")
     colnames(addDwCol)=c("pval","fdr","ratio","nb.hits","nb.genes.path","nb.user.genes","tot.back.genes","path_id","source","description","type","gene.list")
@@ -355,8 +355,8 @@ pathways = function(degs,species) {
     addDwCol = addDwCol[order(addDwCol$pval),]
     addUpCol = addUpCol[,c(8,9,10,11,1,2,3,12,4,5,6,7)]
     addDwCol = addDwCol[,c(8,9,10,11,1,2,3,12,4,5,6,7)]
-    write.table(addUpCol, file = paste0(projectId,'_',names(degs$listDEGs[i]),"_Pathways_Up.txt"), sep = '\t', row.names = F)
-    write.table(addDwCol, file = paste0(projectId,'_',names(degs$listDEGs[i]),"_Pathways_Down.txt"), sep = '\t', row.names = F)
+    write.table(addUpCol, file = paste0('_',names(degs$listDEGs[i]),"_Pathways_Up.txt"), sep = '\t', row.names = F)
+    write.table(addDwCol, file = paste0('_',names(degs$listDEGs[i]),"_Pathways_Down.txt"), sep = '\t', row.names = F)
     up_down[[1]]=addUpCol
     up_down[[2]]=addDwCol
     names(up_down) = c("upregulated_pathways","downregulated_pathways")
@@ -438,7 +438,7 @@ ss = function(deg_normAnnot, species, geneSet) {
   }
   gset = getGmt(getSet) 
   ssgsResults = gsva(ssgs, gset, method='ssgsea')                           #run ssGSEA
-  y<-paste("_",projectId, sep="")                                           #write out results
+  y<-paste("_", sep="")                                           #write out results
   tSS = tempfile(pattern = "ssGSEA_enrichmentScores_", tmpdir = getwd(), fileext = paste0(y,'.txt'))
   write.table(ssgsResults,file=tSS,sep="\t",col.names=NA)
   myfactor <- factor(deg_normAnnot$pheno$groups)
@@ -455,7 +455,7 @@ ss = function(deg_normAnnot, species, geneSet) {
     all.pathways = topTable(ebayes.fit2, coef=i, number=nrow(ebayes.fit2))                                                               #Determine DE pathways
     all.pathways = all.pathways[order(abs(all.pathways$P.Value)),]
     colnames(all.pathways)[2] = 'Avg.Enrichment.Score'
-    write.table(all.pathways,file=paste0(projectId,"_",cons[i],"_ssGSEA_pathways.txt"),sep="\t",row.names=T,col.names=NA)
+    write.table(all.pathways,file=paste0("_",cons[i],"_ssGSEA_pathways.txt"),sep="\t",row.names=T,col.names=NA)
     DEss[[i]] = all.pathways
   }
   names(DEss)=cons
