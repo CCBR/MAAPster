@@ -5,8 +5,8 @@
 #' @param workspace Working directory
 #' @return ExpressionFeatureSet object with raw data and phenotype information
 #' @examples 
-#' celfiles = processCELfiles('NCI_Project_1',c('Ctl_1','Ctl_1','Ctl_1','KO_1','KO_1','KO_1'),'/Users/name/folderName')
-#' celfiles = processCELfiles('NCI_Project_2',c('Ctl','Ctl','Ctl','Ctl','RNA_1','RNA_1','RNA_1','RNA_1','RNA_2','RNA_2','RNA_2','RNA_2'),'/Users/name/folderName')      
+#' celfiles = getCELfiles('NCI_Project_1',c('Ctl_1','Ctl_1','Ctl_1','KO_1','KO_1','KO_1'),'/Users/name/folderName')
+#' celfiles = getCELfiles('NCI_Project_2',c('Ctl','Ctl','Ctl','Ctl','RNA_1','RNA_1','RNA_1','RNA_1','RNA_2','RNA_2','RNA_2','RNA_2'),'/Users/name/folderName')      
 #' @references See packages tools, Biobase, oligo
 
 getCELfiles <- function(projectId,listGroups,workspace) {
