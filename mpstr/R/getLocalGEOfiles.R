@@ -6,8 +6,8 @@
 #' @param workspace Working directory
 #' @return ExpressionFeatureSet object with raw data and phenotype information
 #' @examples 
-#' celfiles = processGEOfiles('NCI_Project_1','GSE61989',c('Ctl','Ctl','Ctl','Ctl','RNA_1','RNA_1','RNA_1','RNA_1','RNA_2','RNA_2','RNA_2','RNA_2'),'/Users/name/folderName')      
-#' celfiles = processGEOfiles('NCI_Project_2','GSE106988', c('Ctl_1','Ctl_1','Ctl_1','KO_1','KO_1','KO_1'),'/Users/name/folderName')
+#' celfiles = getLocalGEOfiles('NCI_Project_1','GSE61989',c('Ctl','Ctl','Ctl','Ctl','RNA_1','RNA_1','RNA_1','RNA_1','RNA_2','RNA_2','RNA_2','RNA_2'),'/Users/name/folderName')      
+#' celfiles = getLocalGEOfiles('NCI_Project_2','GSE106988', c('Ctl_1','Ctl_1','Ctl_1','KO_1','KO_1','KO_1'),'/Users/name/folderName')
 #' @references See packages oligo, GEOquery, Biobase
 
 getLocalGEOfiles <- function(projectId,id,listGroups,workspace){
