@@ -7,7 +7,7 @@
 diffExprGenes(norm, cons, projectId, workspace)
 }
 \arguments{
-\item{norm}{ExpressionFeatureSet object with normalized data from calc function}
+\item{norm}{ExpressionFeatureSet object with normalized data from QCnorm function}
 
 \item{cons}{List groups to compare, groups must match assignments in listGroups param of previous functions}
 
