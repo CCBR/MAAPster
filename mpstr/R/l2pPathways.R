@@ -57,10 +57,10 @@ l2pPathways = function(degs,species,workspace,projectId) {
     addUpCol = read.delim(paste0(workspace,projectId,'_',names(degs$listDEGs[i]),"_Pathways_Up.txt"), sep = '\t')
     addDwCol = read.delim(paste0(workspace,projectId,'_',names(degs$listDEGs[i]),"_Pathways_Down.txt"), sep = '\t')
     
-    colnames(addUpCol)=c("pval","fdr","ratio","nb.hits","nb.genes.path","nb.user.genes","tot.back.genes","path_id","source","description","type","gene.list")
-    colnames(addDwCol)=c("pval","fdr","ratio","nb.hits","nb.genes.path","nb.user.genes","tot.back.genes","path_id","source","description","type","gene.list")
-    addUpCol = addUpCol[order(addUpCol$pval),]
-    addDwCol = addDwCol[order(addDwCol$pval),]
+    colnames(addUpCol)=c("P_Value","FDR","Ratio","Number_Hits","Number_Genes_Pathway","Number_User_Genes","Total_Number_Genes","Pathway_ID","Source","Description","Type","Gene_List")
+    colnames(addDwCol)=c("P_Value","FDR","Ratio","Number_Hits","Number_Genes_Pathway","Number_User_Genes","Total_Number_Genes","Pathway_ID","Source","Description","Type","Gene_List")
+    addUpCol = addUpCol[order(addUpCol$P_Value),]
+    addDwCol = addDwCol[order(addDwCol$P_Value),]
     addUpCol = addUpCol[,c(8,9,10,11,1,2,3,12,4,5,6,7)]
     addDwCol = addDwCol[,c(8,9,10,11,1,2,3,12,4,5,6,7)]
     write.table(addUpCol, file = paste0(workspace,projectId,'_',names(degs$listDEGs[i]),"_Pathways_Up.txt"), sep = '\t', row.names = F)
