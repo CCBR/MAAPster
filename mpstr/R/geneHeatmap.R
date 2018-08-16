@@ -1,5 +1,6 @@
 #' 5) Gene heatmap with selected genes from l2p pathways
 #' 
+#' @export
 #' @param degs Differentially expressed genes object from deg function
 #' @param paths Pathways object from pathways function
 #' @param contrast User-selected contrast to display, must be a contrast from listContrasts argument of deg function

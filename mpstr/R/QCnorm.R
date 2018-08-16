@@ -1,5 +1,6 @@
 #' 2) Runs QC analyses and normalizes data.
 #' 
+#' @export
 #' @param raw ExpressionFeatureSet from either processGEOfiles or processCELfiles function
 #' @param path Directory for plots
 #' @return Normalized ExpressionFeatureSet object with normalized data and phenotype information

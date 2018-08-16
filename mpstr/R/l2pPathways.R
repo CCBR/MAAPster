@@ -1,5 +1,6 @@
 #' l2p Pathway Analysis
 #' 
+#' @export
 #' @param degs Differentially expressed genes object from deg function
 #' @param species Species of organism (human or mouse)
 #' @param workspace Working directory

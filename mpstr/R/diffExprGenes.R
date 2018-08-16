@@ -1,5 +1,6 @@
 #' 3) Differentially Expressed Genes (DEGs)
 #' 
+#' @export
 #' @param norm ExpressionFeatureSet object with normalized data from QCnorm function
 #' @param cons List groups to compare, groups must match assignments in listGroups param of previous functions
 #' @param projectId A unique identifier for the project

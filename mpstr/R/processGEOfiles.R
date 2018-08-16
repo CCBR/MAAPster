@@ -1,5 +1,6 @@
 #' 1) Process GEO mouse or human data from an experiment with raw Affymetrix CEL files, see https://www.ncbi.nlm.nih.gov/geo/
 #' 
+#' @export
 #' @param projectId A unique identifier for the project
 #' @param id A GSE id number
 #' @param listGroups Group assignments for each sample, follow order of samples on GEO series page

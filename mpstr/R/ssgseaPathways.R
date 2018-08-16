@@ -1,5 +1,6 @@
 #' 6) ssGSEA function
 #' 
+#' @export
 #' @param deg_normAnnot Differentially expressed genes object from deg function
 #' @param species Species of organism (human or mouse)
 #' @param geneSet Choice of MSigDB gene set

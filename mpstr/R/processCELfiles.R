@@ -1,5 +1,6 @@
 #' 1) Process local Affymetrix CEL files for mouse or human data 
 #' 
+#' @export
 #' @param projectId A unique identifier for the project
 #' @param listGroups Group assignments for each sample, follow alphabetical order of samples
 #' @param workspace Working directory
