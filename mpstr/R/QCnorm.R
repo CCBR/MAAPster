@@ -4,14 +4,14 @@
 #' @param path Directory for plots
 #' @return Normalized ExpressionFeatureSet object with normalized data and phenotype information
 #' @examples 
-#' norm_celfiles = calc(celfiles,'Users/name/folderName/plots') 
+#' norm_celfiles = QCnorm(celfiles,'Users/name/folderName/plots') 
 #' @references See packages rgl, Biobase, heatmaply, oligo
 #' @note Normalizes using rma, see oligo package
 #' @note Outputs 3D PCA and similarity heatmap
 #' @note Outputs pre-normalization plots, QC plots, post-normalization plots, see oligo package for details
 
 
-calc = function(raw,path) {
+QCnorm = function(raw,path) {
   library(rgl)
   library(Biobase)
   library(heatmaply)

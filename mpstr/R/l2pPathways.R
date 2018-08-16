@@ -6,11 +6,11 @@
 #' @param projectId A unique identifier for the project
 #' @return List of up and downregulated pathways for each contrast
 #' @examples 
-#' l2p_pathways = pathways(diff_expr_genes,'human','/Users/name/folderName','NCI_Project_1')
-#' l2p_pathways = pathways(diff_expr_genes,'mouse','/Users/name/folderName','NCI_Project_2')
+#' l2p_pathways = l2pPathways(diff_expr_genes,'human','/Users/name/folderName','NCI_Project_1')
+#' l2p_pathways = l2pPathways(diff_expr_genes,'mouse','/Users/name/folderName','NCI_Project_2')
 #' @references l2p and m2h from CCBR/CCR/NCI/NIH
 
-pathways = function(degs,species,workspace,projectId) {
+l2pPathways = function(degs,species,workspace,projectId) {
   
   listPathways = vector("list",length(degs$listDEGs))
   for (i in 1:length(degs$listDEGs)) {

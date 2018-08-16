@@ -6,13 +6,13 @@
 #' @param workspace Working directory
 #' @return List of DEGs for each contrast, annotated normalized data, and pheno data
 #' @examples 
-#' diff_expr_genes = deg(norm_celfiles,c("RNA_1-Ctl","RNA_2-Ctl"),'NCI_Project_1','/Users/name/folderName')
-#' diff_expr_genes = deg(norm_celfiles,c("KO_1-Ctl_1"),'NCI_Project_2','/Users/name/folderName')
+#' diff_expr_genes = diffExprGenes(norm_celfiles,c("RNA_1-Ctl","RNA_2-Ctl"),'NCI_Project_1','/Users/name/folderName')
+#' diff_expr_genes = diffExprGenes(norm_celfiles,c("KO_1-Ctl_1"),'NCI_Project_2','/Users/name/folderName')
 #' @note Baseline/control group should be listed second in contrast assignment: c("experimentalGroup-ControlGroup","diseasedGroup-ControlGroup")
 #' @note Outputs volcano plot (using plotly) of differentially expressed genes
 #' @references See plotly, limma and Bioconductor platform design/annotation documentation
 
-deg = function(norm,cons,projectId,workspace) {
+diffExprGenes = function(norm,cons,projectId,workspace) {
   library(limma)
   library(pd.mogene.2.0.st)
   library(mogene20sttranscriptcluster.db)

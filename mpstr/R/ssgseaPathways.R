@@ -7,12 +7,13 @@
 #' @param projectId A unique identifier for the project
 #' @return List containing ssGSEA initial results and differentially expressed ssGSEA pathways
 #' @examples 
-#' ssGSEA_results = ss(diff_expr_genes,'human','C2: Curated Gene Sets','/Users/name/folderName','NCI_Project_1')
+#' ssGSEA_results = ssgseaPathways(diff_expr_genes,'human','C2: Curated Gene Sets','/Users/name/folderName','NCI_Project_1')
 #' @note Human Gene Set Choices: "H: Hallmark Gene Sets", "C1: Positional Gene Sets", "C2: Curated Gene Sets", "C3: Motif Gene Sets", "C4: Computational Gene Sets","C5: GO gene sets", "C6: Oncogenic Signatures", "C7: Immunologic Signatures"
 #' @note Mouse Gene Set Choices: "H: Hallmark Gene Sets", "C2: Curated Gene Sets", "C3: Motif Gene Sets", "C4: Computational Gene Sets", "C5: GO gene sets", "C6: Oncogenic Signatures", "C7: Immunologic Signatures"
 #' @references MSigDB: http://software.broadinstitute.org/gsea/msigdb/index.jsp.  Also see GSEABase, GSVA and pheatmap packages.
+#' @references Mouse gene sets adapted from http://bioinf.wehi.edu.au/software/MSigDB/
 
-ss = function(deg_normAnnot, species, geneSet,workspace,projectId){
+ssgseaPathways = function(deg_normAnnot, species, geneSet,workspace,projectId){
   library(GSEABase)
   library(GSVA)
   library(pheatmap)
