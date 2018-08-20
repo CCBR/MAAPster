@@ -8,14 +8,14 @@
 #' @param pathway_name What is the pathway name? Found in description column of pathway table
 #' @param saveImageFileName Name of heatmap
 #' @examples 
-#' geneHeatmap(diff_expr_genes, l2p_pathways, 'RNA_1-Ctl', 'upregulated_pathways','oxidation-reduction process','Heatmap_Redox') 
-#' geneHeatmap(diff_expr_genes, l2p_pathways, 'KO_1-Ctl_1', 'downregulated_pathways','G-protein coupled receptor activity','Heatmap_GPCR') 
+#' geneHeatmap(diff_expr_genes, l2p_pathways, 'RNA_1-Ctl', 'upregulated_pathways','oxidation-reduction process','Heatmap_Redox','/Users/name/folderName') 
+#' geneHeatmap(diff_expr_genes, l2p_pathways, 'KO_1-Ctl_1', 'downregulated_pathways','G-protein coupled receptor activity','Heatmap_GPCR','/Users/name/folderName') 
 #' @note Nothing to return, outputs heatmap
 #' @references See pheatmap package, mouse/human homologs extracted from http://www.informatics.jax.org/homology.shtml
 
-geneHeatmap = function(degs, paths, contrast, upOrDown, pathway_name,saveImageFileName) {
+geneHeatmap = function(degs, paths, contrast, upOrDown, pathway_name,saveImageFileName,path) {
   library(pheatmap)
-  human2mouse = read.delim(paste0(workspace,'/human2mouse.csv', sep = ''),sep=',')
+  human2mouse = read.delim(paste0(path,'/human2mouse.csv', sep = ''),sep=',')
   paths = paths[[contrast]][[upOrDown]]
   genes = paths$gene.list[paths$description==pathway_name]              #select user input pathway, extract genes
   genes = strsplit(as.character(genes),' ')

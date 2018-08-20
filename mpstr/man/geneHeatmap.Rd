@@ -5,7 +5,7 @@
 \title{5) Gene heatmap with selected genes from l2p pathways}
 \usage{
 geneHeatmap(degs, paths, contrast, upOrDown, pathway_name,
-  saveImageFileName)
+  saveImageFileName, path)
 }
 \arguments{
 \item{degs}{Differentially expressed genes object from deg function}
@@ -27,8 +27,8 @@ geneHeatmap(degs, paths, contrast, upOrDown, pathway_name,
 Nothing to return, outputs heatmap
 }
 \examples{
-geneHeatmap(diff_expr_genes, l2p_pathways, 'RNA_1-Ctl', 'upregulated_pathways','oxidation-reduction process','Heatmap_Redox') 
-geneHeatmap(diff_expr_genes, l2p_pathways, 'KO_1-Ctl_1', 'downregulated_pathways','G-protein coupled receptor activity','Heatmap_GPCR') 
+geneHeatmap(diff_expr_genes, l2p_pathways, 'RNA_1-Ctl', 'upregulated_pathways','oxidation-reduction process','Heatmap_Redox','/Users/name/folderName') 
+geneHeatmap(diff_expr_genes, l2p_pathways, 'KO_1-Ctl_1', 'downregulated_pathways','G-protein coupled receptor activity','Heatmap_GPCR','/Users/name/folderName') 
 }
 \references{
 See pheatmap package, mouse/human homologs extracted from http://www.informatics.jax.org/homology.shtml
