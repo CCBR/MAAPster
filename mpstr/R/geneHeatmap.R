@@ -17,7 +17,7 @@ geneHeatmap = function(degs, paths, contrast, upOrDown, pathway_name,saveImageFi
   library(pheatmap)
   human2mouse = read.delim(paste0(path,'/human2mouse.csv', sep = ''),sep=',')
   paths = paths[[contrast]][[upOrDown]]
-  genes = paths$gene.list[paths$description==pathway_name]              #select user input pathway, extract genes
+  genes = paths$Gene_List[paths$Description==pathway_name]              #select user input pathway, extract genes
   genes = strsplit(as.character(genes),' ')
   genes = unlist(genes)
   exp = degs$norm_annotated                                             #extract normalized expression, subset by genes, aggregate duplicate symbols by mean
@@ -44,7 +44,7 @@ geneHeatmap = function(degs, paths, contrast, upOrDown, pathway_name,saveImageFi
   path_name = pathway_name
   exp = t(scale(t(exp)))                                                #get z-scores by row
   if (nrow(exp) > 30){
-    pheatmap(exp, main=path_name, annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 6,filename=saveImageFileName)
+    pheatmap(exp, main=path_name, annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 4,filename=saveImageFileName)
   } else {
     pheatmap(exp, main=path_name, annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 10,filename=saveImageFileName)
   }
