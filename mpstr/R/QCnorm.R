@@ -16,6 +16,7 @@ QCnorm = function(raw,path) {
   library(rgl)
   library(Biobase)
   library(heatmaply)
+  library(reshape2)
   
   HistplotBN<-"/histBeforeNorm.svg"
   svg(paste0(path,"/histBeforeNorm.svg"),width=8, height=8)
@@ -31,23 +32,15 @@ QCnorm = function(raw,path) {
     dev.off() 
   }
   
-  BoxplotBN<-"/boxplotBeforeNorm.svg"
-  svg(paste0(path,"/boxplotBeforeNorm.svg"),width=6, height=6) 
-  boxplot(raw, which="all", main="Boxplots before normalization",
-          las=2,names=pData(raw)$title, col=pData(raw)$colors)                        #Raw boxplot
-  dev.off()
+  #Export boxplotBN, RLE and NUSE data for plots
+  boxplotDataBN = oligo::boxplot(raw, which="all", plot=FALSE)                       
+  colnames(boxplotDataBN[[1]]$stats) = boxplotDataBN[[1]]$names
+  boxplotDataBN = boxplotDataBN[[1]]$stats
   
+  qc = fitProbeLevelModel(raw)                                                        
+  RLEdata = RLE(qc,type='values')
+  NUSEdata = NUSE(qc, type='values')
   
-  qc = fitProbeLevelModel(raw)                                                        #Calculate QC
-  RLEplotBN<-"/RLEBeforeNorm.svg"
-  svg(paste0(path,"/RLEBeforeNorm.svg"),width=6, height=6) 
-  RLE(qc, main="RLE plot",names=pData(raw)$title, las=2, col=pData(raw)$colors)       #RLE
-  dev.off() 
-  
-  NUSEplotBN<-"/NUSEBeforeNorm.svg"
-  svg(paste0(path,"/NUSEBeforeNorm.svg"),width=6, height=6) 
-  NUSE(qc, main="NUSE plot",names=pData(raw)$title, las=2, col=pData(raw)$colors)     #NUSE
-  dev.off()
   
   #Normalize data
   if (raw@annotation=="pd.hg.u133.plus.2" | raw@annotation=="pd.clariom.s.human.ht" | raw@annotation=="pd.clariom.s.human" | raw@annotation=="pd.clariom.s.mouse.ht" | raw@annotation=="pd.clariom.s.mouse" | raw@annotation=='pd.mouse430.2' | raw@annotation=='pd.hg.u133a' | raw@annotation=='pd.hg.u133a.2' | raw@annotation=='pd.hg.u219' | raw@annotation=='pd.mg.u74av2' | raw@annotation=='pd.mouse430a.2' | raw@annotation=='pd.moe430a' | raw@annotation=='pd.hg.u95av2' | raw@annotation=='pd.hg.u133b') {
@@ -69,29 +62,20 @@ QCnorm = function(raw,path) {
     dev.off() 
   }
   
-  BoxplotAN<-"/boxplotsAfterNorm.svg"
-  svg(paste0(path,"/boxplotsAfterNorm.svg"),width=6, height=6)
-  boxplot(norm, main="Boxplots after RMA normalization",las=2,
-          names=pData(raw)$title, col=pData(raw)$colors)                              #Normalized boxplot
-  dev.off() 
+  # Output boxplotAN data for plots
+  boxplotDataAN = oligo::boxplot(norm, which="all", plot=FALSE)                       
+  colnames(boxplotDataAN$stats) = boxplotDataAN$names
+  boxplotDataAN = boxplotDataAN$stats
   
-  # 3D PCA #                                                                          #3D PCA
+  # Output data for 3D PCA #                                                                         
   tedf= t(exprs(norm))
   if (length(which(apply(tedf, 2, var)==0)) >= 0){
     tedf = tedf[ , apply(tedf, 2, var) != 0]
   }
   pca=prcomp(tedf, scale. = T)
-  open3d()
-  bg3d('white')
-  plot3d(pca$x[,1:3], type='s',size=2, col=pData(raw)$colors)
-  group.v=as.vector(pData(raw)$title)
-  text3d(pca$x, pca$y, pca$z, group.v, cex=0.6, adj=1.5)
-  par3d(mouseMode = "trackball")
-  # END 3D PCA / BEGIN HEATMAP #                                                      #Heatmap
-  writeWebGL(dir = file.path(path, "webGL"),width = 650, reuse = TRUE)
+  pcaData = pca$x[,1:3]
   
-  PCA<-"/webGL/index.html"
-  
+
   mat=as.matrix(dist(t(exprs(norm))))
   rownames(mat)=pData(norm)$title
   colnames(mat)=rownames(mat)
@@ -102,6 +86,6 @@ QCnorm = function(raw,path) {
     file = paste0(path,"/heatmapAfterNorm.html")
   )
   Heatmapolt<-"/heatmapAfterNorm.html"
-  print("+++cal+++")
-  return (List(HistplotBN,MAplotBN,BoxplotBN,RLEplotBN,NUSEplotBN,HistplotAN,MAplotAN,BoxplotAN,PCA,Heatmapolt,norm))
+  print("+++QCnorm+++")
+  return (List(HistplotBN,MAplotBN,boxplotDataBN,RLEdata,NUSEdata,HistplotAN,MAplotAN,boxplotDataAN,pcaData,Heatmapolt,norm))
 }
