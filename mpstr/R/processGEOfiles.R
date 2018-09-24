@@ -16,51 +16,71 @@ processGEOfiles <- function(projectId,id,listGroups,workspace){
   library(oligo)
   library(Biobase)
   
-  
   if(dir.exists(workspace)) {
     unlink(workspace,recursive = TRUE)                                     #Delete the directory and files in that dir 
   }
   
-  dir.create(workspace)                                                    #Create a directory 
-  
+  if(!dir.exists(workspace)) {
+    dir.create(workspace)                                                   #Create a directory 
+  }
   
   id = gsub(" ","",id,fixed=TRUE) 
   #system(paste0('rm *.[cC][eE][lL].gz'))                           #removes previous CEL files if run consecutively
-  getGEOSuppFiles(id, makeDirectory = T, baseDir =workspace)
-  fileID = paste0(id, '_RAW.tar')
-  untar(paste0(workspace,'/',id,'/',fileID),exdir=workspace)
   
-  #list contents of new directory with zipped CEL files
-  SampleName = list.files(path = workspace, pattern = '/*CEL*.gz', ignore.case = T, full.names=T)
-  celfiles = read.celfiles(SampleName)
-  gds <- getGEO(id, GSEMatrix = F,getGPL=T,AnnotGPL=T)             #get meta data 
-  tableNames=c("gsm","title","description","groups")
-  pData(celfiles)[tableNames] = NA
-  for (k in 1:length(GSMList(gds)))                                 #fill table with meta data
-  {
-    if (is.null(Meta(GSMList(gds)[[k]])$description)) {    
-      pData(celfiles)[k,2:4] <-c(Meta(GSMList(gds)[[k]])$geo_accession[1], Meta(GSMList(gds)[[k]])$title[1], 'No data available')
-    } else {
-      pData(celfiles)[k,2:4] <-c(Meta(GSMList(gds)[[k]])$geo_accession[1], Meta(GSMList(gds)[[k]])$title[1], Meta(GSMList(gds)[[k]])$description[1])
-    }
+  readID = function(id) {                                           #error handling: wrong GSE id
+    out = tryCatch(
+      {
+        getGEOSuppFiles(id, makeDirectory = T, baseDir = workspace)
+        fileID = paste0(id, '_RAW.tar')
+        untar(paste0(workspace,'/',id,'/',fileID),exdir=workspace)
+        SampleName = list.files(path = workspace, pattern = '/*CEL*.gz', ignore.case = T, full.names=T)
+        celfiles = read.celfiles(SampleName)
+        gds <- getGEO(id, GSEMatrix = F,getGPL=T,AnnotGPL=T)             #get meta data 
+        tableNames=c("gsm","title","description","groups")
+        pData(celfiles)[tableNames] = NA
+        for (k in 1:length(GSMList(gds)))                                 #fill table with meta data
+        {
+          if (is.null(Meta(GSMList(gds)[[k]])$description)) {    
+            pData(celfiles)[k,2:4] <-c(Meta(GSMList(gds)[[k]])$geo_accession[1], Meta(GSMList(gds)[[k]])$title[1], 'No data available')
+          } else {
+            pData(celfiles)[k,2:4] <-c(Meta(GSMList(gds)[[k]])$geo_accession[1], Meta(GSMList(gds)[[k]])$title[1], Meta(GSMList(gds)[[k]])$description[1])
+          }
+        }
+        pData(celfiles)$groups = listGroups                               #assign groups to samples
+        ####creates a list of colors specific to each group
+        fs = factor(pData(celfiles)$groups)
+        lFs=levels(fs)
+        numFs=length(lFs)
+        colors = list()
+        for (i in 1:numFs){
+          colors[which(fs==lFs[i])] = i*5
+        }
+        colors = unlist(colors)
+        pData(celfiles)$colors = colors
+        print("+++loadGSE+++")
+        celfiles
+      },
+      error=function(cond) {
+        message("Please enter a correct GSE id, this is the number after 'Series' on the GEO series webpage (ex: GSE106988)")
+      }
+    )
   }
-  pData(celfiles)$groups = listGroups                               #assign groups to samples
-  ####creates a list of colors specific to each group
-  fs = factor(pData(celfiles)$groups)
-  lFs=levels(fs)
-  numFs=length(lFs)
-  colors = list()
-  for (i in 1:numFs){
-    colors[which(fs==lFs[i])] = i*5
+  celfiles = readID(id)
+  
+  #Error handling, return data if wrong id
+  returnData = function(cels) {
+    out = tryCatch(
+      {
+        return (list(
+          files=as.data.frame(apply(pData(celfiles),c(1,2),utils::URLencode)),
+          tableOrder=tableNames
+        ))
+      },
+      error=function(cond) {
+        return(NA)
+      }
+  )
+    returnData(celfiles)
   }
-  colors = unlist(colors)
-  pData(celfiles)$colors = colors
-  ####end colors
-  #return(celfiles)
-  #print(pData(celfiles))
-  print("+++loadGSE+++")
-  return (list(
-    files=as.data.frame(apply(pData(celfiles),c(1,2),utils::URLencode)),
-    tableOrder=tableNames
-  ))
 }
+
