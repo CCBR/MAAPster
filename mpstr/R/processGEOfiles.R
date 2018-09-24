@@ -82,8 +82,8 @@ processGEOfiles <- function(projectId,id,listGroups,workspace){
       error=function(cond) {
         return(NA)
       }
-  )
-    returnData(celfiles)
+    )
   }
+    returnData(celfiles)
 }
 
