@@ -4,7 +4,7 @@
 \alias{l2pPathways}
 \title{l2p Pathway Analysis}
 \usage{
-l2pPathways(degs, species, workspace, projectId)
+l2pPathways(degs, species, workspace, projectId, configuration_path)
 }
 \arguments{
 \item{degs}{Differentially expressed genes object from deg function}
@@ -14,6 +14,8 @@ l2pPathways(degs, species, workspace, projectId)
 \item{workspace}{Working directory}
 
 \item{projectId}{A unique identifier for the project}
+
+\item{configuration_path}{Path to configuration files}
 }
 \value{
 List of up and downregulated pathways for each contrast

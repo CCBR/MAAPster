@@ -175,7 +175,7 @@ diffExprGenes = function(norm,cons,projectId,workspace) {
     all$FC = ifelse(all$logFC<0, -1/(2^all$logFC), 2^all$logFC)                     #add fold change and rearrange columns
     all = all[,c(9,12,2,5,6,3,8,10,11,1,4,7)]
     # Write out to a file
-    write.table(all,file=paste(workspace,projectId,"_",cons[i],"_all_genes.txt",sep=""),sep="\t",row.names=F)
+    write.table(all,file=paste(workspace,'/',projectId,"_",cons[i],"_all_genes.txt",sep=""),sep="\t",row.names=F)
     listDEGs[[i]]=all
   }
   names(listDEGs)=cons
@@ -195,7 +195,7 @@ diffExprGenes = function(norm,cons,projectId,workspace) {
     gene=dat$SYMBOL
     volcano_data=as.data.frame(cbind(gene,log_FC,log_pval,Significant))
     volcano_plot<-plot_ly(type='scatter', data = volcano_data, x = log_FC, y = log_pval, text = gene, mode = "markers", color = Significant) %>% layout(title=paste0('Volcano plot for: ',names(listDEGs)[i]),xaxis=list(title="Fold Change",range =c(-5,5),tickvals=c(-5,-4,-3,-2,-1,0,1,2,3,4,5),ticktext=c('-32','-16','-8','-4','-2','1','2','4','8','16','32')),yaxis=list(title="-Log10 pvalue",range =c(0,15)))
-    htmlwidgets::saveWidget(volcano_plot, paste0(workspace,"volcano.html"))
+    htmlwidgets::saveWidget(volcano_plot, paste0(workspace,"/volcano.html"))
   }
   print("+++deg+++")
   return(list(listDEGs=listDEGs, norm_annotated=norm_annotated, pheno=pData(norm)))

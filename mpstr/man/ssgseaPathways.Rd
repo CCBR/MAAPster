@@ -4,7 +4,8 @@
 \alias{ssgseaPathways}
 \title{6) ssGSEA function}
 \usage{
-ssgseaPathways(deg_normAnnot, species, geneSet, workspace, projectId)
+ssgseaPathways(deg_normAnnot, species, geneSet, workspace, projectId,
+  configuration_path)
 }
 \arguments{
 \item{deg_normAnnot}{Differentially expressed genes object from deg function}
@@ -16,6 +17,8 @@ ssgseaPathways(deg_normAnnot, species, geneSet, workspace, projectId)
 \item{workspace}{Working directory}
 
 \item{projectId}{A unique identifier for the project}
+
+\item{configuration_path}{Path to configuration files}
 }
 \value{
 List containing ssGSEA initial results and differentially expressed ssGSEA pathways
