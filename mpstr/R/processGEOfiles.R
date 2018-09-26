@@ -72,6 +72,7 @@ processGEOfiles <- function(projectId,id,listGroups,workspace){
   
   #Error handling, return data if wrong id
   returnData = function(cels) {
+    tableNames=c("gsm","title","description","groups")
     out = tryCatch(
       {
         return (list(
