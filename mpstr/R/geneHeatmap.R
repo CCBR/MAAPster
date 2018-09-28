@@ -13,8 +13,12 @@
 #' @note Nothing to return, outputs heatmap
 #' @references See pheatmap package, mouse/human homologs extracted from http://www.informatics.jax.org/homology.shtml
 
-geneHeatmap = function(degs, paths, contrast, upOrDown, pathway_name,saveImageFileName,path) {
+geneHeatmap = function(degs, paths, contrast, upOrDown, pathway_name,saveImageFileName,path,workspace) {
   library(pheatmap)
+  
+  geneHeatmap_ERR = file(paste0(workspace,'/geneHeatmap.err'),open='wt')
+  sink(geneHeatmap_ERR,type='message',append=TRUE)
+  
   human2mouse = read.delim(paste0(path,'/human2mouse.csv', sep = ''),sep=',')
   paths = paths[[contrast]][[upOrDown]]
   genes = paths$Gene_List[paths$Description==pathway_name]              #select user input pathway, extract genes
@@ -48,4 +52,5 @@ geneHeatmap = function(degs, paths, contrast, upOrDown, pathway_name,saveImageFi
   } else {
     pheatmap(exp, main=path_name, annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 10,filename=saveImageFileName)
   }
+  sink(type='message')
 }

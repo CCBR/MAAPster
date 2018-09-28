@@ -61,6 +61,10 @@ diffExprGenes = function(norm,cons,projectId,workspace) {
   library(hugene11sttranscriptcluster.db)
   library(pd.mogene.1.1.st.v1)
   library(mogene11sttranscriptcluster.db)
+  
+  diffExprGenes_ERR = file(paste0(workspace,'/diffExprGenes.err'),open='wt')
+  sink(diffExprGenes_ERR,type='message',append=TRUE)
+  
   myfactor <- factor(pData(norm)$groups)
   design1 <- model.matrix(~0+myfactor)
   colnames(design1) <- levels(myfactor)
@@ -199,4 +203,5 @@ diffExprGenes = function(norm,cons,projectId,workspace) {
   }
   print("+++deg+++")
   return(list(listDEGs=listDEGs, norm_annotated=norm_annotated, pheno=pData(norm)))
+  sink(type='message')
 }

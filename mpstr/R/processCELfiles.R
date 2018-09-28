@@ -14,6 +14,10 @@ processCELfiles <- function(projectId,listGroups,workspace) {
   library(tools)
   library(Biobase)
   library(oligo)
+  
+  processCELfiles_ERR = file(paste0(workspace,'/processCELfiles.err'),open='wt')
+  sink(processCELfiles_ERR,type='message',append=TRUE)
+  
   print(workspace)
   SampleName = list.files(path = workspace, pattern = '/*CEL*.gz', ignore.case = T, full.names=T)
   celfiles = read.celfiles(SampleName)
@@ -36,4 +40,4 @@ processCELfiles <- function(projectId,listGroups,workspace) {
     files=as.data.frame(apply(pData(celfiles),c(1,2),utils::URLencode))
   ))
 }
-
+sink(type='message')

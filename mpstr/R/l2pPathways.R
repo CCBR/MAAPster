@@ -14,6 +14,9 @@
 
 l2pPathways = function(degs,species,workspace,projectId,configuration_path) {
   
+  l2pPathways_ERR = file(paste0(workspace,'/l2pPathways.err'),open='wt')
+  sink(l2pPathways_ERR,type='message',append=TRUE)
+  
   listPathways = vector("list",length(degs$listDEGs))
   for (i in 1:length(degs$listDEGs)) {
     up_down = vector("list",2)
@@ -73,4 +76,5 @@ l2pPathways = function(degs,species,workspace,projectId,configuration_path) {
   names(listPathways) = names(degs$listDEGs)
   print("+++pathways+++")
   return(listPathways)
+  sink(type='message')
 }

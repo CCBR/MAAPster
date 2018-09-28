@@ -19,6 +19,10 @@ ssgseaPathways = function(deg_normAnnot, species, geneSet,workspace,projectId,co
   library(GSEABase)
   library(GSVA)
   library(pheatmap)
+  
+  ssgseaPathways_ERR = file(paste0(workspace,'/ssgseaPathways.err'),open='wt')
+  sink(ssgseaPathways_ERR,type='message',append=TRUE)
+  
   normAnnot = deg_normAnnot$norm_annotated
   ssgs = normAnnot[normAnnot$SYMBOL!='NA',]
   #if human or mouse, prepare data for gsva
@@ -79,6 +83,7 @@ ssgseaPathways = function(deg_normAnnot, species, geneSet,workspace,projectId,co
   }
   print("+++ssGSEA+++")
   return(list(ssgsResults=ssgsResults, DEss=DEss))
+  sink(type='message')
 }
 
 

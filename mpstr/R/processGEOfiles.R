@@ -11,23 +11,27 @@
 #' celfiles = processGEOfiles('NCI_Project_2','GSE106988', c('Ctl_1','Ctl_1','Ctl_1','KO_1','KO_1','KO_1'),'/Users/name/folderName')
 #' @references See packages oligo, GEOquery, Biobase
 
+
 processGEOfiles <- function(projectId,id,listGroups,workspace){
   library(GEOquery)
   library(oligo)
   library(Biobase)
   
   if(dir.exists(workspace)) {
-    unlink(workspace,recursive = TRUE)                                     #Delete the directory and files in that dir 
+    unlink(workspace,recursive = TRUE)                                      #Delete the directory and files in that dir 
   }
   
   if(!dir.exists(workspace)) {
     dir.create(workspace)                                                   #Create a directory 
   }
+  processGEOfiles_ERR = file(paste0(workspace,"/processGEOfiles.err"),open='wt')    #Open file to write error messages
+  sink(processGEOfiles_ERR,type='message',append=TRUE)                      #Save error messages to file
   
   id = gsub(" ","",id,fixed=TRUE) 
-  #system(paste0('rm *.[cC][eE][lL].gz'))                           #removes previous CEL files if run consecutively
+  #system(paste0('rm *.[cC][eE][lL].gz'))                                   #removes previous CEL files if run consecutively
   
-  readID = function(id) {                                           #error handling: wrong GSE id
+  saveMessage = ''
+  readID = function(id) {                                                   #error handling: wrong GSE id
     out = tryCatch(
       {
         getGEOSuppFiles(id, makeDirectory = T, baseDir = workspace)
@@ -35,7 +39,7 @@ processGEOfiles <- function(projectId,id,listGroups,workspace){
         untar(paste0(workspace,'/',id,'/',fileID),exdir=workspace)
         SampleName = list.files(path = workspace, pattern = '/*CEL*.gz', ignore.case = T, full.names=T)
         if (length(grep('*CEL*',SampleName,ignore.case = T)) == 0) {
-          message("Raw files must be CEL files")
+          saveMessage = "Raw files must be CEL files"
         }
         celfiles = read.celfiles(SampleName)
         gds <- getGEO(id, GSEMatrix = F,getGPL=T,AnnotGPL=T)             #get meta data 
@@ -64,7 +68,7 @@ processGEOfiles <- function(projectId,id,listGroups,workspace){
         celfiles
       },
       error=function(cond) {
-        message("Please enter a correct GSE id, this is the number after 'Series' on the GEO series webpage (ex: GSE106988)")
+        return(saveMessage)
       }
     )
   }
@@ -81,10 +85,12 @@ processGEOfiles <- function(projectId,id,listGroups,workspace){
         ))
       },
       error=function(cond) {
-        return(NA)
+        message(paste0(cels,"\nPlease enter a correct GSE id, this is the number after 'Series' on the GEO series webpage (ex: GSE106988)"))
+        return(paste0(cels,"\nPlease enter a correct GSE id, this is the number after 'Series' on the GEO series webpage (ex: GSE106988)"))
       }
     )
   }
     returnData(celfiles)
 }
+sink(type='message')      #Return messages to console
 

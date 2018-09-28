@@ -18,6 +18,9 @@ QCnorm = function(raw,path) {
   library(heatmaply)
   library(reshape2)
   
+  QCnorm_ERR = file(paste0(path,'/QCnorm.err'),open='wt')
+  sink(QCnorm_ERR,type='message',append=TRUE)
+  
   HistplotBN<-"/histBeforeNorm.svg"
   svg(paste0(path,"/histBeforeNorm.svg"),width=8, height=8)
   hist(raw,which="all", main =" Raw Samples distribution")          
@@ -88,4 +91,5 @@ QCnorm = function(raw,path) {
   Heatmapolt<-"/heatmapAfterNorm.html"
   print("+++QCnorm+++")
   return (List(HistplotBN,MAplotBN,boxplotDataBN,RLEdata,NUSEdata,HistplotAN,MAplotAN,boxplotDataAN,pcaData,Heatmapolt,norm))
+  sink(type='message')
 }

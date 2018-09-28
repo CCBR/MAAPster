@@ -14,6 +14,10 @@ getCELfiles <- function(projectId,listGroups,workspace) {
   library(tools)
   library(Biobase)
   library(oligo)
+  
+  getCELfiles_ERR = file(paste0(workspace,'/getCELfiles.err'),open='wt')
+  sink(getCELfiles_ERR,type='message',append=TRUE)
+  
   SampleName = list.files(path = workspace, pattern = '/*CEL*.gz', ignore.case = T, full.names=T)
   celfiles = read.celfiles(SampleName)
   pData(celfiles)$title = basename(file_path_sans_ext(SampleName))  #add sample name to pheno
@@ -29,5 +33,5 @@ getCELfiles <- function(projectId,listGroups,workspace) {
   colors = unlist(colors)
   pData(celfiles)$colors = colors
   return(celfiles)
-  
+  sink(type='message')
 }

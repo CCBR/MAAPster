@@ -16,6 +16,9 @@ getLocalGEOfiles <- function(projectId,id,listGroups,workspace){
   library(oligo)
   library(Biobase)
   
+  getLocalGEOfiles_ERR = file(paste0(workspace,'/getLocalGEOfiles.err'),open='wt')
+  sink(getLocalGEOfiles_ERR,type='message',append=TRUE)
+  
   id = gsub(" ","",id,fixed=TRUE) 
   
   #list contents of new directory with zipped CEL files
@@ -48,3 +51,4 @@ getLocalGEOfiles <- function(projectId,id,listGroups,workspace){
   
   return(celfiles)
 }
+sink(type='message')
