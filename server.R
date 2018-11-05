@@ -1094,7 +1094,7 @@ shinyServer(function(input, output) {
               exp = deg()$all
               exp = exp[exp$SYMBOL %in% genes,]
               #if mouse data, convert from human to mouse gene orthologs
-              if (nrow(exp)==0) {
+              if (!(raw()@annotation=="pd.hg.u133.plus.2" | raw()@annotation=="pd.hugene.2.0.st" | raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.human" | raw()@annotation=='pd.hg.u133a' | raw()@annotation=='pd.hugene.1.0.st.v1' | raw()@annotation=='pd.hg.u133a.2' | raw()@annotation=='pd.huex.1.0.st.v2' | raw()@annotation=='pd.hg.u219' | raw()@annotation=='pd.ht.hg.u133.plus.pm' | raw()@annotation=='pd.hg.u95av2' | raw()@annotation=='pd.hta.2.0' | raw()@annotation=='pd.hg.u133b' | raw()@annotation=='pd.hugene.1.1.st.v1')) {
                 genes = human2mouse$mouse[human2mouse$human %in% genes]
                 genes = as.character(genes)
                 exp = deg()$all
@@ -1111,15 +1111,15 @@ shinyServer(function(input, output) {
               exp = subset(exp, select = -c(SYMBOL))
               exp = exp[,sampleColumns]
               #limit to 100 genes
-              if(nrow(exp)>100){
-                exp = exp[1:100,]
-              }
+              # if(nrow(exp)>100){
+              #   exp = exp[1:100,]
+              # }
               #set heatmap parameters
               matCol = data.frame(group=v$data$group[sampleColumns])
               rownames(matCol) = v$data$title[sampleColumns]
               matColors = list(group = unique(colors[sampleColumns]))
               names(matColors$group) = unique(v$data$group[sampleColumns])
-              path_name = paste0(toupper(pathways()$up[input$topUp_rows_selected, 'description']),' PATHWAY (max 100 genes)')
+              path_name = paste0(toupper(pathways()$up[input$topUp_rows_selected, 'description']),' PATHWAY ')
               #get z-scores by row
               exp = t(scale(t(exp)))  
               
@@ -1136,6 +1136,7 @@ shinyServer(function(input, output) {
             if (length(pathways()$dw[input$topDown_rows_selected, 'gene.list'])==0){
               showNotification('Select a pathway to see heatmap below')
             } else {
+              human2mouse = read.delim('human2mouse.csv',sep=',')
               #select user input pathway, extract genes
               genes = pathways()$dw[input$topDown_rows_selected, 'gene.list']
               genes = strsplit(as.character(genes),' ')
@@ -1144,6 +1145,13 @@ shinyServer(function(input, output) {
               #extract normalized expression, subset by genes, filter columns, aggregate duplicate symbols with means
               exp = deg()$all
               exp = exp[exp$SYMBOL %in% genes,]
+              #if mouse data, convert from human to mouse gene orthologs
+              if (!(raw()@annotation=="pd.hg.u133.plus.2" | raw()@annotation=="pd.hugene.2.0.st" | raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.human" | raw()@annotation=='pd.hg.u133a' | raw()@annotation=='pd.hugene.1.0.st.v1' | raw()@annotation=='pd.hg.u133a.2' | raw()@annotation=='pd.huex.1.0.st.v2' | raw()@annotation=='pd.hg.u219' | raw()@annotation=='pd.ht.hg.u133.plus.pm' | raw()@annotation=='pd.hg.u95av2' | raw()@annotation=='pd.hta.2.0' | raw()@annotation=='pd.hg.u133b' | raw()@annotation=='pd.hugene.1.1.st.v1')) {
+                genes = human2mouse$mouse[human2mouse$human %in% genes]
+                genes = as.character(genes)
+                exp = deg()$all
+                exp = exp[exp$SYMBOL %in% genes,]
+              }
               exp = subset(exp, select = -c(ACCNUM,DESC,ENTREZ,Row.names))
               exp = aggregate(.~SYMBOL,data=exp,mean)
               
@@ -1155,9 +1163,9 @@ shinyServer(function(input, output) {
               exp = subset(exp, select = -c(SYMBOL))
               exp = exp[,sampleColumns]
               #limit to 100 genes
-              if(nrow(exp)>100){
-                exp = exp[1:100,]
-              }
+              # if(nrow(exp)>100){
+              #   exp = exp[1:100,]
+              # }
               #set heatmap parameters
               matCol = data.frame(group=v$data$group[sampleColumns])
               rownames(matCol) = v$data$title[sampleColumns]
