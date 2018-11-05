@@ -26,7 +26,7 @@ ssgseaPathways = function(deg_normAnnot, species, geneSet,workspace,projectId,co
   normAnnot = deg_normAnnot$norm_annotated
   ssgs = normAnnot[normAnnot$SYMBOL!='NA',]
   #if human or mouse, prepare data for gsva
-  if (species=='human') {
+  if (tolower(species)=='human') {
     ssgs = subset(ssgs, select=-c(ACCNUM,DESC,Row.names,ENTREZ))
     ssgs = aggregate(.~SYMBOL,data=ssgs,mean)                               #aggregate duplicate probes by mean
     rownames(ssgs) = ssgs$SYMBOL

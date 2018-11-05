@@ -5,7 +5,7 @@
 \title{5) Gene heatmap with selected genes from l2p pathways}
 \usage{
 geneHeatmap(degs, paths, contrast, upOrDown, pathway_name,
-  saveImageFileName, path, workspace)
+  saveImageFileName, path, workspace, species)
 }
 \arguments{
 \item{degs}{Differentially expressed genes object from deg function}
@@ -19,6 +19,12 @@ geneHeatmap(degs, paths, contrast, upOrDown, pathway_name,
 \item{pathway_name}{What is the pathway name? Found in description column of pathway table}
 
 \item{saveImageFileName}{Name of heatmap}
+
+\item{path}{Path to app configuration files}
+
+\item{workspace}{Path to output plots}
+
+\item{species}{Either human or mouse}
 }
 \description{
 5) Gene heatmap with selected genes from l2p pathways

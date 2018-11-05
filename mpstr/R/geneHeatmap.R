@@ -7,13 +7,16 @@
 #' @param upOrDown Is user-selected pathway from up or down list? (matches names of up and down pathways from output of pathways function)
 #' @param pathway_name What is the pathway name? Found in description column of pathway table
 #' @param saveImageFileName Name of heatmap
+#' @param path Path to app configuration files
+#' @param workspace Path to output plots
+#' @param species Either human or mouse
 #' @examples 
 #' geneHeatmap(diff_expr_genes, l2p_pathways, 'RNA_1-Ctl', 'upregulated_pathways','oxidation-reduction process','Heatmap_Redox','/Users/name/folderName') 
 #' geneHeatmap(diff_expr_genes, l2p_pathways, 'KO_1-Ctl_1', 'downregulated_pathways','G-protein coupled receptor activity','Heatmap_GPCR','/Users/name/folderName') 
 #' @note Nothing to return, outputs heatmap
 #' @references See pheatmap package, mouse/human homologs extracted from http://www.informatics.jax.org/homology.shtml
 
-geneHeatmap = function(degs, paths, contrast, upOrDown, pathway_name,saveImageFileName,path,workspace) {
+geneHeatmap = function(degs, paths, contrast, upOrDown, pathway_name,saveImageFileName,path,workspace,species) {
   library(pheatmap)
   
   geneHeatmap_ERR = file(paste0(workspace,'/geneHeatmap.err'),open='wt')
@@ -26,7 +29,7 @@ geneHeatmap = function(degs, paths, contrast, upOrDown, pathway_name,saveImageFi
   genes = unlist(genes)
   exp = degs$norm_annotated                                             #extract normalized expression, subset by genes, aggregate duplicate symbols by mean
   exp = exp[exp$SYMBOL %in% genes,]
-  if (nrow(exp)==0) {
+  if (tolower(species)=='mouse') {
     genes = human2mouse$mouse[human2mouse$human %in% genes]
     genes = as.character(genes)
     exp = degs$norm_annotated                                            
@@ -38,9 +41,6 @@ geneHeatmap = function(degs, paths, contrast, upOrDown, pathway_name,saveImageFi
   rownames(exp) = exp$SYMBOL
   exp = subset(exp, select = -c(SYMBOL))
   exp = exp[,sampleColumns]
-  if(nrow(exp)>100){                                                    #limit to 100 genes
-    exp = exp[1:100,]
-  }
   matCol = data.frame(group=degs$pheno$groups[sampleColumns])           #set heatmap parameters
   rownames(matCol) = rownames(degs$pheno)[sampleColumns]
   matColors = list(group = unique(degs$pheno$colors[sampleColumns]))
@@ -48,9 +48,9 @@ geneHeatmap = function(degs, paths, contrast, upOrDown, pathway_name,saveImageFi
   path_name = pathway_name
   exp = t(scale(t(exp)))                                                #get z-scores by row
   if (nrow(exp) > 30){
-    pheatmap(exp, main=path_name, annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 4,filename=saveImageFileName)
+    pheatmap(exp, main=path_name, annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 4,filename=paste0(workspace,'/',saveImageFileName))
   } else {
-    pheatmap(exp, main=path_name, annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 10,filename=saveImageFileName)
+    pheatmap(exp, main=path_name, annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 10,filename=paste0(workspace,'/',saveImageFileName))
   }
   sink(type='message')
 }

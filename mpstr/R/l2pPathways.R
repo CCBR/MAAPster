@@ -38,7 +38,7 @@ l2pPathways = function(degs,species,workspace,projectId,configuration_path) {
     fin.up$SYMBOL = as.character(fin.up$SYMBOL)
     fin.dw$SYMBOL = as.character(fin.dw$SYMBOL)
     
-    if (species=='human')
+    if (tolower(species)=='human')
     {
       cat(fin.up$SYMBOL,file=(paste0(workspace,'/',projectId,'_',names(degs$listDEGs[i]),'_Top500_Up.txt')), sep='\n')
       cat(fin.dw$SYMBOL,file=(paste0(workspace,'/',projectId,'_',names(degs$listDEGs[i]),'_Top500_Down.txt')),sep='\n')
