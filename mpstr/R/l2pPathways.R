@@ -8,8 +8,8 @@
 #' @param configuration_path Path to configuration files
 #' @return List of up and downregulated pathways for each contrast
 #' @examples
-#' l2p_pathways = l2pPathways(diff_expr_genes,'human','/Users/name/folderName','NCI_Project_1')
-#' l2p_pathways = l2pPathways(diff_expr_genes,'mouse','/Users/name/folderName','NCI_Project_2')
+#' l2p_pathways = l2pPathways(diff_expr_genes,'human','/Users/name/folderName','NCI_Project_1','/Users/name/config')
+#' l2p_pathways = l2pPathways(diff_expr_genes,'mouse','/Users/name/folderName','NCI_Project_2','/Users/name/config')
 #' @references l2p and m2h from CCBR/CCR/NCI/NIH
 
 l2pPathways = function(degs,species,workspace,projectId,configuration_path) {

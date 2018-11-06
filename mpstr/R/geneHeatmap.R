@@ -11,8 +11,8 @@
 #' @param workspace Path to output plots
 #' @param species Either human or mouse
 #' @examples 
-#' geneHeatmap(diff_expr_genes, l2p_pathways, 'RNA_1-Ctl', 'upregulated_pathways','oxidation-reduction process','Heatmap_Redox','/Users/name/folderName') 
-#' geneHeatmap(diff_expr_genes, l2p_pathways, 'KO_1-Ctl_1', 'downregulated_pathways','G-protein coupled receptor activity','Heatmap_GPCR','/Users/name/folderName') 
+#' geneHeatmap(diff_expr_genes, l2p_pathways, 'RNA_1-Ctl', 'upregulated_pathways','oxidation-reduction process','Heatmap_Redox','/Users/name/folderName','/Users/name/config','human') 
+#' geneHeatmap(diff_expr_genes, l2p_pathways, 'KO_1-Ctl_1', 'downregulated_pathways','G-protein coupled receptor activity','Heatmap_GPCR','/Users/name/folderName','/Users/name/config','human') 
 #' @note Nothing to return, outputs heatmap
 #' @references See pheatmap package, mouse/human homologs extracted from http://www.informatics.jax.org/homology.shtml
 
