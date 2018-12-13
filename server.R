@@ -194,41 +194,28 @@ shinyServer(function(input, output) {
         
         incProgress(0.25)
         
-        readIDagain = function(id) {
-          out = tryCatch(
-            {
-              gds <- getGEO(id, GSEMatrix = F,getGPL=T,AnnotGPL=T)
-              
-              mytable=matrix("",length(GSMList(gds)),3)
-              colnames(mytable)=c("gsm","title","description")
-              
-              for (k in 1:length(GSMList(gds)))
-              {
-                if (is.null(Meta(GSMList(gds)[[k]])$description)) {     #error handling, some records don't have descriptions
-                  mytable[k,] <-c(Meta(GSMList(gds)[[k]])$geo_accession[1], Meta(GSMList(gds)[[k]])$title[1], 'No data available')
-                } else {
-                  mytable[k,] <-c(Meta(GSMList(gds)[[k]])$geo_accession[1], Meta(GSMList(gds)[[k]])$title[1], Meta(GSMList(gds)[[k]])$description[1])
-                }
-              }
-              # }
-              
-              mytable <- data.frame(mytable)
-              
-              mytable$group <- "..."
-              v$data <- mytable
-            },
-            warning=function(cond) {
-              message("Please enter a correct GSE id, this is the number after 'Series' on the GEO series webpage (ex: GSE106988)")
-              info("Please enter a correct GSE id, this is the number after 'Series' on the GEO series webpage (ex: GSE106988)")
-            },
-            error=function(cond) {
-              message("Please enter a correct GSE id, this is the number after 'Series' on the GEO series webpage (ex: GSE106988)")
-              info("Please enter a correct GSE id, this is the number after 'Series' on the GEO series webpage (ex: GSE106988)")
-            }
-          )
-        }
-        readIDagain(id)
+        #gds <- getGEO(input$gseid, GSEMatrix = F,getGPL=T,AnnotGPL=T)
+        gds <- getGEO(id, GSEMatrix = F,getGPL=T,AnnotGPL=T)
+        #gds
         
+        mytable=matrix("",length(GSMList(gds)),3)
+        colnames(mytable)=c("gsm","title","description")
+        
+        
+        for (k in 1:length(GSMList(gds)))
+        {
+          if (is.null(Meta(GSMList(gds)[[k]])$description)) {     #error handling, some records don't have descriptions
+            mytable[k,] <-c(Meta(GSMList(gds)[[k]])$geo_accession[1], Meta(GSMList(gds)[[k]])$title[1], 'No data available')
+          } else {
+            mytable[k,] <-c(Meta(GSMList(gds)[[k]])$geo_accession[1], Meta(GSMList(gds)[[k]])$title[1], Meta(GSMList(gds)[[k]])$description[1])
+          }
+        }
+        # }
+        
+        mytable <- data.frame(mytable)
+        
+        mytable$group <- "..."
+        v$data <- mytable
         
         incProgress(0.25)
         output$mytable = DT::renderDataTable({
