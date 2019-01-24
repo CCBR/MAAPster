@@ -37,7 +37,7 @@ processGEOfiles <- function(projectId,id,listGroups,workspace){
         getGEOSuppFiles(id, makeDirectory = T, baseDir = workspace)
         fileID = paste0(id, '_RAW.tar')
         untar(paste0(workspace,'/',id,'/',fileID),exdir=workspace)
-        SampleName = list.files(path = workspace, pattern = '/*CEL*.gz', ignore.case = T, full.names=T)
+        SampleName = list.files(path = workspace, pattern = '/*CEL.gz|/*CEL$', ignore.case = T, full.names=T)
         if (length(grep('*CEL*',SampleName,ignore.case = T)) == 0) {
           saveMessage = "Raw files must be CEL files"
         }

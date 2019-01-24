@@ -19,7 +19,7 @@ processCELfiles <- function(projectId,listGroups,workspace) {
   sink(processCELfiles_ERR,type='message',append=TRUE)
   
   print(workspace)
-  SampleName = list.files(path = workspace, pattern = '/*CEL*.gz', ignore.case = T, full.names=T)
+  SampleName = list.files(path = workspace, pattern = '/*CEL.gz|/*CEL$', ignore.case = T, full.names=T)
   celfiles = read.celfiles(SampleName)
   pData(celfiles)$title = basename(file_path_sans_ext(SampleName))  #add sample name to pheno
   

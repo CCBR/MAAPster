@@ -22,7 +22,7 @@ getLocalGEOfiles <- function(projectId,id,listGroups,workspace){
   id = gsub(" ","",id,fixed=TRUE) 
   
   #list contents of new directory with zipped CEL files
-  SampleName = list.files(path = workspace, pattern = '/*CEL*.gz', ignore.case = T, full.names=T)
+  SampleName = list.files(path = workspace, pattern = '/*CEL.gz|/*CEL$', ignore.case = T, full.names=T)
   celfiles = read.celfiles(SampleName)
   gds <- getGEO(id, GSEMatrix = F,getGPL=T,AnnotGPL=T)             #get meta data 
   tableNames=c("gsm","title","description","groups")
