@@ -79,7 +79,7 @@ ssgseaPathways = function(deg_normAnnot, species, geneSet,workspace,projectId,co
     paths = t(scale(t(paths)))
     saveImageFileName<-paste0(workspace,'/ssgseaHeatmap',i,'.jpg',sep="")
     
-    pheatmap(paths,annotation_col=matCol,annotation_colors=matColors,drop_levels=TRUE,fontsize=7, main='Enrichment Scores for Top 50 Differentially Expressed ssGSEA Pathways',filename=saveImageFileName,width=12,height = 12)
+    pheatmap(paths,annotation_col=matCol,annotation_colors=matColors,drop_levels=TRUE,fontsize=7, main='Enrichment Scores for Top 50 Differentially Expressed ssGSEA Pathways\n(Row Z-Scores)',filename=saveImageFileName,width=12,height = 12)
   }
   print("+++ssGSEA+++")
   return(list(ssgsResults=ssgsResults, DEss=DEss))

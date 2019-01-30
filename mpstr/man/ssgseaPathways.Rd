@@ -32,7 +32,7 @@ Human Gene Set Choices: "H: Hallmark Gene Sets", "C1: Positional Gene Sets", "C2
 Mouse Gene Set Choices: "H: Hallmark Gene Sets", "C2: Curated Gene Sets", "C3: Motif Gene Sets", "C4: Computational Gene Sets", "C5: GO gene sets", "C6: Oncogenic Signatures", "C7: Immunologic Signatures"
 }
 \examples{
-ssGSEA_results = ssgseaPathways(diff_expr_genes,'human','C2: Curated Gene Sets','/Users/name/folderName','NCI_Project_1')
+ssGSEA_results = ssgseaPathways(diff_expr_genes,'human','C2: Curated Gene Sets','/Users/name/folderName','NCI_Project_1','/Users/name/config')
 }
 \references{
 MSigDB: http://software.broadinstitute.org/gsea/msigdb/index.jsp.  Also see GSEABase, GSVA and pheatmap packages.

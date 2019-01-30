@@ -24,8 +24,8 @@ List of up and downregulated pathways for each contrast
 l2p Pathway Analysis
 }
 \examples{
-l2p_pathways = l2pPathways(diff_expr_genes,'human','/Users/name/folderName','NCI_Project_1')
-l2p_pathways = l2pPathways(diff_expr_genes,'mouse','/Users/name/folderName','NCI_Project_2')
+l2p_pathways = l2pPathways(diff_expr_genes,'human','/Users/name/folderName','NCI_Project_1','/Users/name/config')
+l2p_pathways = l2pPathways(diff_expr_genes,'mouse','/Users/name/folderName','NCI_Project_2','/Users/name/config')
 }
 \references{
 l2p and m2h from CCBR/CCR/NCI/NIH

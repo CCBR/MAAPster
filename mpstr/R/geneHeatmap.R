@@ -48,9 +48,9 @@ geneHeatmap = function(degs, paths, contrast, upOrDown, pathway_name,saveImageFi
   path_name = pathway_name
   exp = t(scale(t(exp)))                                                #get z-scores by row
   if (nrow(exp) > 30){
-    pheatmap(exp, main=path_name, annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 4,filename=paste0(workspace,'/',saveImageFileName))
+    pheatmap(exp, main=paste0(path_name,'\n(Row Z-Scores)'),annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 4,filename=paste0(workspace,'/',saveImageFileName))
   } else {
-    pheatmap(exp, main=path_name, annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 10,filename=paste0(workspace,'/',saveImageFileName))
+    pheatmap(exp, main=paste0(path_name,'\n(Row Z-Scores)'),annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 10,filename=paste0(workspace,'/',saveImageFileName))
   }
   sink(type='message')
 }
