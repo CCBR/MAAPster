@@ -968,7 +968,16 @@ shinyServer(function(input, output) {
               incProgress(amount = 0.25, detail = 'determining variance ...')
               rgl.open(useNULL=T)
               bg3d('white')
-              plot3d(pca$x[,1:3],col=colors, type='s',size=2)
+              
+              pc1.var=100*round(((pca$sdev)**2)[1]/sum((pca$sdev)**2),digits=2) # %var pc1 
+              pc2.var=100*round(((pca$sdev)**2)[2]/sum((pca$sdev)**2),digits=2) # % var pc2
+              pc3.var=100*round(((pca$sdev)**2)[3]/sum((pca$sdev)**2),digits=2) # % var pc3
+              
+              xLabel=paste0("PC1 - ",pc1.var,"%")
+              yLabel=paste0("PC2 - ",pc2.var," %")
+              zLabel=paste0("PC2 - ",pc3.var," %")
+              
+              plot3d(pca$x[,1:3],col=colors, type='s',size=2,xlab=xLabel,ylab=yLabel,zlab=zLabel)
               group.v=as.vector(pData(norm())$SampleID)
               text3d(pca$x, pca$y, pca$z, group.v, cex=0.6, adj=1.5)
               par3d(mouseMode = "trackball")
