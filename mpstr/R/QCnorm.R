@@ -76,7 +76,7 @@ QCnorm = function(raw,path) {
     tedf = tedf[ , apply(tedf, 2, var) != 0]
   }
   pca=prcomp(tedf, scale. = T)
-  pcaData = pca$x[,1:3]
+  #pcaData = pca$x[,1:3]
   
 
   mat=as.matrix(dist(t(exprs(norm))))
@@ -90,6 +90,6 @@ QCnorm = function(raw,path) {
   )
   Heatmapolt<-"/heatmapAfterNorm.html"
   print("+++QCnorm+++")
-  return (List(HistplotBN,MAplotBN,boxplotDataBN,RLEdata,NUSEdata,HistplotAN,MAplotAN,boxplotDataAN,pcaData,Heatmapolt,norm))
+  return (List(HistplotBN,MAplotBN,boxplotDataBN,RLEdata,NUSEdata,HistplotAN,MAplotAN,boxplotDataAN,pca,Heatmapolt,norm))
   sink(type='message')
 }
