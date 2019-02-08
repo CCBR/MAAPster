@@ -71,7 +71,7 @@ ssgseaPathways = function(deg_normAnnot, species, geneSet,workspace,projectId,co
   for (i in 1:length(DEss)){                                                                                                             #Heatmap
     sampleColumns = c(which(deg_normAnnot$pheno$groups==gsub("-.*$","",cons[i])),which(deg_normAnnot$pheno$groups==gsub("^.*-","",cons[i])))   #Subset columns (samples)
     DEss_sig = DEss[[i]][DEss[[i]]$P.Value<0.05,]
-    paths = ssgsResults[rownames(ssgsResults) %in% rownames(DEss[[i]])[1:50],]                                                           #Subset rows (pathways)
+    paths = ssgsResults[rownames(ssgsResults) %in% rownames(DEss_sig)[1:50],]                                                           #Subset rows (pathways)
     paths = paths[,sampleColumns]
     matCol = data.frame(group=deg_normAnnot$pheno$groups[sampleColumns])
     rownames(matCol) = rownames(deg_normAnnot$pheno)[sampleColumns]
