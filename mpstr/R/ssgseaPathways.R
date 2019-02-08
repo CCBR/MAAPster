@@ -32,17 +32,17 @@ ssgseaPathways = function(deg_normAnnot, species, geneSet,workspace,projectId,co
     rownames(ssgs) = ssgs$SYMBOL
     ssgs = subset(ssgs, select=-c(SYMBOL))
     ssgs = as.matrix(ssgs)
-    getSet = switch(geneSet, "H: Hallmark Gene Sets"="h.all.v6.1.symbols.gmt", "C1: Positional Gene Sets"="c1.all.v6.1.symbols.gmt", "C2: Curated Gene Sets"="c2.all.v6.1.symbols.gmt",
-                    "C3: Motif Gene Sets"="c3.all.v6.1.symbols.gmt", "C4: Computational Gene Sets"="c4.all.v6.1.symbols.gmt","C5: GO gene sets"="c5.all.v6.1.symbols.gmt",
-                    "C6: Oncogenic Signatures"="c6.all.v6.1.symbols.gmt", "C7: Immunologic Signatures"="c7.all.v6.1.symbols.gmt")
+    getSet = switch(geneSet, "H: Hallmark Gene Sets"="h.all.v6.2.symbols.gmt", "C1: Positional Gene Sets"="c1.all.v6.2.symbols.gmt", "C2: Curated Gene Sets"="c2.all.v6.2.symbols.gmt",
+                    "C3: Motif Gene Sets"="c3.all.v6.2.symbols.gmt", "C4: Computational Gene Sets"="c4.all.v6.2.symbols.gmt","C5: GO gene sets"="c5.all.v6.2.symbols.gmt",
+                    "C6: Oncogenic Signatures"="c6.all.v6.2.symbols.gmt", "C7: Immunologic Signatures"="c7.all.v6.2.symbols.gmt")
   } else {
     ssgs = subset(ssgs, select=-c(ACCNUM,DESC,Row.names,SYMBOL))
     ssgs = aggregate(.~ENTREZ,data=ssgs,mean)                               #aggregate duplicate probes by mean
     rownames(ssgs) = ssgs$ENTREZ
     ssgs = subset(ssgs, select=-c(ENTREZ))
     ssgs = as.matrix(ssgs)
-    getSet = switch(geneSet, "H: Hallmark Gene Sets"="mouse_H_v5p2.gmt", "C2: Curated Gene Sets"="mouse_C2_v5p2.gmt", "C3: Motif Gene Sets"="mouse_C3_v5p2.gmt", "C4: Computational Gene Sets"="mouse_C4_v5p2.gmt",
-                    "C5: GO gene sets"="mouse_C5_v5p2.gmt", "C6: Oncogenic Signatures"="mouse_C6_v5p2.gmt", "C7: Immunologic Signatures"="mouse_C7_v5p2.gmt")
+    getSet = switch(geneSet, "Co-expression"="MousePath_Co-expression_entrez.gmt", "Gene Ontology"="MousePath_GO_entrez.gmt", "Curated Pathway"="MousePath_Pathway_entrez.gmt", "Metabolic"="MousePath_Metabolic_entrez.gmt",
+                    "TF targets"="MousePath_TF_entrez.gmt", "miRNA targets"="MousePath_miRNA_entrez.gmt", "Location"="MousePath_Location_entrez.gmt")
   }
   getSet = paste0(configuration_path,'/',getSet)
   gset = getGmt(getSet)
