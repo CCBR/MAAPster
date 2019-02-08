@@ -70,6 +70,7 @@ ssgseaPathways = function(deg_normAnnot, species, geneSet,workspace,projectId,co
   names(DEss)=cons
   for (i in 1:length(DEss)){                                                                                                             #Heatmap
     sampleColumns = c(which(deg_normAnnot$pheno$groups==gsub("-.*$","",cons[i])),which(deg_normAnnot$pheno$groups==gsub("^.*-","",cons[i])))   #Subset columns (samples)
+    DEss_sig = DEss[[i]][DEss[[i]]$P.Value<0.05,]
     paths = ssgsResults[rownames(ssgsResults) %in% rownames(DEss[[i]])[1:50],]                                                           #Subset rows (pathways)
     paths = paths[,sampleColumns]
     matCol = data.frame(group=deg_normAnnot$pheno$groups[sampleColumns])
@@ -79,7 +80,7 @@ ssgseaPathways = function(deg_normAnnot, species, geneSet,workspace,projectId,co
     paths = t(scale(t(paths)))
     saveImageFileName<-paste0(workspace,'/ssgseaHeatmap',i,'.jpg',sep="")
     
-    pheatmap(paths,annotation_col=matCol,annotation_colors=matColors,drop_levels=TRUE,fontsize=7, main='Enrichment Scores for Top 50 Differentially Expressed ssGSEA Pathways\n(Row Z-Scores)',filename=saveImageFileName,width=12,height = 12)
+    pheatmap(paths,annotation_col=matCol,annotation_colors=matColors,drop_levels=TRUE,fontsize=7, main='Enrichment Scores for Top 50 Differentially Expressed ssGSEA Pathways (p-value<0.05)\n(Row Z-Scores)',filename=saveImageFileName,width=12,height = 12)
   }
   print("+++ssGSEA+++")
   return(list(ssgsResults=ssgsResults, DEss=DEss))
