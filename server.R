@@ -954,11 +954,11 @@ shinyServer(function(input, output) {
         ## end mvaplat after normalization
         
         ## pca 3D
-        output$pca3d=renderRglwidget(
+        output$pca3d=renderPlotly(
           {
             withProgress(message = 'Generating PCA', detail = 'starting ...', value = 0.5, {
               tedf= t(exprs(norm()))
-              
+
               #removes zero  variances (issue with small sample sizes)
               if (length(which(apply(tedf, 2, var)==0)) >= 0){
                 tedf = tedf[ , apply(tedf, 2, var) != 0]
@@ -966,22 +966,22 @@ shinyServer(function(input, output) {
               
               pca=prcomp(tedf, scale. = T)
               incProgress(amount = 0.25, detail = 'determining variance ...')
-              rgl.open(useNULL=T)
-              bg3d('white')
-              
-              pc1.var=100*round(((pca$sdev)**2)[1]/sum((pca$sdev)**2),digits=2) # %var pc1 
-              pc2.var=100*round(((pca$sdev)**2)[2]/sum((pca$sdev)**2),digits=2) # % var pc2
-              pc3.var=100*round(((pca$sdev)**2)[3]/sum((pca$sdev)**2),digits=2) # % var pc3
+
+              pc1.var=round(pca$sdev[1]^2/sum(pca$sdev^2)*100,2)
+              pc2.var=round(pca$sdev[2]^2/sum(pca$sdev^2)*100,2)
+              pc3.var=round(pca$sdev[3]^2/sum(pca$sdev^2)*100,2)
               
               xLabel=paste0("PC1 - ",pc1.var,"%")
               yLabel=paste0("PC2 - ",pc2.var," %")
               zLabel=paste0("PC2 - ",pc3.var," %")
               
-              plot3d(pca$x[,1:3],col=colors, type='s',size=2,xlab=xLabel,ylab=yLabel,zlab=zLabel)
               group.v=as.vector(pData(norm())$SampleID)
-              text3d(pca$x, pca$y, pca$z, group.v, cex=0.6, adj=1.5)
-              par3d(mouseMode = "trackball")
-              rglwidget()
+              plot_ly(as.data.frame(pca$x[,1:3]), x = ~PC1, y = ~PC2, z = ~PC3,color = v$data$group, hoverinfo="text",
+                           hovertext = ~group.v) %>%
+                add_markers() %>%
+                layout(scene = list(xaxis = list(title = paste0("PC1 (",pc1.var,"%)")),
+                                    yaxis = list(title = paste0("PC2 (",pc2.var,"%)")),
+                                    zaxis = list(title = paste0("PC3 (",pc3.var,"%)"))))
             })
           }
         )
@@ -1103,6 +1103,7 @@ shinyServer(function(input, output) {
               k$all = cbind(paste0(k$k1, ' vs ', k$k2))
               num = which(input$NumContrasts==k$all[,1])
               sampleColumns = c(which(v$data$group==k$k2[num]),which(v$data$group==k$k1[num])) 
+              
               rownames(exp) = exp$SYMBOL
               exp = subset(exp, select = -c(SYMBOL))
               exp = exp[,sampleColumns]

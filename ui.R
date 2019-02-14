@@ -260,7 +260,7 @@ shinyUI(
                                                    tabPanel("Histogram",plotOutput("rmahist")),
                                                    tabPanel("Maplots",uiOutput("normaplot")),
                                                    tabPanel("Boxplots",plotOutput("rmabox")),
-                                                   tabPanel("3D-PCA",rglwidgetOutput("pca3d")),
+                                                   tabPanel("3D-PCA",plotlyOutput("pca3d")),
                                                    tabPanel("Interactive Heatmap",plotlyOutput("heatmap"))
                                        ),
                                        navbarMenu (title="DEG-Enrichments-tables",
