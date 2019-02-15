@@ -971,10 +971,6 @@ shinyServer(function(input, output) {
               pc2.var=round(pca$sdev[2]^2/sum(pca$sdev^2)*100,2)
               pc3.var=round(pca$sdev[3]^2/sum(pca$sdev^2)*100,2)
               
-              xLabel=paste0("PC1 - ",pc1.var,"%")
-              yLabel=paste0("PC2 - ",pc2.var," %")
-              zLabel=paste0("PC2 - ",pc3.var," %")
-              
               group.v=as.vector(pData(norm())$SampleID)
               plot_ly(as.data.frame(pca$x[,1:3]), x = ~PC1, y = ~PC2, z = ~PC3,color = v$data$group, hoverinfo="text",
                            hovertext = ~group.v) %>%
