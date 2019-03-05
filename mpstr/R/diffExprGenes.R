@@ -198,7 +198,7 @@ diffExprGenes = function(norm,cons,projectId,workspace) {
     Significant[which(dat$P.Value>=0.05 & abs(dat$logFC)>=1)]="AbsLogFoldChange>1"
     gene=dat$SYMBOL
     volcano_data=as.data.frame(cbind(gene,log_FC,log_pval,Significant))
-    volcano_plot<-plot_ly(type='scatter', data = volcano_data, x = log_FC, y = log_pval, text = gene, mode = "markers", color = Significant) %>% layout(xaxis=list(title="Fold Change",range =c(-5,5),tickvals=c(-5,-4,-3,-2,-1,0,1,2,3,4,5),ticktext=c('-32','-16','-8','-4','-2','1','2','4','8','16','32')),yaxis=list(title="-Log10 pvalue",range =c(0,15)))
+    volcano_plot<-plot_ly(type='scatter', data = volcano_data, x = log_FC, y = log_pval, text = gene, mode = "markers", color = Significant) %>% layout(title=names(listDEGs)[i],xaxis=list(title="Fold Change",range =c(-5,5),tickvals=c(-5,-4,-3,-2,-1,0,1,2,3,4,5),ticktext=c('-32','-16','-8','-4','-2','1','2','4','8','16','32')),yaxis=list(title="-Log10 pvalue",range =c(0,15)))
     htmlwidgets::saveWidget(volcano_plot, paste0(workspace,"/volcano.html"))
   }
   print("+++deg+++")
