@@ -41,21 +41,29 @@ processGEOfiles <- function(projectId,id,listGroups,workspace){
         if (length(grep('*CEL*',SampleName,ignore.case = T)) == 0) {
           saveMessage = "Raw files must be CEL files"
         }
-        celfiles = read.celfiles(SampleName)
+        #celfiles = read.celfiles(SampleName)
         gds <- getGEO(id, GSEMatrix = F,getGPL=T,AnnotGPL=T)             #get meta data 
-        tableNames=c("gsm","title","description","groups")
-        pData(celfiles)[tableNames] = NA
+        mytable=matrix("",length(GSMList(gds)),4)
+        colnames(mytable) = c("gsm","title","description","groups")
+        # tableNames=c("gsm","title","description","groups")
+        # pData(celfiles)[tableNames] = NA
         for (k in 1:length(GSMList(gds)))                                 #fill table with meta data
         {
           if (is.null(Meta(GSMList(gds)[[k]])$description)) {    
-            pData(celfiles)[k,2:4] <-c(Meta(GSMList(gds)[[k]])$geo_accession[1], Meta(GSMList(gds)[[k]])$title[1], 'No data available')
+            #pData(celfiles)[k,2:4] <-c(Meta(GSMList(gds)[[k]])$geo_accession[1], Meta(GSMList(gds)[[k]])$title[1], 'No data available')
+            mytable[k,1:3] <-c(Meta(GSMList(gds)[[k]])$geo_accession[1], Meta(GSMList(gds)[[k]])$title[1], 'No data available')
           } else {
-            pData(celfiles)[k,2:4] <-c(Meta(GSMList(gds)[[k]])$geo_accession[1], Meta(GSMList(gds)[[k]])$title[1], Meta(GSMList(gds)[[k]])$description[1])
+            # pData(celfiles)[k,2:4] <-c(Meta(GSMList(gds)[[k]])$geo_accession[1], Meta(GSMList(gds)[[k]])$title[1], Meta(GSMList(gds)[[k]])$description[1])
+            mytable[k,1:3] <-c(Meta(GSMList(gds)[[k]])$geo_accession[1], Meta(GSMList(gds)[[k]])$title[1], Meta(GSMList(gds)[[k]])$description[1])
           }
         }
-        pData(celfiles)$groups = listGroups                               #assign groups to samples
+        # pData(celfiles)$groups = listGroups                               #assign groups to samples
+        mytable = as.data.frame(mytable)
+        mytable$groups = listGroups                               #assign groups to samples
+        
         ####creates a list of colors specific to each group
-        fs = factor(pData(celfiles)$groups)
+        #fs = factor(pData(celfiles)$groups)
+        fs = factor(mytable$groups)
         lFs=levels(fs)
         numFs=length(lFs)
         colors = list()
@@ -63,8 +71,16 @@ processGEOfiles <- function(projectId,id,listGroups,workspace){
           colors[which(fs==lFs[i])] = i*5
         }
         colors = unlist(colors)
-        pData(celfiles)$colors = colors
+        # pData(celfiles)$colors = colors
+        mytable$colors = colors
         print("+++loadGSE+++")
+        
+        # Restructure pheno data to change rownames from filenames to sample titles (for MAplot sample titles)
+        # pd = pData(celfiles)
+        pd = mytable
+        rownames(pd) = mytable$title
+        pd = AnnotatedDataFrame(pd)
+        celfiles = read.celfiles(SampleName,phenoData = pd)
         celfiles
       },
       error=function(cond) {
@@ -90,7 +106,7 @@ processGEOfiles <- function(projectId,id,listGroups,workspace){
       }
     )
   }
-    returnData(celfiles)
+  returnData(celfiles)
 }
 sink(type='message')      #Return messages to console
 

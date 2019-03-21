@@ -21,6 +21,9 @@ QCnorm = function(raw,path) {
   QCnorm_ERR = file(paste0(path,'/QCnorm.err'),open='wt')
   sink(QCnorm_ERR,type='message',append=TRUE)
   
+  
+  ### -> start here and figure out how to change names in raw, look into previous functions getGEO files?
+  
   HistplotBN<-"/histBeforeNorm.svg"
   svg(paste0(path,"/histBeforeNorm.svg"),width=8, height=8)
   hist(raw,which="all", main =" Raw Samples distribution")          
