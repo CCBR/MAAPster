@@ -17,18 +17,23 @@ QCnorm = function(raw,path) {
   library(Biobase)
   library(heatmaply)
   library(reshape2)
+  library(plotly)
+  library(reshape2)
   
   QCnorm_ERR = file(paste0(path,'/QCnorm.err'),open='wt')
   sink(QCnorm_ERR,type='message',append=TRUE)
   
-  
-  ### -> start here and figure out how to change names in raw, look into previous functions getGEO files?
-  
-  HistplotBN<-"/histBeforeNorm.svg"
-  svg(paste0(path,"/histBeforeNorm.svg"),width=8, height=8)
-  hist(raw,which="all", main =" Raw Samples distribution")          
-  dev.off()  
-  #Raw histogram
+  dat = hist(raw,which="all")  
+  dat_x = melt(dat[[1]]$x)
+  dat_y = melt(dat[[1]]$y)
+  dat = data.frame(x=dat_x$value,y=dat_y$value,sample=dat_x$Var2)
+ 
+  HistplotBN = plot_ly(dat, x=~x, y=~y, color=~sample, text = ~sample) %>%
+    add_lines() %>%
+    layout(title='Distribution before Normalization')
+  htmlwidgets::saveWidget(HistplotBN, paste0(path,"/histBeforeNorm.html"))
+
+
   nbfacs=nrow(pData(raw))
   MAplotBN<-List()
   for (i in 1:nbfacs) {
@@ -55,10 +60,17 @@ QCnorm = function(raw,path) {
     norm =rma(raw, background=TRUE, normalize=TRUE, subset=NULL, target="core")
   }
   
-  HistplotAN<-"/histAfterNorm.svg"
-  svg(paste0(path,"/histAfterNorm.svg"),width=6, height=6)
-  hist(norm, main ="Distribution after Normalization")                             #Normalized histogram
-  dev.off()
+  
+  dat = hist(norm)  
+  dat_x = melt(dat[['x']])
+  dat_y = melt(dat[['y']])
+  dat = data.frame(x=dat_x$value,y=dat_y$value,sample=dat_x$Var2)
+  
+  HistplotAN = plot_ly(dat, x=~x, y=~y, color=~sample, text = ~sample) %>%
+    add_lines() %>%
+    layout(title='Distribution after Normalization')
+  htmlwidgets::saveWidget(HistplotAN, paste0(path,"/histAfterNorm.html"))
+  
   
   MAplotAN<-List()
   for (i in 1:nbfacs) {
@@ -93,6 +105,7 @@ QCnorm = function(raw,path) {
   )
   Heatmapolt<-"/heatmapAfterNorm.html"
   print("+++QCnorm+++")
-  return (List(HistplotBN,MAplotBN,boxplotDataBN,RLEdata,NUSEdata,HistplotAN,MAplotAN,boxplotDataAN,pca,Heatmapolt,norm))
+  #return (List(HistplotBN,MAplotBN,boxplotDataBN,RLEdata,NUSEdata,HistplotAN,MAplotAN,boxplotDataAN,pca,Heatmapolt,norm))
+  return (List(MAplotBN,boxplotDataBN,RLEdata,NUSEdata,MAplotAN,boxplotDataAN,pca,Heatmapolt,norm))
   sink(type='message')
 }
