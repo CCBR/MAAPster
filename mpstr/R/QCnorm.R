@@ -27,6 +27,7 @@ QCnorm = function(raw,path) {
   dat_x = melt(dat[[1]]$x)
   dat_y = melt(dat[[1]]$y)
   dat = data.frame(x=dat_x$value,y=dat_y$value,sample=dat_x$Var2)
+  dat$sample = gsub('\n','',dat$sample)
  
   HistplotBN = plot_ly(dat, x=~x, y=~y, color=~sample, text = ~sample) %>%
     add_lines() %>%
@@ -71,6 +72,7 @@ QCnorm = function(raw,path) {
   dat_x = melt(dat[['x']])
   dat_y = melt(dat[['y']])
   dat = data.frame(x=dat_x$value,y=dat_y$value,sample=dat_x$Var2)
+  dat$sample = gsub('\n','',dat$sample)
   
   HistplotAN = plot_ly(dat, x=~x, y=~y, color=~sample, text = ~sample) %>%
     add_lines() %>%
