@@ -44,13 +44,19 @@ QCnorm = function(raw,path) {
   }
   
   #Export boxplotBN, RLE and NUSE data for plots
-  boxplotDataBN = oligo::boxplot(raw, which="all", plot=FALSE)                       
-  colnames(boxplotDataBN[[1]]$stats) = boxplotDataBN[[1]]$names
-  boxplotDataBN = boxplotDataBN[[1]]$stats
+  boxplotDataBN = list()
+  temp = oligo::boxplot(raw, which="all", plot=FALSE)                       
+  colnames(temp[[1]]$stats) = temp[[1]]$names
+  boxplotDataBN[[1]] = temp[[1]]$stats
+  boxplotDataBN[[2]] = 'log-intensity'
   
+  RLEdata = list()
+  NUSEdata = list()
   qc = fitProbeLevelModel(raw)                                                        
-  RLEdata = RLE(qc,type='values')
-  NUSEdata = NUSE(qc, type='values')
+  RLEdata[[1]] = RLE(qc,type='values')
+  RLEdata[[2]] = 'RLE'
+  NUSEdata[[1]] = NUSE(qc, type='values')
+  NUSEdata[[2]] = 'NUSE'
   
   
   #Normalize data
@@ -80,10 +86,13 @@ QCnorm = function(raw,path) {
     dev.off() 
   }
   
-  # Output boxplotAN data for plots
-  boxplotDataAN = oligo::boxplot(norm, which="all", plot=FALSE)                       
-  colnames(boxplotDataAN$stats) = boxplotDataAN$names
-  boxplotDataAN = boxplotDataAN$stats
+  boxplotDataAN = list()
+  temp = oligo::boxplot(norm, which="all", plot=FALSE)                       
+  colnames(temp$stats) = temp$names
+  boxplotDataAN[[1]] = temp$stats
+  boxplotDataAN[[2]] = 'log-intensity'
+  
+  
   
   # Output data for 3D PCA #                                                                         
   tedf= t(exprs(norm))
