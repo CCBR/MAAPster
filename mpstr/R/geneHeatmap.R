@@ -47,10 +47,20 @@ geneHeatmap = function(degs, paths, contrast, upOrDown, pathway_name,saveImageFi
   names(matColors$group) = unique(degs$pheno$groups[sampleColumns])
   path_name = pathway_name
   exp = t(scale(t(exp)))                                                #get z-scores by row
+  
+  # break up sample names
+  colNames = rownames(matCol)
+  parsedNames = vector("list",length(colNames))
+  for (i in 1:length(colNames)) {
+    temp = substring(colNames[i], seq(1, nchar(colNames[i])-1, nchar(colNames[i])/2), seq(nchar(colNames[i])/2, nchar(colNames[i]), nchar(colNames[i])-nchar(colNames[i])/2))
+    temp = paste(temp, collapse = '\n')
+    parsedNames[[i]] = temp
+  }
+  
   if (nrow(exp) > 30){
-    pheatmap(exp, main=paste0(path_name,'\n(Row Z-Scores)'),annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 4,filename=paste0(workspace,'/',saveImageFileName))
+    pheatmap(exp, main=paste0(path_name,'\n(Row Z-Scores)'),annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 4,labels_col = parsedNames,filename=paste0(workspace,'/',saveImageFileName))
   } else {
-    pheatmap(exp, main=paste0(path_name,'\n(Row Z-Scores)'),annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 10,filename=paste0(workspace,'/',saveImageFileName))
+    pheatmap(exp, main=paste0(path_name,'\n(Row Z-Scores)'),annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 10,labels_col = parsedNames,filename=paste0(workspace,'/',saveImageFileName))
   }
   sink(type='message')
 }
