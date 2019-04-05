@@ -51,7 +51,17 @@ getLocalGEOfiles <- function(projectId,id,listGroups,workspace){
   
   # Restructure pheno data to change rownames from filenames to sample titles (for MAplot sample titles)
   pd = mytable
-  rownames(pd) = mytable$title
+  
+  #parse sample names
+  colNames = as.character(mytable$title)
+  parsedNames = vector("list",length(colNames))
+  for (i in 1:length(colNames)) {
+    temp = substring(colNames[i], seq(1, nchar(colNames[i])-1, nchar(colNames[i])/2), seq(nchar(colNames[i])/2, nchar(colNames[i]), nchar(colNames[i])-nchar(colNames[i])/2))
+    temp = paste(temp, collapse = '\n')
+    parsedNames[[i]] = temp
+  } #end parse
+  
+  rownames(pd) = parsedNames
   pd = AnnotatedDataFrame(pd)
   celfiles = read.celfiles(SampleName,phenoData = pd)
   
