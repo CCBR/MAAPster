@@ -1,6 +1,6 @@
 Package: mpstr
 Title: MicroArray Analysis Pipeline (MAAPster)
-Version: 1.1.22
+Version: 1.1.23
 Authors@R: c(person("Kristin", "Valdez", email = "kristin.valdez@nih.gov", role = c("aut","cre")), person("Fathi", "Elloumi", email = "Fathi.Elloumi@nih.gov", role = c("aut")), person("Skyler", "Kuhn", email = "skyler.kuhn@nih.gov", role = c("ctb")), person("Abdalla", "Abdelmaksoud", email = "abdalla.abdelmaksoud@nih.gov", role = c("ctb")))
 Description: Analyzes microarray data from local CEL file input or GSE accession number.  Performs quality control, differential expression analysis (using the oligo and limma packages), pathway analysis (l2p,m2h by CCBR/CCR/NCI/NIH), and ssGSEA analysis (BROAD MSigDB <http://software.broadinstitute.org/gsea/msigdb/index.jsp>, GSVA package).  
 Outputs: Sample QC similarity heatmap and 3D PCA plot. Probe QC NUSE and RLE plots (see oligo package).  Pre and post-normalization intensity histogram, MAplots and boxplots. Volcano plot, gene heatmaps and ssGSEA heatmaps. Tables for differentially expressed genes, l2p pathways (from CCBR at CCR/NCI/NIH), and ssGSEA pathways.  

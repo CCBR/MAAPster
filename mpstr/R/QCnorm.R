@@ -19,10 +19,12 @@ QCnorm = function(raw,path) {
   library(reshape2)
   library(plotly)
   library(reshape2)
+  library(amap)
   
   QCnorm_ERR = file(paste0(path,'/QCnorm.err'),open='wt')
   sink(QCnorm_ERR,type='message',append=TRUE)
   
+  # histogram before normalization
   dat = hist(raw,which="all")  
   dat_x = melt(dat[[1]]$x)
   dat_y = melt(dat[[1]]$y)
@@ -34,7 +36,7 @@ QCnorm = function(raw,path) {
     layout(title='Distribution before Normalization',xaxis=list(title='log-intensity'),yaxis=list(title='density'),legend=list(x=0,y=-0.5))
   htmlwidgets::saveWidget(HistplotBN, paste0(path,"/histBeforeNorm.html"))
 
-
+  # MA plots before normalization
   nbfacs=nrow(pData(raw))
   MAplotBN<-List()
   for (i in 1:nbfacs) {
@@ -67,7 +69,7 @@ QCnorm = function(raw,path) {
     norm =rma(raw, background=TRUE, normalize=TRUE, subset=NULL, target="core")
   }
   
-  
+  # histogram after normalization
   dat = hist(norm)  
   dat_x = melt(dat[['x']])
   dat_y = melt(dat[['y']])
@@ -79,7 +81,7 @@ QCnorm = function(raw,path) {
     layout(title='Distribution after Normalization',xaxis=list(title='log-intensity'),yaxis=list(title='density'),legend=list(x=0,y=-0.5))
   htmlwidgets::saveWidget(HistplotAN, paste0(path,"/histAfterNorm.html"))
   
-  
+  # MAplot after normalization
   MAplotAN<-List()
   for (i in 1:nbfacs) {
     MAplotAN<-c(MAplotAN,paste0("/MAplotsAfterNorm",i,".jpg"))
@@ -88,13 +90,12 @@ QCnorm = function(raw,path) {
     dev.off() 
   }
   
+  # boxplot after normalization
   boxplotDataAN = list()
   temp = oligo::boxplot(norm, which="all", plot=FALSE)                       
   colnames(temp$stats) = temp$names
   boxplotDataAN[[1]] = temp$stats
   boxplotDataAN[[2]] = 'log-intensity'
-  
-  
   
   # Output data for 3D PCA #                                                                         
   tedf= t(exprs(norm))
@@ -102,19 +103,24 @@ QCnorm = function(raw,path) {
     tedf = tedf[ , apply(tedf, 2, var) != 0]
   }
   pca=prcomp(tedf, scale. = T)
-  #pcaData = pca$x[,1:3]
-  
 
-  mat=as.matrix(dist(t(exprs(norm))))
+  # similarity heatmap
+  mat=as.matrix(Dist(t(exprs(norm)),method = 'pearson',diag = TRUE))
+  mat = 1 - mat
   rownames(mat)=pData(norm)$title
   colnames(mat)=rownames(mat)
+  sampleColors = data.frame(Group = raw@phenoData@data$groups)
   
-  heatmaply(
-    mat,margins = c(80,120,60,40),
-    colorRampPalette(colors = c("red", "yellow")),
-    file = paste0(path,"/heatmapAfterNorm.html")
-  )
+  heatmaply(mat,
+    plot_method = 'plotly',
+    margins = c(80,120,60,40),
+    row_side_colors = sampleColors[,c('Group')],
+    col_side_colors = sampleColors$Group,
+    colorRampPalette(colors = c("yellow", "red")),
+    file = paste0(path,"/heatmapAfterNorm.html"),
+    symm = TRUE  )
   Heatmapolt<-"/heatmapAfterNorm.html"
+  
   print("+++QCnorm+++")
   #return (List(HistplotBN,MAplotBN,boxplotDataBN,RLEdata,NUSEdata,HistplotAN,MAplotAN,boxplotDataAN,pca,Heatmapolt,norm))
   return (List(MAplotBN,boxplotDataBN,RLEdata,NUSEdata,MAplotAN,boxplotDataAN,pca,Heatmapolt,norm))
