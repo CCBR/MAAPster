@@ -20,6 +20,7 @@ QCnorm = function(raw,path) {
   library(plotly)
   library(reshape2)
   library(amap)
+  library(gplots)
   
   QCnorm_ERR = file(paste0(path,'/QCnorm.err'),open='wt')
   sink(QCnorm_ERR,type='message',append=TRUE)
@@ -115,7 +116,6 @@ QCnorm = function(raw,path) {
   mat=as.data.frame(as.matrix(Dist(t(exprs(norm)),method = 'pearson',diag = TRUE)))
   mat = 1 - mat
   #sample color palette for heatmap
-  library(gplots)
   x = col2hex(raw@phenoData@data$colors)
   mat$annotation = x
   mat$Groups = raw@phenoData@data$groups
