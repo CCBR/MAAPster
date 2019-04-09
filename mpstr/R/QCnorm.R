@@ -117,6 +117,7 @@ QCnorm = function(raw,path) {
   mat = 1 - mat
   #sample color palette for heatmap
   x = col2hex(raw@phenoData@data$colors)
+  sampleColors = x            # to return
   mat$annotation = x
   mat$Groups = raw@phenoData@data$groups
   x = unique(x)
@@ -135,6 +136,6 @@ QCnorm = function(raw,path) {
   Heatmapolt<-"/heatmapAfterNorm.html"
   
   print("+++QCnorm+++")
-  return (List(MAplotBN,boxplotDataBN,RLEdata,NUSEdata,MAplotAN,boxplotDataAN,pca,Heatmapolt,norm))
+  return (List(MAplotBN,boxplotDataBN,RLEdata,NUSEdata,MAplotAN,boxplotDataAN,pca,Heatmapolt,norm,sampleColors))
   sink(type='message')
 }
