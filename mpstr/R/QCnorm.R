@@ -25,7 +25,10 @@ QCnorm = function(raw,path) {
   sink(QCnorm_ERR,type='message',append=TRUE)
   
   # histogram before normalization
-  dat = hist(raw,which="all")  
+  svg(paste0(path,"/temp.svg"),width=8, height=8)
+  dat = hist(raw,which="all")
+  dev.off()
+  
   dat_x = melt(dat[[1]]$x)
   dat_y = melt(dat[[1]]$y)
   dat = data.frame(x=dat_x$value,y=dat_y$value,sample=dat_x$Var2)
@@ -70,7 +73,10 @@ QCnorm = function(raw,path) {
   }
   
   # histogram after normalization
-  dat = hist(norm)  
+  svg(paste0(path,"/temp2.svg"),width=8, height=8)
+  dat = hist(norm)
+  dev.off()
+  
   dat_x = melt(dat[['x']])
   dat_y = melt(dat[['y']])
   dat = data.frame(x=dat_x$value,y=dat_y$value,sample=dat_x$Var2)
@@ -105,24 +111,30 @@ QCnorm = function(raw,path) {
   pca=prcomp(tedf, scale. = T)
 
   # similarity heatmap
-  mat=as.matrix(Dist(t(exprs(norm)),method = 'pearson',diag = TRUE))
+  mat = Dist(t(exprs(norm)),method = 'pearson',diag = TRUE)
+  mat=as.data.frame(as.matrix(Dist(t(exprs(norm)),method = 'pearson',diag = TRUE)))
   mat = 1 - mat
-  rownames(mat)=pData(norm)$title
-  colnames(mat)=rownames(mat)
-  sampleColors = data.frame(Group = raw@phenoData@data$groups)
+  #sample color palette for heatmap
+  library(gplots)
+  x = col2hex(raw@phenoData@data$colors)
+  mat$annotation = x
+  mat$Groups = raw@phenoData@data$groups
+  x = unique(x)
+  names(x) = unique(raw@phenoData@data$groups)
   
-  heatmaply(mat,
-    plot_method = 'plotly',
-    margins = c(80,120,60,40),
-    row_side_colors = sampleColors[,c('Group')],
-    col_side_colors = sampleColors$Group,
-    colorRampPalette(colors = c("yellow", "red")),
-    file = paste0(path,"/heatmapAfterNorm.html"),
-    symm = TRUE  )
+  heatmaply(mat[,1:(ncol(mat)-2)],
+            plot_method = 'plotly',
+            margins = c(80,120,60,40),
+            # row_side_colors = mat[,'Group', drop=FALSE],
+            # row_side_palette = x,
+            col_side_palette = x,
+            col_side_colors = mat[,'Groups', drop=FALSE],
+            colorRampPalette(colors = c("yellow", "red")),
+            file = paste0(path,"/heatmapAfterNorm.html"),
+            symm = TRUE  )
   Heatmapolt<-"/heatmapAfterNorm.html"
   
   print("+++QCnorm+++")
-  #return (List(HistplotBN,MAplotBN,boxplotDataBN,RLEdata,NUSEdata,HistplotAN,MAplotAN,boxplotDataAN,pca,Heatmapolt,norm))
   return (List(MAplotBN,boxplotDataBN,RLEdata,NUSEdata,MAplotAN,boxplotDataAN,pca,Heatmapolt,norm))
   sink(type='message')
 }
