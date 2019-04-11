@@ -55,7 +55,7 @@ listOfBiocPackages = c("GEOquery","pd.clariom.s.rat","clariomsrattranscriptclust
                        "mouse430a2.db","pd.moe430a","moe430a.db","pd.hg.u95av2","hgu95av2.db","pd.hta.2.0",
                        "hta20transcriptcluster.db","pd.moex.1.0.st.v1","moex10sttranscriptcluster.db","pd.hg.u133b",
                        "hgu133b.db","pd.hugene.1.1.st.v1","hugene11sttranscriptcluster.db","pd.mogene.1.1.st.v1",
-                       "mogene11sttranscriptcluster.db","oligo","geneplotter","multtest","Biobase",
+                       "mogene11sttranscriptcluster.db","pd.hugene.2.1.st","hugene21sttranscriptcluster.db","oligo","geneplotter","multtest","Biobase",
                        "GSVA","GSEABase","annotate","limma")
 
 notInstalled = setdiff(listOfBiocPackages, rownames(installed.packages()))
