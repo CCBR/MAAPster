@@ -49,6 +49,8 @@ library(pd.mogene.1.1.st.v1)
 library(mogene11sttranscriptcluster.db)
 library(pd.clariom.s.rat)
 library(clariomsrattranscriptcluster.db)
+library(pd.hugene.2.1.st)
+library(hugene21sttranscriptcluster.db)
 #library(primeviewprobe)
 #library(GSEA)
 library(limma)
@@ -291,102 +293,6 @@ shinyServer(function(input, output) {
     })
   })
   
-  # observeEvent(input$number, {
-  #              isolate({
-  #                output$ui <- renderUI({
-  #                  if (is.null(input$number))
-  #                    return()
-  # 
-  #                  switch(input$number,
-  #                         "1" = selectInput("group1", "Please select a group",
-  #                                           choices = c("Group_1" = "Group_1"),
-  #                                           selected = "Group_1"
-  #                         ),
-  #                         "2" = selectInput("group1", "Please select a group",
-  #                                           choices = c("Group_1" = "Group_1",
-  #                                                       "Group_2" = "Group_2"),
-  #                                           selected = "Group_1"
-  #                         ),
-  #                         "3" = selectInput("group1", "Please select a group",
-  #                                           choices = c("Group_1" = "Group_1",
-  #                                                       "Group_2" = "Group_2",
-  #                                                       "Group_3" = "Group_3"),
-  #                                           selected = "Group_1"
-  #                         ),
-  #                         "4" = selectInput("group1", "Please select a group",
-  #                                           choices = c("Group_1" = "Group_1",
-  #                                                       "Group_2" = "Group_2",
-  #                                                       "Group_3" = "Group_3",
-  #                                                       "Group_4" = "Group_4"),
-  #                                           selected = "Group_1"
-  #                         ),
-  #                         "5" = selectInput("group1", "Please select a group",
-  #                                           choices = c("Group_1" = "Group_1",
-  #                                                       "Group_2" = "Group_2",
-  #                                                       "Group_3" = "Group_3",
-  #                                                       "Group_4" = "Group_4",
-  #                                                       "Group_5" = "Group_5"),
-  #                                           selected = "Group_1"
-  #                         ),
-  #                         "6" = selectInput("group1", "Please select a group",
-  #                                           choices = c("Group_1" = "Group_1",
-  #                                                       "Group_2" = "Group_2",
-  #                                                       "Group_3" = "Group_3",
-  #                                                       "Group_4" = "Group_4",
-  #                                                       "Group_5" = "Group_5",
-  #                                                       "Group_6" = "Group_6"),
-  #                                           selected = "Group_1"
-  #                         ),
-  #                         "7" = selectInput("group1", "Please select a group",
-  #                                           choices = c("Group_1" = "Group_1",
-  #                                                       "Group_2" = "Group_2",
-  #                                                       "Group_3" = "Group_3",
-  #                                                       "Group_4" = "Group_4",
-  #                                                       "Group_5" = "Group_5",
-  #                                                       "Group_6" = "Group_6",
-  #                                                       "Group_7" = "Group_7"),
-  #                                           selected = "Group_1"
-  #                         ),
-  #                         "8" = selectInput("group1", "Please select a group",
-  #                                           choices = c("Group_1" = "Group_1",
-  #                                                       "Group_2" = "Group_2",
-  #                                                       "Group_3" = "Group_3",
-  #                                                       "Group_4" = "Group_4",
-  #                                                       "Group_5" = "Group_5",
-  #                                                       "Group_6" = "Group_6",
-  #                                                       "Group_7" = "Group_7",
-  #                                                       "Group_8" = "Group_8"),
-  #                                           selected = "Group_1"
-  #                         ),
-  #                         "9" = selectInput("group1", "Please select a group",
-  #                                           choices = c("Group_1" = "Group_1",
-  #                                                       "Group_2" = "Group_2",
-  #                                                       "Group_3" = "Group_3",
-  #                                                       "Group_4" = "Group_4",
-  #                                                       "Group_5" = "Group_5",
-  #                                                       "Group_6" = "Group_6",
-  #                                                       "Group_7" = "Group_7",
-  #                                                       "Group_8" = "Group_8",
-  #                                                       "Group_9" = "Group_9"),
-  #                                           selected = "Group_1"
-  #                         ),
-  #                         "10" = selectInput("group1", "Please select a group",
-  #                                           choices = c("Group_1" = "Group_1",
-  #                                                       "Group_2" = "Group_2",
-  #                                                       "Group_3" = "Group_3",
-  #                                                       "Group_4" = "Group_4",
-  #                                                       "Group_5" = "Group_5",
-  #                                                       "Group_6" = "Group_6",
-  #                                                       "Group_7" = "Group_7",
-  #                                                       "Group_8" = "Group_8",
-  #                                                       "Group_9" = "Group_9",
-  #                                                       "Group_10" = "Group_10"),
-  #                                           selected = "Group_1"
-  #                         )
-  #                  )
-  #                })
-  #              })
-  #        })
   
   observeEvent(input$addrow,{
     isolate({
@@ -446,7 +352,6 @@ shinyServer(function(input, output) {
                 }
                 rownames(Pheno) = Pheno$title
                 cels = SampleName
-                
                 incProgress(0.25)
                 
                 pd = AnnotatedDataFrame(Pheno)
@@ -458,7 +363,7 @@ shinyServer(function(input, output) {
               tAnnot = tempfile(pattern = "annotation_", tmpdir = getwd(), fileext = paste0(y,'.txt'))
               cat(celfiles@annotation,file=tAnnot)
               
-              if (celfiles@annotation!="pd.hg.u133.plus.2" & celfiles@annotation!="pd.mogene.2.0.st" & celfiles@annotation!="pd.hugene.2.0.st" & celfiles@annotation!="pd.clariom.s.human.ht" & celfiles@annotation!="pd.clariom.s.human" & celfiles@annotation!="pd.clariom.s.mouse.ht" & celfiles@annotation!="pd.clariom.s.mouse" & celfiles@annotation!='pd.mouse430.2' & celfiles@annotation!='pd.hg.u133a' & celfiles@annotation!='pd.hugene.1.0.st.v1' & celfiles@annotation!='pd.mogene.1.0.st.v1' & celfiles@annotation!='pd.hg.u133a.2' & celfiles@annotation!='pd.huex.1.0.st.v2' & celfiles@annotation!='pd.hg.u219' & celfiles@annotation!='pd.mg.u74av2' & celfiles@annotation!='pd.mouse430a.2' & celfiles@annotation!='pd.moe430a' & celfiles@annotation!='pd.hg.u95av2' & celfiles@annotation!='pd.hta.2.0' & celfiles@annotation!='pd.moex.1.0.st.v1' & celfiles@annotation!='pd.hg.u133b' & celfiles@annotation!='pd.hugene.1.1.st.v1' & celfiles@annotation!='pd.mogene.1.1.st.v1' & celfiles@annotation!='pd.clariom.s.rat') {
+              if (celfiles@annotation!="pd.hg.u133.plus.2" & celfiles@annotation!="pd.mogene.2.0.st" & celfiles@annotation!="pd.hugene.2.0.st" & celfiles@annotation!="pd.clariom.s.human.ht" & celfiles@annotation!="pd.clariom.s.human" & celfiles@annotation!="pd.clariom.s.mouse.ht" & celfiles@annotation!="pd.clariom.s.mouse" & celfiles@annotation!='pd.mouse430.2' & celfiles@annotation!='pd.hg.u133a' & celfiles@annotation!='pd.hugene.1.0.st.v1' & celfiles@annotation!='pd.mogene.1.0.st.v1' & celfiles@annotation!='pd.hg.u133a.2' & celfiles@annotation!='pd.huex.1.0.st.v2' & celfiles@annotation!='pd.hg.u219' & celfiles@annotation!='pd.mg.u74av2' & celfiles@annotation!='pd.mouse430a.2' & celfiles@annotation!='pd.moe430a' & celfiles@annotation!='pd.hg.u95av2' & celfiles@annotation!='pd.hta.2.0' & celfiles@annotation!='pd.moex.1.0.st.v1' & celfiles@annotation!='pd.hg.u133b' & celfiles@annotation!='pd.hugene.1.1.st.v1' & celfiles@annotation!='pd.mogene.1.1.st.v1' & celfiles@annotation!='pd.clariom.s.rat' & celfiles@annotation!='pd.hugene.2.1.st') {
                 #cat("Please sort your phenotype on sample name and upload it again. \n")
                 info(paste0("Affymetrix platform: ",celfiles@annotation," NOT supported. Leaving..."))
                 stopApp(-1)
@@ -645,6 +550,10 @@ shinyServer(function(input, output) {
                                                             } else{
                                                               if (raw()@annotation=='pd.clariom.s.rat'){
                                                                 Annot <- data.frame(ACCNUM=sapply(contents(clariomsrattranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(clariomsrattranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(clariomsrattranscriptclusterGENENAME), paste, collapse=", "), ENTREZ=sapply(contents(clariomsrattranscriptclusterENTREZID), paste, collapse=", "))
+                                                              } else {
+                                                                if (raw()@annotation=='pd.hugene.2.1.st') {
+                                                                  Annot <- data.frame(ACCNUM=sapply(contents(hugene21sttranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(hugene21sttranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(hugene21sttranscriptclusterGENENAME), paste, collapse=", "), ENTREZ=sapply(contents(hugene21sttranscriptclusterENTREZID), paste, collapse=", "))
+                                                                }
                                                               }
                                                             }
                                                           }
@@ -751,7 +660,7 @@ shinyServer(function(input, output) {
             #x2=rownames(fin.dw)
             #gdw=apply(array(as.character(x2)),1,function(z) unlist(strsplit(z, "\\|"))[2])
             
-            if (raw()@annotation=="pd.hg.u133.plus.2" | raw()@annotation=="pd.hugene.2.0.st" | raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.human" | raw()@annotation=='pd.hg.u133a' | raw()@annotation=='pd.hugene.1.0.st.v1' | raw()@annotation=='pd.hg.u133a.2' | raw()@annotation=='pd.huex.1.0.st.v2' | raw()@annotation=='pd.hg.u219' | raw()@annotation=='pd.ht.hg.u133.plus.pm' | raw()@annotation=='pd.hg.u95av2' | raw()@annotation=='pd.hta.2.0' | raw()@annotation=='pd.hg.u133b' | raw()@annotation=='pd.hugene.1.1.st.v1') 
+            if (raw()@annotation=="pd.hg.u133.plus.2" | raw()@annotation=="pd.hugene.2.0.st" | raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.human" | raw()@annotation=='pd.hg.u133a' | raw()@annotation=='pd.hugene.1.0.st.v1' | raw()@annotation=='pd.hg.u133a.2' | raw()@annotation=='pd.huex.1.0.st.v2' | raw()@annotation=='pd.hg.u219' | raw()@annotation=='pd.ht.hg.u133.plus.pm' | raw()@annotation=='pd.hg.u95av2' | raw()@annotation=='pd.hta.2.0' | raw()@annotation=='pd.hg.u133b' | raw()@annotation=='pd.hugene.1.1.st.v1' | raw()@annotation=='pd.hugene.2.1.st') 
             {
               cat(fin.up$SYMBOL,file=(paste0(input$ProjectID,'_',names(deg()$mylist[num]),'_Top500_Up.txt')), sep='\n')
               cat(fin.dw$SYMBOL,file=(paste0(input$ProjectID,'_',names(deg()$mylist[num]),'_Top500_Down.txt')),sep='\n')
@@ -789,7 +698,7 @@ shinyServer(function(input, output) {
               ssgs =  deg()$all
               ssgs = ssgs[ssgs$SYMBOL!='NA',]
               
-              if (raw()@annotation=="pd.hg.u133.plus.2" | raw()@annotation=="pd.hugene.2.0.st" | raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.human" | raw()@annotation=='pd.hg.u133a' | raw()@annotation=='pd.hugene.1.0.st.v1' | raw()@annotation=='pd.hg.u133a.2' | raw()@annotation=='pd.huex.1.0.st.v2' | raw()@annotation=='pd.hg.u219' | raw()@annotation=='pd.ht.hg.u133.plus.pm' | raw()@annotation=='pd.hg.u95av2' | raw()@annotation=='pd.hta.2.0' | raw()@annotation=='pd.hg.u133b' | raw()@annotation=='pd.hugene.1.1.st.v1') {
+              if (raw()@annotation=="pd.hg.u133.plus.2" | raw()@annotation=="pd.hugene.2.0.st" | raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.human" | raw()@annotation=='pd.hg.u133a' | raw()@annotation=='pd.hugene.1.0.st.v1' | raw()@annotation=='pd.hg.u133a.2' | raw()@annotation=='pd.huex.1.0.st.v2' | raw()@annotation=='pd.hg.u219' | raw()@annotation=='pd.ht.hg.u133.plus.pm' | raw()@annotation=='pd.hg.u95av2' | raw()@annotation=='pd.hta.2.0' | raw()@annotation=='pd.hg.u133b' | raw()@annotation=='pd.hugene.1.1.st.v1' | raw()@annotation=='pd.hugene.2.1.st') {
                 ssgs = subset(ssgs, select=-c(ACCNUM,DESC,Row.names,ENTREZ))
                 ssgs = aggregate(.~SYMBOL,data=ssgs,mean)                               #aggregate duplicate probes by mean
                 rownames(ssgs) = ssgs$SYMBOL
@@ -879,6 +788,7 @@ shinyServer(function(input, output) {
         
         facs <- pData(raw())$SampleID
         nbfacs=length(facs)
+        
         
         for (i in 1:nbfacs) {
           local({
@@ -1086,7 +996,7 @@ shinyServer(function(input, output) {
               exp = deg()$all
               exp = exp[exp$SYMBOL %in% genes,]
               #if mouse data, convert from human to mouse gene orthologs
-              if (!(raw()@annotation=="pd.hg.u133.plus.2" | raw()@annotation=="pd.hugene.2.0.st" | raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.human" | raw()@annotation=='pd.hg.u133a' | raw()@annotation=='pd.hugene.1.0.st.v1' | raw()@annotation=='pd.hg.u133a.2' | raw()@annotation=='pd.huex.1.0.st.v2' | raw()@annotation=='pd.hg.u219' | raw()@annotation=='pd.ht.hg.u133.plus.pm' | raw()@annotation=='pd.hg.u95av2' | raw()@annotation=='pd.hta.2.0' | raw()@annotation=='pd.hg.u133b' | raw()@annotation=='pd.hugene.1.1.st.v1')) {
+              if (!(raw()@annotation=="pd.hg.u133.plus.2" | raw()@annotation=="pd.hugene.2.0.st" | raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.human" | raw()@annotation=='pd.hg.u133a' | raw()@annotation=='pd.hugene.1.0.st.v1' | raw()@annotation=='pd.hg.u133a.2' | raw()@annotation=='pd.huex.1.0.st.v2' | raw()@annotation=='pd.hg.u219' | raw()@annotation=='pd.ht.hg.u133.plus.pm' | raw()@annotation=='pd.hg.u95av2' | raw()@annotation=='pd.hta.2.0' | raw()@annotation=='pd.hg.u133b' | raw()@annotation=='pd.hugene.1.1.st.v1' | raw()@annotation=='pd.hugene.2.1.st')) {
                 genes = human2mouse$mouse[human2mouse$human %in% genes]
                 genes = as.character(genes)
                 exp = deg()$all
@@ -1139,7 +1049,7 @@ shinyServer(function(input, output) {
               exp = deg()$all
               exp = exp[exp$SYMBOL %in% genes,]
               #if mouse data, convert from human to mouse gene orthologs
-              if (!(raw()@annotation=="pd.hg.u133.plus.2" | raw()@annotation=="pd.hugene.2.0.st" | raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.human" | raw()@annotation=='pd.hg.u133a' | raw()@annotation=='pd.hugene.1.0.st.v1' | raw()@annotation=='pd.hg.u133a.2' | raw()@annotation=='pd.huex.1.0.st.v2' | raw()@annotation=='pd.hg.u219' | raw()@annotation=='pd.ht.hg.u133.plus.pm' | raw()@annotation=='pd.hg.u95av2' | raw()@annotation=='pd.hta.2.0' | raw()@annotation=='pd.hg.u133b' | raw()@annotation=='pd.hugene.1.1.st.v1')) {
+              if (!(raw()@annotation=="pd.hg.u133.plus.2" | raw()@annotation=="pd.hugene.2.0.st" | raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.human" | raw()@annotation=='pd.hg.u133a' | raw()@annotation=='pd.hugene.1.0.st.v1' | raw()@annotation=='pd.hg.u133a.2' | raw()@annotation=='pd.huex.1.0.st.v2' | raw()@annotation=='pd.hg.u219' | raw()@annotation=='pd.ht.hg.u133.plus.pm' | raw()@annotation=='pd.hg.u95av2' | raw()@annotation=='pd.hta.2.0' | raw()@annotation=='pd.hg.u133b' | raw()@annotation=='pd.hugene.1.1.st.v1' | raw()@annotation=='pd.hugene.2.1.st')) {
                 genes = human2mouse$mouse[human2mouse$human %in% genes]
                 genes = as.character(genes)
                 exp = deg()$all
