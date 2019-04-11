@@ -61,6 +61,8 @@ diffExprGenes = function(norm,cons,projectId,workspace) {
   library(hugene11sttranscriptcluster.db)
   library(pd.mogene.1.1.st.v1)
   library(mogene11sttranscriptcluster.db)
+  library(pd.hugene.2.1.st)
+  library(hugene21sttranscriptcluster.db)
   
   diffExprGenes_ERR = file(paste0(workspace,'/diffExprGenes.err'),open='wt')
   sink(diffExprGenes_ERR,type='message',append=TRUE)
@@ -144,6 +146,10 @@ diffExprGenes = function(norm,cons,projectId,workspace) {
                                               } else {
                                                 if (norm@annotation=='pd.mogene.1.1.st.v1') {
                                                   Annot <- data.frame(ACCNUM=sapply(contents(mogene11sttranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(mogene11sttranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(mogene11sttranscriptclusterGENENAME), paste, collapse=", "), ENTREZ=sapply(contents(mogene11sttranscriptclusterENTREZID), paste, collapse=", "))
+                                                } else {
+                                                  if (raw()@annotation=='pd.hugene.2.1.st') {
+                                                    Annot <- data.frame(ACCNUM=sapply(contents(hugene21sttranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(hugene21sttranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(hugene21sttranscriptclusterGENENAME), paste, collapse=", "), ENTREZ=sapply(contents(hugene21sttranscriptclusterENTREZID), paste, collapse=", "))
+                                                  }
                                                 }
                                               }
                                             }

@@ -21,6 +21,7 @@ QCnorm = function(raw,path) {
   library(reshape2)
   library(amap)
   library(gplots)
+  library(limma)
   
   QCnorm_ERR = file(paste0(path,'/QCnorm.err'),open='wt')
   sink(QCnorm_ERR,type='message',append=TRUE)
