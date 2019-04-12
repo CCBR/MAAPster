@@ -7,12 +7,12 @@
 #' @examples 
 #' norm_celfiles = QCnorm(celfiles,'Users/name/folderName/plots') 
 #' @references See packages rgl, Biobase, heatmaply, oligo
-#' @note Normalizes using rma, see oligo package
+#' @note Normalizes using rma and cyclic loess, see oligo  and limma packages
 #' @note Outputs 3D PCA and similarity heatmap
 #' @note Outputs pre-normalization plots, QC plots, post-normalization plots, see oligo package for details
 
 
-QCnorm = function(raw,path) {
+loess_QCnorm = function(raw,path) {
   library(rgl)
   library(Biobase)
   library(heatmaply)
@@ -22,8 +22,9 @@ QCnorm = function(raw,path) {
   library(amap)
   library(gplots)
   library(limma)
+  library(oligo)
   
-  QCnorm_ERR = file(paste0(path,'/QCnorm.err'),open='wt')
+  QCnorm_ERR = file(paste0(path,'/loess_QCnorm.err'),open='wt')
   sink(QCnorm_ERR,type='message',append=TRUE)
   
   # histogram before normalization
@@ -35,12 +36,12 @@ QCnorm = function(raw,path) {
   dat_y = melt(dat[[1]]$y)
   dat = data.frame(x=dat_x$value,y=dat_y$value,sample=dat_x$Var2)
   dat$sample = gsub('\n','',dat$sample)
- 
+  
   HistplotBN = plot_ly(dat, x=~x, y=~y, color=~sample, text = ~sample) %>%
     add_lines() %>%
     layout(title='Distribution before Normalization',xaxis=list(title='log-intensity'),yaxis=list(title='density'),legend=list(x=0,y=-0.5))
   htmlwidgets::saveWidget(HistplotBN, paste0(path,"/histBeforeNorm.html"))
-
+  
   # MA plots before normalization
   nbfacs=nrow(pData(raw))
   MAplotBN<-List()
@@ -74,6 +75,12 @@ QCnorm = function(raw,path) {
     norm =rma(raw, background=TRUE, normalize=TRUE, subset=NULL, target="core")
   }
   
+  loess = normalizeCyclicLoess(norm, weights = NULL,  span=0.7, iterations = 3, method = "fast")
+  pheno = new("AnnotatedDataFrame",data=norm@phenoData@data)
+  loess = ExpressionSet(assayData = loess,phenoData = pheno)
+  loess@annotation = norm@annotation
+  norm = loess
+  
   # histogram after normalization
   svg(paste0(path,"/temp2.svg"),width=8, height=8)
   dat = hist(norm)
@@ -86,14 +93,14 @@ QCnorm = function(raw,path) {
   
   HistplotAN = plot_ly(dat, x=~x, y=~y, color=~sample, text = ~sample) %>%
     add_lines() %>%
-    layout(title='Distribution after Normalization',xaxis=list(title='log-intensity'),yaxis=list(title='density'),legend=list(x=0,y=-0.5))
-  htmlwidgets::saveWidget(HistplotAN, paste0(path,"/histAfterNorm.html"))
+    layout(title='Distribution after RMA and Loess Normalization',xaxis=list(title='log-intensity'),yaxis=list(title='density'),legend=list(x=0,y=-0.5))
+  htmlwidgets::saveWidget(HistplotAN, paste0(path,"/histAfterLoessNorm.html"))
   
   # MAplot after normalization
   MAplotAN<-List()
   for (i in 1:nbfacs) {
-    MAplotAN<-c(MAplotAN,paste0("/MAplotsAfterNorm",i,".jpg"))
-    jpeg(paste0(path,"/MAplotsAfterNorm",i,".jpg"),width=5, height=5,units = "in", res = 300)
+    MAplotAN<-c(MAplotAN,paste0("/MAplotsAfterLoessRMA",i,".jpg"))
+    jpeg(paste0(path,"/MAplotsAfterLoessNorm",i,".jpg"),width=5, height=5,units = "in", res = 300)
     MAplot(norm,which=i,plotFun=smoothScatter,refSamples=c(1:nbfacs), main='', cex=2) #Normalized MAplots
     dev.off() 
   }
@@ -111,14 +118,13 @@ QCnorm = function(raw,path) {
     tedf = tedf[ , apply(tedf, 2, var) != 0]
   }
   pca=prcomp(tedf, scale. = T)
-
+  
   # similarity heatmap
   mat = Dist(t(exprs(norm)),method = 'pearson',diag = TRUE)
   mat=as.data.frame(as.matrix(Dist(t(exprs(norm)),method = 'pearson',diag = TRUE)))
   mat = 1 - mat
   #sample color palette for heatmap
   x = col2hex(raw@phenoData@data$colors)
-  sampleColors = x            # to return
   mat$annotation = x
   mat$Groups = raw@phenoData@data$groups
   x = unique(x)
@@ -132,11 +138,11 @@ QCnorm = function(raw,path) {
             col_side_palette = x,
             col_side_colors = mat[,'Groups', drop=FALSE],
             colorRampPalette(colors = c("yellow", "red")),
-            file = paste0(path,"/heatmapAfterNorm.html"),
+            file = paste0(path,"/heatmapAfterLoessNorm.html"),
             symm = TRUE  )
-  Heatmapolt<-"/heatmapAfterNorm.html"
+  Heatmapolt<-"/heatmapAfterLoessNorm.html"
   
   print("+++QCnorm+++")
-  return (List(MAplotBN,boxplotDataBN,RLEdata,NUSEdata,MAplotAN,boxplotDataAN,pca,Heatmapolt,norm,sampleColors))
+  return (List(MAplotBN,boxplotDataBN,RLEdata,NUSEdata,MAplotAN,MAplotAL,boxplotDataAN,pca,Heatmapolt,norm))
   sink(type='message')
 }
