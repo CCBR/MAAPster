@@ -143,6 +143,6 @@ loess_QCnorm = function(raw,path) {
   Heatmapolt<-"/heatmapAfterLoessNorm.html"
   
   print("+++QCnorm+++")
-  return (List(MAplotBN,boxplotDataBN,RLEdata,NUSEdata,MAplotAN,MAplotAL,boxplotDataAN,pca,Heatmapolt,norm))
+  return (List(MAplotBN,boxplotDataBN,RLEdata,NUSEdata,HistplotAN,MAplotAN,boxplotDataAN,pca,Heatmapolt,norm,sampleColors))
   sink(type='message')
 }
