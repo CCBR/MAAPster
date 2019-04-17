@@ -125,6 +125,7 @@ loess_QCnorm = function(raw,path) {
   mat = 1 - mat
   #sample color palette for heatmap
   x = col2hex(raw@phenoData@data$colors)
+  sampleColors = x            # to return
   mat$annotation = x
   mat$Groups = raw@phenoData@data$groups
   x = unique(x)
