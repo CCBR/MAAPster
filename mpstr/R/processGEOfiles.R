@@ -39,7 +39,7 @@ processGEOfiles <- function(projectId,id,listGroups,workspace){
         untar(paste0(workspace,'/',id,'/',fileID),exdir=workspace)
         SampleName = list.files(path = workspace, pattern = '/*CEL.gz|/*CEL$', ignore.case = T, full.names=T)
         if (length(grep('*CEL*',SampleName,ignore.case = T)) == 0) {
-          saveMessage = "Raw files must be CEL files"
+          saveMessage = "Raw files must be CEL files. "
         }
         gds <- getGEO(id, GSEMatrix = F,getGPL=T,AnnotGPL=T)             #get meta data 
         mytable=matrix("",length(GSMList(gds)),4)

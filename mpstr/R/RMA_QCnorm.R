@@ -38,7 +38,7 @@ RMA_QCnorm = function(raw,path) {
  
   HistplotBN = plot_ly(dat, x=~x, y=~y, color=~sample, text = ~sample) %>%
     add_lines() %>%
-    layout(title='Distribution before Normalization',xaxis=list(title='log-intensity'),yaxis=list(title='density'),legend=list(x=0,y=-0.5))
+    layout(title='Distribution before Normalization',xaxis=list(title='log-intensity'),yaxis=list(title='density'),legend=list(x=13,y=0.1))
   htmlwidgets::saveWidget(HistplotBN, paste0(path,"/histBeforeNorm.html"))
 
   # MA plots before normalization
@@ -86,7 +86,7 @@ RMA_QCnorm = function(raw,path) {
   
   HistplotAN = plot_ly(dat, x=~x, y=~y, color=~sample, text = ~sample) %>%
     add_lines() %>%
-    layout(title='Distribution after RMA Normalization',xaxis=list(title='log-intensity'),yaxis=list(title='density'),legend=list(x=0,y=-0.5))
+    layout(title='Distribution after RMA Normalization',xaxis=list(title='log-intensity'),yaxis=list(title='density'),legend=list(x=13,y=0.1))
   htmlwidgets::saveWidget(HistplotAN, paste0(path,"/histAfterRMAnorm.html"))
   
   # MAplot after normalization
