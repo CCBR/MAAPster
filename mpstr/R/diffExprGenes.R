@@ -73,7 +73,21 @@ diffExprGenes = function(norm,cons,projectId,workspace) {
   fit1 <- lmFit(norm,design1)
   contrast.matrix <- makeContrasts(contrasts=cons,levels=design1)
   fit2 <- contrasts.fit(fit1, contrast.matrix)
-  ebayes.fit2=eBayes(fit2) 
+  
+  # try/catch for 1 sample/group
+  attemptEbayes = function(theFit) {
+    out = tryCatch(
+      {
+        ebayes.fit2=eBayes(fit2) 
+      },
+      error=function(cond){
+        return('At least 2 samples per group required for differential expression analysis.')
+      }
+    ) 
+    return(out)
+  } 
+  outMsg = attemptEbayes(fit2)
+  
   if (norm@annotation=="pd.mogene.2.0.st") {  
     Annot <- data.frame(ACCNUM=sapply(contents(mogene20sttranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(mogene20sttranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(mogene20sttranscriptclusterGENENAME), paste, collapse=", "), ENTREZ=sapply(contents(mogene20sttranscriptclusterENTREZID), paste, collapse=", "))     
   } else {
@@ -174,40 +188,53 @@ diffExprGenes = function(norm,cons,projectId,workspace) {
       }
     }
   }
-  numContrasts = length(cons)
-  listDEGs = vector("list",numContrasts)                                            #initialize output list for each contrast
-  for (i in 1:numContrasts)
-  {
-    all.genes.con = topTable(ebayes.fit2, coef = i, number=nrow(ebayes.fit2))
-    all <- merge(all.genes.con, Annot,by.x=0, by.y=0, all.x=T)                      #annotate
-    all=all[order(all$P.Value),]
-    colnames(all)[1]="probsetID"
-    all$FC = ifelse(all$logFC<0, -1/(2^all$logFC), 2^all$logFC)                     #add fold change and rearrange columns
-    all = all[,c(9,12,2,5,6,3,8,10,11,1,4,7)]
-    # Write out to a file
-    write.table(all,file=paste(workspace,'/',projectId,"_",cons[i],"_all_genes.txt",sep=""),sep="\t",row.names=F)
-    listDEGs[[i]]=all
+  catchAndReturn = function(outMsg) {
+    out = tryCatch(
+      {
+        ebayes.fit2 = outMsg
+        numContrasts = length(cons)
+        listDEGs = vector("list",numContrasts)                                            #initialize output list for each contrast
+        for (i in 1:numContrasts)
+        {
+          all.genes.con = topTable(ebayes.fit2, coef = i, number=nrow(ebayes.fit2))
+          all <- merge(all.genes.con, Annot,by.x=0, by.y=0, all.x=T)                      #annotate
+          all=all[order(all$P.Value),]
+          colnames(all)[1]="probsetID"
+          all$FC = ifelse(all$logFC<0, -1/(2^all$logFC), 2^all$logFC)                     #add fold change and rearrange columns
+          all = all[,c(9,12,2,5,6,3,8,10,11,1,4,7)]
+          # Write out to a file
+          write.table(all,file=paste(workspace,'/',projectId,"_",cons[i],"_all_genes.txt",sep=""),sep="\t",row.names=F)
+          listDEGs[[i]]=all
+        }
+        names(listDEGs)=cons
+        norm_annotated <- merge(exprs(norm), Annot,by.x=0, by.y=0, all.x=T)               #write out normalized annotated data
+        y<-paste("_",projectId, sep="")
+        tNorm = tempfile(pattern = "normalized_data_", tmpdir =workspace, fileext = paste0(y,'.txt'))
+        write.table(norm_annotated,file=tNorm,sep="\t",row.names=F)  
+        for (i in 1:length(listDEGs)) {                                                   #Volcano plots
+          dat=listDEGs[[i]]
+          dat = dat[dat$SYMBOL!='NA',]
+          log_FC=dat$logFC
+          log_pval=-log10(dat$P.Value)
+          Significant=rep("NotSignificant",length(log_FC))
+          Significant[which(dat$P.Value<0.05 & abs(dat$logFC)>=1)]="AbsLogFoldChange>1 & PValue<0.05"
+          Significant[which(dat$P.Value<0.05 & abs(dat$logFC)<1)]="PValue<0.05"
+          Significant[which(dat$P.Value>=0.05 & abs(dat$logFC)>=1)]="AbsLogFoldChange>1"
+          gene=dat$SYMBOL
+          volcano_data=as.data.frame(cbind(gene,log_FC,log_pval,Significant))
+          volcano_plot<-plot_ly(type='scatter', data = volcano_data, x = log_FC, y = log_pval, text = gene, mode = "markers", color = Significant) %>% layout(title=names(listDEGs)[i],xaxis=list(title="Fold Change",range =c(-5,5),tickvals=c(-5,-4,-3,-2,-1,0,1,2,3,4,5),ticktext=c('-32','-16','-8','-4','-2','1','2','4','8','16','32')),yaxis=list(title="-Log10 pvalue",range =c(0,15)))
+          htmlwidgets::saveWidget(volcano_plot, paste0(workspace,"/volcano.html"))
+        }
+        return(list(listDEGs=listDEGs, norm_annotated=norm_annotated, pheno=pData(norm)))
+      },
+      error=function(cond) {
+        return(outMsg)
+      }
+    ) 
+    return(out)
   }
-  names(listDEGs)=cons
-  norm_annotated <- merge(exprs(norm), Annot,by.x=0, by.y=0, all.x=T)               #write out normalized annotated data
-  y<-paste("_",projectId, sep="")
-  tNorm = tempfile(pattern = "normalized_data_", tmpdir =workspace, fileext = paste0(y,'.txt'))
-  write.table(norm_annotated,file=tNorm,sep="\t",row.names=F)  
-  for (i in 1:length(listDEGs)) {                                                   #Volcano plots
-    dat=listDEGs[[i]]
-    dat = dat[dat$SYMBOL!='NA',]
-    log_FC=dat$logFC
-    log_pval=-log10(dat$P.Value)
-    Significant=rep("NotSignificant",length(log_FC))
-    Significant[which(dat$P.Value<0.05 & abs(dat$logFC)>=1)]="AbsLogFoldChange>1 & PValue<0.05"
-    Significant[which(dat$P.Value<0.05 & abs(dat$logFC)<1)]="PValue<0.05"
-    Significant[which(dat$P.Value>=0.05 & abs(dat$logFC)>=1)]="AbsLogFoldChange>1"
-    gene=dat$SYMBOL
-    volcano_data=as.data.frame(cbind(gene,log_FC,log_pval,Significant))
-    volcano_plot<-plot_ly(type='scatter', data = volcano_data, x = log_FC, y = log_pval, text = gene, mode = "markers", color = Significant) %>% layout(title=names(listDEGs)[i],xaxis=list(title="Fold Change",range =c(-5,5),tickvals=c(-5,-4,-3,-2,-1,0,1,2,3,4,5),ticktext=c('-32','-16','-8','-4','-2','1','2','4','8','16','32')),yaxis=list(title="-Log10 pvalue",range =c(0,15)))
-    htmlwidgets::saveWidget(volcano_plot, paste0(workspace,"/volcano.html"))
-  }
+  return(catchAndReturn(outMsg))
+  
   print("+++deg+++")
-  return(list(listDEGs=listDEGs, norm_annotated=norm_annotated, pheno=pData(norm)))
   sink(type='message')
 }
