@@ -12,7 +12,7 @@
 #' @note Outputs pre-normalization plots, QC plots, post-normalization plots, see oligo package for details
 
 
-RMA_QCnorm = function(raw,path) {
+RMA_QCnorm = function(raw,path,contrast) {
   library(rgl)
   library(Biobase)
   library(heatmaply)
@@ -113,16 +113,17 @@ RMA_QCnorm = function(raw,path) {
   pca=prcomp(tedf, scale. = T)
 
   # similarity heatmap
-  mat = Dist(t(exprs(norm)),method = 'pearson',diag = TRUE)
-  mat=as.data.frame(as.matrix(Dist(t(exprs(norm)),method = 'pearson',diag = TRUE)))
+  # Only output samples in selected contrast
+  sampleColumns = c(which(raw@phenoData@data$groups==gsub("-.*$","",contrast)),which(raw@phenoData@data$groups==gsub("^.*-","",contrast)))
+  mat=as.data.frame(as.matrix(Dist(t(exprs(norm)[,sampleColumns]),method = 'pearson',diag = TRUE)))
   mat = 1 - mat
   #sample color palette for heatmap
-  x = col2hex(raw@phenoData@data$colors)
+  x = col2hex(raw@phenoData@data$colors)[sampleColumns]
   sampleColors = x            # to return
   mat$annotation = x
-  mat$Groups = raw@phenoData@data$groups
+  mat$Groups = raw@phenoData@data$groups[sampleColumns]
   x = unique(x)
-  names(x) = unique(raw@phenoData@data$groups)
+  names(x) = unique(raw@phenoData@data$groups[sampleColumns])
   
   heatmaply(mat[,1:(ncol(mat)-2)],
             plot_method = 'plotly',

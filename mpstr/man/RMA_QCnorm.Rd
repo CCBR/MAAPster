@@ -4,7 +4,7 @@
 \alias{RMA_QCnorm}
 \title{2) Runs QC analyses and normalizes data.}
 \usage{
-RMA_QCnorm(raw, path)
+RMA_QCnorm(raw, path, contrast)
 }
 \arguments{
 \item{raw}{ExpressionFeatureSet from either processGEOfiles or processCELfiles function}

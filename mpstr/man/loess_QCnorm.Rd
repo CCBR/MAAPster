@@ -4,7 +4,7 @@
 \alias{loess_QCnorm}
 \title{2) Runs QC analyses and normalizes data.}
 \usage{
-loess_QCnorm(raw, path)
+loess_QCnorm(raw, path, contrast)
 }
 \arguments{
 \item{raw}{ExpressionFeatureSet from either processGEOfiles or processCELfiles function}
