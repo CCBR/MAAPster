@@ -3,6 +3,7 @@
 #' @export
 #' @param raw ExpressionFeatureSet from either processGEOfiles or processCELfiles function
 #' @param path Directory for plots
+#' @param contrast Contrast for subsetting QC plots by samples in chosen groups
 #' @return Normalized ExpressionFeatureSet object with normalized data and phenotype information
 #' @examples 
 #' norm_celfiles = QCnorm(celfiles,'Users/name/folderName/plots') 

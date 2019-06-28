@@ -10,6 +10,8 @@ loess_QCnorm(raw, path, contrast)
 \item{raw}{ExpressionFeatureSet from either processGEOfiles or processCELfiles function}
 
 \item{path}{Directory for plots}
+
+\item{contrast}{Contrast for subsetting QC plots by samples in chosen groups}
 }
 \value{
 Normalized ExpressionFeatureSet object with normalized data and phenotype information
