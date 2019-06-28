@@ -6,7 +6,7 @@
 #' @param contrast Contrast for subsetting QC plots by samples in chosen groups
 #' @return Normalized ExpressionFeatureSet object with normalized data and phenotype information
 #' @examples 
-#' norm_celfiles = QCnorm(celfiles,'Users/name/folderName/plots') 
+#' norm_celfiles = RMA_QCnorm(celfiles,'Users/name/folderName/plots',c("RNA_1-Ctl","RNA_2-Ctl")) 
 #' @references See packages rgl, Biobase, heatmaply, oligo
 #' @note Normalizes using rma, see oligo package
 #' @note Outputs 3D PCA and similarity heatmap
