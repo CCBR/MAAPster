@@ -27,7 +27,7 @@ Outputs 3D PCA and similarity heatmap
 Outputs pre-normalization plots, QC plots, post-normalization plots, see oligo package for details
 }
 \examples{
-norm_celfiles = QCnorm(celfiles,'Users/name/folderName/plots') 
+norm_celfiles = loess_QCnorm(celfiles,'Users/name/folderName/plots',c("RNA_1-Ctl","RNA_2-Ctl")) 
 }
 \references{
 See packages rgl, Biobase, heatmaply, oligo
