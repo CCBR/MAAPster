@@ -81,6 +81,7 @@ library(GSEABase)
 library(pheatmap)
 library(viridis)
 library(dendsort)
+library(htmlwidgets)
 
 #setwd('/Users/valdezkm/Documents/MicroarrayPipeline/CodeInProgress/MicroArrayPipeline')
 
@@ -371,6 +372,7 @@ shinyServer(function(input, output) {
               incProgress(0.25)
               
               celfiles
+              
             })
           })
         
@@ -401,7 +403,8 @@ shinyServer(function(input, output) {
           {
             ##-------------
             withProgress(message = 'Analysis starting...', value = 0, {
-              facs <- factor(pData(raw())$group)
+              subs = pData(norm())[pData(norm())$group != '...',]
+              facs <- factor(subs$group)
               labfacs=levels(facs)
               nbfacs=length(labfacs)
               contra=data.frame(k$k1,k$k2)
@@ -424,12 +427,12 @@ shinyServer(function(input, output) {
                 #  stopApp(-1)
                 #}
               }
-              
-              myfactor <- factor(pData(norm())$group)
+              myfactor <- factor(subs$group)
               design1 <- model.matrix(~0+myfactor)
               colnames(design1) <- levels(myfactor)
               
-              fit1 <- lmFit(norm(),design1)
+              sub_dat = norm()[,sampleNames(norm()) %in% subs$SampleID]
+              fit1 <- lmFit(sub_dat,design1)
               contrast.matrix <- makeContrasts(contrasts=cons,levels=design1)
               
               fit2 <- contrasts.fit(fit1, contrast.matrix)
@@ -607,8 +610,8 @@ shinyServer(function(input, output) {
                 ## end for
               }
               
-              all <- merge(exprs(norm()), Annot,by.x=0, by.y=0, all.x=T)
-              
+              # output annotated normalized expression
+              all <- merge(exprs(sub_dat), Annot,by.x=0, by.y=0, all.x=T)
               y<-paste("_",input$ProjectID, sep="")
               tNorm = tempfile(pattern = "normalized_data_", tmpdir = getwd(), fileext = paste0(y,'.txt'))
               write.table(all,file=tNorm,sep="\t",row.names=F)
@@ -806,7 +809,8 @@ shinyServer(function(input, output) {
         output$rawbox=renderPlot(
           {
             par(mar=c(8,4,4,2))
-            boxplot(raw(), col=colors, which="all", main="Boxplots before normalization",las=2,names=pData(raw())$SampleID)
+            tempNames = gsub('_(HG-U133A_2).CEL','',pData(raw())$SampleID,fixed = T)
+            boxplot(raw(), col=colors, which="all", main="Boxplots before normalization",las=2,names=tempNames)
           }
         )
         output$rle=renderPlot(
@@ -858,7 +862,8 @@ shinyServer(function(input, output) {
         output$rmabox=renderPlot(
           {
             par(mar=c(8,4,4,2))
-            boxplot(norm(),col=colors, main="Boxplots after RMA normalization",las=2,names=pData(norm())$SampleID)
+            tempNames = gsub('_(HG-U133A_2).CEL','',pData(raw())$SampleID,fixed = T)
+            boxplot(norm(),col=colors, main="Boxplots after RMA normalization",las=2,names=tempNames)
           }
         )
         ## end mvaplat after normalization
@@ -882,12 +887,14 @@ shinyServer(function(input, output) {
               pc3.var=round(pca$sdev[3]^2/sum(pca$sdev^2)*100,2)
               
               group.v=as.vector(pData(norm())$SampleID)
-              plot_ly(as.data.frame(pca$x[,1:3]), x = ~PC1, y = ~PC2, z = ~PC3,color = v$data$group, hoverinfo="text",
+              p = plot_ly(as.data.frame(pca$x[,1:3]), x = ~PC1, y = ~PC2, z = ~PC3,color = v$data$group, hoverinfo="text",
                            hovertext = ~group.v) %>%
                 add_markers() %>%
                 layout(scene = list(xaxis = list(title = paste0("PC1 (",pc1.var,"%)")),
                                     yaxis = list(title = paste0("PC2 (",pc2.var,"%)")),
                                     zaxis = list(title = paste0("PC3 (",pc3.var,"%)"))))
+              htmlwidgets::saveWidget(as_widget(p), "pca.html")
+              p
             })
           }
         )
