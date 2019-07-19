@@ -138,9 +138,10 @@ RMA_QCnorm = function(raw,path,contrast) {
             symm = TRUE  )
   Heatmapolt<-"/heatmapAfterRMAnorm.html"
   
+  norm_all = norm
   norm = norm[,sampleNames(norm)[sampleColumns]]
   
   print("+++QCnorm+++")
-  return (List(MAplotBN,boxplotDataBN,RLEdata,NUSEdata,HistplotAN,MAplotAN,boxplotDataAN,pca,Heatmapolt,norm,sampleColors))
+  return (List(MAplotBN,boxplotDataBN,RLEdata,NUSEdata,HistplotAN,MAplotAN,boxplotDataAN,pca,Heatmapolt,norm,sampleColors,norm_all))
   sink(type='message')
 }
