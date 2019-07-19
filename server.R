@@ -403,10 +403,13 @@ shinyServer(function(input, output) {
           {
             ##-------------
             withProgress(message = 'Analysis starting...', value = 0, {
-              subs = pData(norm())[pData(norm())$group != '...',]
+              
+              sampleColumns = c(which(v$data$group %in% k$k2[,1]),which(v$data$group %in% k$k1[,1]))
+              subs = pData(norm())[sampleColumns,]
+              
               facs <- factor(subs$group)
               labfacs=levels(facs)
-              nbfacs=length(labfacs)
+              # nbfacs=length(labfacs)
               contra=data.frame(k$k1,k$k2)
               
               nb=dim(contra)[1]
@@ -431,7 +434,7 @@ shinyServer(function(input, output) {
               design1 <- model.matrix(~0+myfactor)
               colnames(design1) <- levels(myfactor)
               
-              sub_dat = norm()[,sampleNames(norm()) %in% subs$SampleID]
+              sub_dat = norm()[,sampleNames(norm())[sampleColumns]]
               fit1 <- lmFit(sub_dat,design1)
               contrast.matrix <- makeContrasts(contrasts=cons,levels=design1)
               
