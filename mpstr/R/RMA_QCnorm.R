@@ -138,7 +138,7 @@ RMA_QCnorm = function(raw,path,contrast) {
             symm = TRUE  )
   Heatmapolt<-"/heatmapAfterRMAnorm.html"
   
-  norm_all = norm
+  norm_all = exprs(norm)
   norm = norm[,sampleNames(norm)[sampleColumns]]
   
   print("+++QCnorm+++")

@@ -146,7 +146,7 @@ loess_QCnorm = function(raw,path,contrast) {
             symm = TRUE  )
   Heatmapolt<-"/heatmapAfterLoessNorm.html"
   
-  norm_all = norm
+  norm_all = exprs(norm)
   norm = norm[,sampleNames(norm)[sampleColumns]]
   
   print("+++QCnorm+++")
