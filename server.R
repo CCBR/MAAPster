@@ -613,12 +613,14 @@ shinyServer(function(input, output) {
                 ## end for
               }
               
-              # output annotated normalized expression
-              all <- merge(exprs(sub_dat), Annot,by.x=0, by.y=0, all.x=T)
+              # output annotated normalized expression for all samples
+              all_output = merge(exprs(norm()), Annot,by.x=0, by.y=0, all.x=T)
               y<-paste("_",input$ProjectID, sep="")
               tNorm = tempfile(pattern = "normalized_data_", tmpdir = getwd(), fileext = paste0(y,'.txt'))
-              write.table(all,file=tNorm,sep="\t",row.names=F)
-              #  
+              write.table(all_output,file=tNorm,sep="\t",row.names=F)
+              
+              # return annotated normalized expression for chosen samples
+              all <- merge(exprs(sub_dat), Annot,by.x=0, by.y=0, all.x=T)
               names(mylist)=cons
               
               incProgress(0.5, detail = 'DEG done')
