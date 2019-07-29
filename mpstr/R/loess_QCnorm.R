@@ -6,7 +6,7 @@
 #' @param contrast Contrast for subsetting QC plots by samples in chosen groups
 #' @return Normalized ExpressionFeatureSet object with normalized data and phenotype information
 #' @examples 
-#' norm_celfiles = loess_QCnorm(celfiles,'Users/name/folderName/plots',c("RNA_1-Ctl","RNA_2-Ctl")) 
+#' norm_celfiles = loess_QCnorm(celfiles,'Users/name/folderName/plots',c("RNA_1-Ctl")) 
 #' @references See packages rgl, Biobase, heatmaply, oligo
 #' @note Normalizes using rma and cyclic loess, see oligo  and limma packages
 #' @note Outputs 3D PCA and similarity heatmap
