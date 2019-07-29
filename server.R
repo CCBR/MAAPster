@@ -404,7 +404,7 @@ shinyServer(function(input, output) {
             ##-------------
             withProgress(message = 'Analysis starting...', value = 0, {
               
-              sampleColumns = c(which(v$data$group %in% k$k2[,1]),which(v$data$group %in% k$k1[,1]))
+              sampleColumns = sort(c(which(v$data$group %in% k$k2[,1]),which(v$data$group %in% k$k1[,1])))
               subs = pData(norm())[sampleColumns,]
               
               facs <- factor(subs$group)
@@ -814,8 +814,9 @@ shinyServer(function(input, output) {
         output$rawbox=renderPlot(
           {
             par(mar=c(8,4,4,2))
-            tempNames = gsub('_(HG-U133A_2).CEL','',pData(raw())$SampleID,fixed = T)
-            boxplot(raw(), col=colors, which="all", main="Boxplots before normalization",las=2,names=tempNames)
+            # tempNames = gsub('_(HG-U133A_2).CEL','',pData(raw())$SampleID,fixed = T)
+            # boxplot(raw(), col=colors, which="all", main="Boxplots before normalization",las=2,names=tempNames)
+            boxplot(raw(), col=colors, which="all", main="Boxplots before normalization",las=2,names=pData(raw())$SampleID)
           }
         )
         output$rle=renderPlot(
@@ -899,6 +900,7 @@ shinyServer(function(input, output) {
                                     yaxis = list(title = paste0("PC2 (",pc2.var,"%)")),
                                     zaxis = list(title = paste0("PC3 (",pc3.var,"%)"))))
               htmlwidgets::saveWidget(as_widget(p), "pca.html")
+              # save(p,file='/Users/valdezkm/Documents/GBM_cellLines_MicroArray/QC/p.RData')
               p
             })
           }
@@ -1166,6 +1168,7 @@ shinyServer(function(input, output) {
             matColors = list(group = unique(colors[sampleColumns]))
             names(matColors$group) = unique(v$data$group[sampleColumns])
             #calculate z scores for rows
+            paths = paths[,sampleColumns]
             paths = t(scale(t(paths)))  
             
             pheatmap(paths,annotation_col=matCol,annotation_colors=matColors,drop_levels=TRUE,fontsize=7, main='Enrichment Scores for Top 50 Differentially Expressed ssGSEA Pathways')
