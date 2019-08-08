@@ -100,7 +100,7 @@ loess_QCnorm = function(raw,path,contrast) {
   # MAplot after normalization
   MAplotAN<-List()
   for (i in 1:nbfacs) {
-    MAplotAN<-c(MAplotAN,paste0("/MAplotsAfterLoessRMA",i,".jpg"))
+    MAplotAN<-c(MAplotAN,paste0("/MAplotsAfterLoessNorm",i,".jpg"))
     jpeg(paste0(path,"/MAplotsAfterLoessNorm",i,".jpg"),width=5, height=5,units = "in", res = 300)
     MAplot(norm,which=i,plotFun=smoothScatter,refSamples=c(1:nbfacs), main='', cex=2) #Normalized MAplots
     dev.off() 
