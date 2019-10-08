@@ -378,6 +378,7 @@ shinyServer(function(input, output) {
         
         norm=reactive(
           {
+            write.csv(exprs(raw()),'~/Desktop/temp.csv')
             withProgress(message = 'Normalization', detail = 'starting ...', value = 0, {
               if (raw()@annotation=="pd.hg.u133.plus.2" | raw()@annotation=="pd.clariom.s.human.ht" | raw()@annotation=="pd.clariom.s.human" | raw()@annotation=="pd.clariom.s.mouse.ht" | raw()@annotation=="pd.clariom.s.mouse" | raw()@annotation=='pd.mouse430.2' | raw()@annotation=='pd.hg.u133a' | raw()@annotation=='pd.hg.u133a.2' | raw()@annotation=='pd.hg.u219' | raw()@annotation=='pd.mg.u74av2' | raw()@annotation=='pd.mouse430a.2' | raw()@annotation=='pd.moe430a' | raw()@annotation=='pd.hg.u95av2' | raw()@annotation=='pd.hg.u133b' | raw()@annotation=='pd.clariom.s.rat') {
                 incProgress(0.5)
@@ -588,6 +589,7 @@ shinyServer(function(input, output) {
               
               incProgress(0.25)
               mylist=vector("list",nb)
+              myCollapsedList=vector("list",nb)
               
               for (i in 1:nb)
               {
@@ -602,14 +604,19 @@ shinyServer(function(input, output) {
                 
                 #add fold change and rearrange columns
                 all$FC = ifelse(all$logFC<0, -1/(2^all$logFC), 2^all$logFC)
-                #all = all[,c(9,1,8,10,11,2,5,6,3,4,7)]
                 all = all[,c(9,12,2,5,6,3,8,10,11,1,4,7)]
-                
-                # Write out to a file:
+                # Write uncollapsed deg out to a file
                 write.table(all,file=paste(input$ProjectID,"_",cons[i],"_all_genes.txt",sep=""),sep="\t",row.names=F)
-                # cat("Contrast: ",i," done \n")
                 
+                # Collapse deg for gui and output, write out to file
+                collapsed = all[,-c(7,10)]
+                collapsed = aggregate(.~SYMBOL+DESC+ENTREZ,data=collapsed,mean)  
+                collapsed = collapsed[,c(1,4:8,2:3,9:10)]
+                write.table(collapsed,file=paste(input$ProjectID,"_",cons[i],"_all_genes_collapsed.txt",sep=""),sep="\t",row.names=F)
+                
+                # create deg lists (both uncollapsed and collapsed) to return
                 mylist[[i]]=all
+                myCollapsedList[[i]] = collapsed
                 ## end for
               }
               
@@ -626,7 +633,7 @@ shinyServer(function(input, output) {
               incProgress(0.5, detail = 'DEG done')
               
               #mylist
-              list(mylist=mylist, all=all, cons=cons, design1=design1, nb=nb)
+              list(mylist=mylist, all=all, cons=cons, design1=design1, nb=nb, myCollapsedList=myCollapsedList)
             })
             ##-------------
           }
@@ -919,7 +926,7 @@ shinyServer(function(input, output) {
             k$all = cbind(paste0(k$k1, ' vs ', k$k2))
             num = which(input$NumContrasts==k$all[,1])
             
-            dat = deg()$mylist[[num]]
+            dat = deg()$myCollapsedList[[num]]
             dat = dat[,-3]
             dat[,3:4] = format(dat[,3:4], scientific = TRUE)
             

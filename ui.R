@@ -106,41 +106,6 @@ shinyUI(
           ))
     ),
     br(),
-    
-    
-    #shinyjs::hidden(
-    #  div(id='hide1',
-    # conditionalPanel(
-    # condition = 'input.number == 1',
-    #     fluidRow(),
-    #       column(2,
-    #         #lapply(1:input$number, function(i) {     
-    #         selectInput("group1", "Please select a group",
-    #                     #choices = paste0('Group', i),
-    #                     choices = c("Group_1" = "Group_1"),
-    #                     selected = "Group_1"
-    #         #)}
-    #       ),
-    #       actionButton("button2", "Define")
-    # )
-    # ),
-    # 
-    #   conditionalPanel(
-    #   condition = 'input.number == 2',
-    #   fluidRow(),
-    #   column(2,
-    #          #lapply(1:input$number, function(i) {     
-    #          selectInput("group1", "Please select a group",
-    #                      #choices = paste0('Group', i),
-    #                      choices = c("Group_1" = "Group_1", "Group_2" = "Group_2"),
-    #                      selected = "Group_1"
-    #                      #)}
-    #          ),
-    #          actionButton("button2", "Define")
-    #   )
-    # ),
-    
-    
     br(),
     shinyjs::hidden(
       div(id= "hide2",
