@@ -68,8 +68,15 @@ diffExprGenes = function(norm,cons,projectId,workspace) {
   sink(diffExprGenes_ERR,type='message',append=TRUE)
   
   myfactor <- factor(pData(norm)$groups)
-  design1 <- model.matrix(~0+myfactor)
-  colnames(design1) <- levels(myfactor)
+  if (!'batch'%in%colnames(pData(norm))) {
+    design1 <- model.matrix(~0+myfactor)
+    colnames(design1) <- levels(myfactor)
+  } else {
+    batch = factor(pData(norm)$batch)
+    design1 <- model.matrix(~0+myfactor+batch)
+    colnames(design1)[1:2] = levels(myfactor)
+  }
+ 
   fit1 <- lmFit(norm,design1)
   contrast.matrix <- makeContrasts(contrasts=cons,levels=design1)
   fit2 <- contrasts.fit(fit1, contrast.matrix)

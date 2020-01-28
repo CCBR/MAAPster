@@ -4,15 +4,16 @@
 #' @param projectId A unique identifier for the project
 #' @param id A GSE id number
 #' @param listGroups Group assignments for each sample, follow order of samples on GEO series page
+#' @param listBatches Optional list of batches for each sample, follow alphabetical order of samples
 #' @param workspace Working directory
 #' @return ExpressionFeatureSet object with raw data and phenotype information
 #' @examples 
-#' celfiles = processGEOfiles('NCI_Project_1','GSE61989',c('Ctl','Ctl','Ctl','Ctl','RNA_1','RNA_1','RNA_1','RNA_1','RNA_2','RNA_2','RNA_2','RNA_2'),'/Users/name/folderName')      
-#' celfiles = processGEOfiles('NCI_Project_2','GSE106988', c('Ctl_1','Ctl_1','Ctl_1','KO_1','KO_1','KO_1'),'/Users/name/folderName')
+#' celfiles = processGEOfiles(projectId='NCI_Project_1',id='GSE61989',listGroups=c('Ctl','Ctl','Ctl','Ctl','RNA_1','RNA_1','RNA_1','RNA_1','RNA_2','RNA_2','RNA_2','RNA_2'),workspace='/Users/name/folderName')      
+#' celfiles = processGEOfiles(projectId='NCI_Project_2',id='GSE106988',listGroups=c('Ctl_1','Ctl_1','Ctl_1','KO_1','KO_1','KO_1'),listBatches=c(rep('A',6),rep('B',6)),workspace='/Users/name/folderName')
 #' @references See packages oligo, GEOquery, Biobase
 
 
-processGEOfiles <- function(projectId,id,listGroups,workspace){
+processGEOfiles <- function(projectId,id,listGroups,listBatches=NULL,workspace){
   library(GEOquery)
   library(oligo)
   library(Biobase)
@@ -42,8 +43,15 @@ processGEOfiles <- function(projectId,id,listGroups,workspace){
           saveMessage = "Raw files must be CEL files. "
         }
         gds <- getGEO(id, GSEMatrix = F,getGPL=T,AnnotGPL=T)             #get meta data 
-        mytable=matrix("",length(GSMList(gds)),4)
-        colnames(mytable) = c("gsm","title","description","groups")
+       
+        if(is.null(listBatches)) {
+          mytable=matrix("",length(GSMList(gds)),4)
+          colnames(mytable) = c("gsm","title","description","groups")
+        } else {
+          mytable=matrix("",length(GSMList(gds)),5)
+          colnames(mytable) = c("gsm","title","description","groups","batch")
+        }
+        
         for (k in 1:length(GSMList(gds)))                                 #fill table with meta data
         {
           if (is.null(Meta(GSMList(gds)[[k]])$description)) {    
@@ -53,7 +61,10 @@ processGEOfiles <- function(projectId,id,listGroups,workspace){
           }
         }
         mytable = as.data.frame(mytable)
-        mytable$groups = listGroups                               #assign groups to samples
+        mytable$groups = listGroups                       #assign groups to samples
+        if(!is.null(listBatches)) {
+          mytable$batch = listBatches                     # assign optional batch to samples
+        }
         
         ####creates a list of colors specific to each group
         fs = factor(mytable$groups)
@@ -93,7 +104,12 @@ processGEOfiles <- function(projectId,id,listGroups,workspace){
   
   #Error handling, return data if wrong id
   returnData = function(cels) {
-    tableNames=c("gsm","title","description","groups")
+    if (is.null(listBatches)) {
+      tableNames=c("gsm","title","description","groups")
+    } else {
+      tableNames=c('gsm','title','description','groups','batch')
+    }
+    
     out = tryCatch(
       {
         return (list(

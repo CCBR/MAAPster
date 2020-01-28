@@ -4,6 +4,7 @@
 #' @param raw ExpressionFeatureSet from either processGEOfiles or processCELfiles function
 #' @param path Directory for plots
 #' @param contrast Contrast for subsetting QC plots by samples in chosen groups
+#' @param listBatches Optional list of batches for each sample, follow alphabetical order of samples
 #' @return Normalized ExpressionFeatureSet object with normalized data and phenotype information
 #' @examples 
 #' norm_celfiles = loess_QCnorm(celfiles,'Users/name/folderName/plots',c("RNA_1-Ctl")) 
@@ -13,7 +14,7 @@
 #' @note Outputs pre-normalization plots, QC plots, post-normalization plots, see oligo package for details
 
 
-loess_QCnorm = function(raw,path,contrast) {
+loess_QCnorm = function(raw,path,contrast,listBatches=NULL) {
   library(rgl)
   library(Biobase)
   library(heatmaply)
@@ -24,9 +25,14 @@ loess_QCnorm = function(raw,path,contrast) {
   library(gplots)
   library(limma)
   library(oligo)
+  library(sva)
   
   QCnorm_ERR = file(paste0(path,'/loess_QCnorm.err'),open='wt')
   sink(QCnorm_ERR,type='message',append=TRUE)
+  
+  # subset to samples in contrast
+  sampleColumns = c(which(raw@phenoData@data$groups==gsub("-.*$","",contrast)),which(raw@phenoData@data$groups==gsub("^.*-","",contrast)))
+  raw = raw[,sampleNames(raw)[sampleColumns]]
   
   # histogram before normalization
   svg(paste0(path,"/temp.svg"),width=8, height=8)
@@ -81,10 +87,28 @@ loess_QCnorm = function(raw,path,contrast) {
   loess = ExpressionSet(assayData = loess,phenoData = pheno)
   loess@annotation = norm@annotation
   norm = loess
+
+  
+  # add optional batch correction for plots
+  if (is.null(listBatches)) {
+    norm_plots = norm
+  } else {
+    # set up variables
+    temp = norm
+    modCombat = model.matrix(~1,data=pData(temp))
+    batch = pData(temp)$batch
+    # run combat
+    norm_plots = ComBat(dat=exprs(temp),batch=batch,mod=modCombat,par.prior=TRUE,prior.plots=FALSE)
+    # turn back into expression set
+    pheno = new("AnnotatedDataFrame",data=temp@phenoData@data)
+    norm_plots = ExpressionSet(assayData=norm_plots,phenoData=pheno)
+    norm_plots@annotation = temp@annotation
+  }
+  
   
   # histogram after normalization
   svg(paste0(path,"/temp2.svg"),width=8, height=8)
-  dat = hist(norm)
+  dat = hist(norm_plots)
   dev.off()
   
   dat_x = melt(dat[['x']])
@@ -102,19 +126,19 @@ loess_QCnorm = function(raw,path,contrast) {
   for (i in 1:nbfacs) {
     MAplotAN<-c(MAplotAN,paste0("/MAplotsAfterLoessNorm",i,".jpg"))
     jpeg(paste0(path,"/MAplotsAfterLoessNorm",i,".jpg"),width=5, height=5,units = "in", res = 300)
-    MAplot(norm,which=i,plotFun=smoothScatter,refSamples=c(1:nbfacs), main='', cex=2) #Normalized MAplots
+    MAplot(norm_plots,which=i,plotFun=smoothScatter,refSamples=c(1:nbfacs), main='', cex=2) #Normalized MAplots
     dev.off() 
   }
   
   # boxplot after normalization
   boxplotDataAN = list()
-  temp = oligo::boxplot(norm, which="all", plot=FALSE)                       
+  temp = oligo::boxplot(norm_plots, which="all", plot=FALSE)                       
   colnames(temp$stats) = temp$names
   boxplotDataAN[[1]] = temp$stats
   boxplotDataAN[[2]] = 'log-intensity'
   
   # Output data for 3D PCA #                                                                         
-  tedf= t(exprs(norm))
+  tedf= t(exprs(norm_plots))
   if (length(which(apply(tedf, 2, var)==0)) >= 0){
     tedf = tedf[ , apply(tedf, 2, var) != 0]
   }
@@ -122,16 +146,15 @@ loess_QCnorm = function(raw,path,contrast) {
   
   # similarity heatmap
   # Only output samples in selected contrast
-  sampleColumns = c(which(raw@phenoData@data$groups==gsub("-.*$","",contrast)),which(raw@phenoData@data$groups==gsub("^.*-","",contrast)))
-  mat=as.data.frame(as.matrix(Dist(t(exprs(norm)[,sampleColumns]),method = 'pearson',diag = TRUE)))
+  mat=as.data.frame(as.matrix(Dist(t(exprs(norm_plots)),method = 'pearson',diag = TRUE)))
   mat = 1 - mat
   #sample color palette for heatmap
-  x = col2hex(raw@phenoData@data$colors)[sampleColumns]
+  x = col2hex(raw@phenoData@data$colors)
   sampleColors = x            # to return
   mat$annotation = x
-  mat$Groups = raw@phenoData@data$groups[sampleColumns]
+  mat$Groups = raw@phenoData@data$groups
   x = unique(x)
-  names(x) = unique(raw@phenoData@data$groups[sampleColumns])
+  names(x) = unique(raw@phenoData@data$groups)
   
  
   heatmaply(mat[,1:(ncol(mat)-2)],
@@ -147,7 +170,7 @@ loess_QCnorm = function(raw,path,contrast) {
   Heatmapolt<-"/heatmapAfterLoessNorm.html"
   
   norm_all = exprs(norm)
-  norm = norm[,sampleNames(norm)[sampleColumns]]
+  # norm = norm[,sampleNames(norm)[sampleColumns]]
   
   print("+++QCnorm+++")
   return (List(MAplotBN,boxplotDataBN,RLEdata,NUSEdata,HistplotAN,MAplotAN,boxplotDataAN,pca,Heatmapolt,norm,sampleColors,norm_all))

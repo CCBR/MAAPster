@@ -27,7 +27,7 @@ Baseline/control group should be listed second in contrast assignment: c("experi
 Outputs volcano plot (using plotly) of differentially expressed genes
 }
 \examples{
-diff_expr_genes = diffExprGenes(norm_celfiles,c("RNA_1-Ctl","RNA_2-Ctl"),'NCI_Project_1','/Users/name/folderName')
+diff_expr_genes = diffExprGenes(norm_celfiles,c("RNA_1-Ctl"),'NCI_Project_1','/Users/name/folderName')
 diff_expr_genes = diffExprGenes(norm_celfiles,c("KO_1-Ctl_1"),'NCI_Project_2','/Users/name/folderName')
 }
 \references{

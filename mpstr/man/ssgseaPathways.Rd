@@ -4,8 +4,14 @@
 \alias{ssgseaPathways}
 \title{6) ssGSEA function}
 \usage{
-ssgseaPathways(deg_normAnnot, species, geneSet, workspace, projectId,
-  configuration_path)
+ssgseaPathways(
+  deg_normAnnot,
+  species,
+  geneSet,
+  workspace,
+  projectId,
+  configuration_path
+)
 }
 \arguments{
 \item{deg_normAnnot}{Differentially expressed genes object from deg function}

@@ -4,7 +4,7 @@
 \alias{loess_QCnorm}
 \title{2) Runs QC analyses and normalizes data.}
 \usage{
-loess_QCnorm(raw, path, contrast)
+loess_QCnorm(raw, path, contrast, listBatches = NULL)
 }
 \arguments{
 \item{raw}{ExpressionFeatureSet from either processGEOfiles or processCELfiles function}
@@ -12,6 +12,8 @@ loess_QCnorm(raw, path, contrast)
 \item{path}{Directory for plots}
 
 \item{contrast}{Contrast for subsetting QC plots by samples in chosen groups}
+
+\item{listBatches}{Optional list of batches for each sample, follow alphabetical order of samples}
 }
 \value{
 Normalized ExpressionFeatureSet object with normalized data and phenotype information
@@ -27,7 +29,7 @@ Outputs 3D PCA and similarity heatmap
 Outputs pre-normalization plots, QC plots, post-normalization plots, see oligo package for details
 }
 \examples{
-norm_celfiles = loess_QCnorm(celfiles,'Users/name/folderName/plots',c("RNA_1-Ctl","RNA_2-Ctl")) 
+norm_celfiles = loess_QCnorm(celfiles,'Users/name/folderName/plots',c("RNA_1-Ctl")) 
 }
 \references{
 See packages rgl, Biobase, heatmaply, oligo

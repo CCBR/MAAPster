@@ -4,8 +4,17 @@
 \alias{geneHeatmap}
 \title{5) Gene heatmap with selected genes from l2p pathways}
 \usage{
-geneHeatmap(degs, paths, contrast, upOrDown, pathway_name,
-  saveImageFileName, path, workspace, species)
+geneHeatmap(
+  degs,
+  paths,
+  contrast,
+  upOrDown,
+  pathway_name,
+  saveImageFileName,
+  path,
+  workspace,
+  species
+)
 }
 \arguments{
 \item{degs}{Differentially expressed genes object from deg function}

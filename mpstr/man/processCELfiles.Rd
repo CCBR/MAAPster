@@ -4,12 +4,14 @@
 \alias{processCELfiles}
 \title{1) Process local Affymetrix CEL files for mouse or human data}
 \usage{
-processCELfiles(projectId, listGroups, workspace)
+processCELfiles(projectId, listGroups, listBatches = NULL, workspace)
 }
 \arguments{
 \item{projectId}{A unique identifier for the project}
 
 \item{listGroups}{Group assignments for each sample, follow alphabetical order of samples}
+
+\item{listBatches}{Optional list of batches for each sample, follow alphabetical order of samples}
 
 \item{workspace}{Working directory}
 }
@@ -20,8 +22,8 @@ ExpressionFeatureSet object with raw data and phenotype information
 1) Process local Affymetrix CEL files for mouse or human data
 }
 \examples{
-celfiles = processCELfiles('NCI_Project_1',c('Ctl_1','Ctl_1','Ctl_1','KO_1','KO_1','KO_1'),'/Users/name/folderName')
-celfiles = processCELfiles('NCI_Project_2',c('Ctl','Ctl','Ctl','Ctl','RNA_1','RNA_1','RNA_1','RNA_1','RNA_2','RNA_2','RNA_2','RNA_2'),'/Users/name/folderName')      
+celfiles = processCELfiles(projectId='NCI_Project_1',listGroups=c('Ctl_1','Ctl_1','Ctl_1','KO_1','KO_1','KO_1'),workspace='/Users/name/folderName')
+celfiles = processCELfiles(projectId='NCI_Project_2',listGroups=c('Ctl','Ctl','Ctl','Ctl','RNA_1','RNA_1','RNA_1','RNA_1','RNA_2','RNA_2','RNA_2','RNA_2'),listBatches=c(rep('A',6),rep('B',6)),workspace='/Users/name/folderName')      
 }
 \references{
 See packages tools, Biobase, oligo
