@@ -27,12 +27,12 @@ geneHeatmap = function(degs, paths, contrast, upOrDown, pathway_name,saveImageFi
   genes = paths$Gene_List[paths$Description==pathway_name]              #select user input pathway, extract genes
   genes = strsplit(as.character(genes),' ')
   genes = unlist(genes)
-  exp = degs$norm_annotated                                             #extract normalized expression, subset by genes, aggregate duplicate symbols by mean
+  exp = degs$norm_plots_annotated                                             #extract normalized expression, subset by genes, aggregate duplicate symbols by mean
   exp = exp[exp$SYMBOL %in% genes,]
   if (tolower(species)=='mouse') {
     genes = human2mouse$mouse[human2mouse$human %in% genes]
     genes = as.character(genes)
-    exp = degs$norm_annotated                                            
+    exp = degs$norm_plots_annotated                                            
     exp = exp[exp$SYMBOL %in% genes,]
   }
   exp = subset(exp, select = -c(ACCNUM,DESC,ENTREZ,Row.names))
@@ -49,18 +49,25 @@ geneHeatmap = function(degs, paths, contrast, upOrDown, pathway_name,saveImageFi
   exp = t(scale(t(exp)))                                                #get z-scores by row
   
   # break up sample names
-  colNames = rownames(matCol)
-  parsedNames = vector("list",length(colNames))
-  for (i in 1:length(colNames)) {
-    temp = substring(colNames[i], seq(1, nchar(colNames[i])-1, nchar(colNames[i])/2), seq(nchar(colNames[i])/2, nchar(colNames[i]), nchar(colNames[i])-nchar(colNames[i])/2))
-    temp = paste(temp, collapse = '\n')
-    parsedNames[[i]] = temp
-  }
+  # colNames = rownames(matCol)
+  # parsedNames = vector("list",length(colNames))
+  # for (i in 1:length(colNames)) {
+  #   temp = substring(colNames[i], seq(1, nchar(colNames[i])-1, nchar(colNames[i])/2), seq(nchar(colNames[i])/2, nchar(colNames[i]), nchar(colNames[i])-nchar(colNames[i])/2))
+  #   temp = paste(temp, collapse = '\n')
+  #   parsedNames[[i]] = temp
+  # }
+  
+  # if (nrow(exp) > 30){
+  #   pheatmap(exp, main=paste0(path_name,'\n(Row Z-Scores)'),annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 4,labels_col = parsedNames,filename=paste0(workspace,'/',saveImageFileName))
+  # } else {
+  #   pheatmap(exp, main=paste0(path_name,'\n(Row Z-Scores)'),annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 10,labels_col = parsedNames,filename=paste0(workspace,'/',saveImageFileName))
+  # }
   
   if (nrow(exp) > 30){
-    pheatmap(exp, main=paste0(path_name,'\n(Row Z-Scores)'),annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 4,labels_col = parsedNames,filename=paste0(workspace,'/',saveImageFileName))
+    pheatmap(exp, main=paste0(path_name,'\n(Row Z-Scores)'),annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 4,labels_col = as.character(rownames(matCol)),filename=paste0(workspace,'/',saveImageFileName))
   } else {
-    pheatmap(exp, main=paste0(path_name,'\n(Row Z-Scores)'),annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 10,labels_col = parsedNames,filename=paste0(workspace,'/',saveImageFileName))
+    pheatmap(exp, main=paste0(path_name,'\n(Row Z-Scores)'),annotation_col=matCol, annotation_colors=matColors, drop_levels=TRUE, fontsize_row = 10,labels_col = as.character(rownames(matCol)),filename=paste0(workspace,'/',saveImageFileName))
   }
+  
   sink(type='message')
 }

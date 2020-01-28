@@ -164,7 +164,9 @@ RMA_QCnorm = function(raw,path,contrast,listBatches=NULL) {
   norm_all = exprs(norm)
   # norm = norm[,sampleNames(norm)[sampleColumns]]
   
+  
+  
   print("+++QCnorm+++")
-  return (List(MAplotBN,boxplotDataBN,RLEdata,NUSEdata,HistplotAN,MAplotAN,boxplotDataAN,pca,Heatmapolt,norm,sampleColors,norm_all))
+  return (List(MAplotBN,boxplotDataBN,RLEdata,NUSEdata,HistplotAN,MAplotAN,boxplotDataAN,pca,Heatmapolt,norm,sampleColors,norm_all,norm_plots))
   sink(type='message')
 }

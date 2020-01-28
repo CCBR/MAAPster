@@ -23,7 +23,7 @@ ssgseaPathways = function(deg_normAnnot, species, geneSet,workspace,projectId,co
   ssgseaPathways_ERR = file(paste0(workspace,'/ssgseaPathways.err'),open='wt')
   sink(ssgseaPathways_ERR,type='message',append=TRUE)
   
-  normAnnot = deg_normAnnot$norm_annotated
+  normAnnot = deg_normAnnot$norm_plots_annotated
   ssgs = normAnnot[normAnnot$SYMBOL!='NA',]
   #if human or mouse, prepare data for gsva
   if (tolower(species)=='human') {

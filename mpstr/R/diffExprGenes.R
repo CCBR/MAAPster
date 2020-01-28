@@ -2,6 +2,7 @@
 #' 
 #' @export
 #' @param norm ExpressionFeatureSet object with normalized data from QCnorm function
+#' @param norm_plots ExpressionFeatureSet object with normalized and ComBat batch corrected data from QCnorm function
 #' @param cons List groups to compare, groups must match assignments in listGroups param of previous functions
 #' @param projectId A unique identifier for the project
 #' @param workspace Working directory
@@ -13,7 +14,7 @@
 #' @note Outputs volcano plot (using plotly) of differentially expressed genes
 #' @references See plotly, limma and Bioconductor platform design/annotation documentation
 
-diffExprGenes = function(norm,cons,projectId,workspace) {
+diffExprGenes = function(norm,norm_plots,cons,projectId,workspace) {
   library(limma)
   library(pd.mogene.2.0.st)
   library(mogene20sttranscriptcluster.db)
@@ -215,6 +216,7 @@ diffExprGenes = function(norm,cons,projectId,workspace) {
         }
         names(listDEGs)=cons
         norm_annotated <- merge(exprs(norm), Annot,by.x=0, by.y=0, all.x=T)               #write out normalized annotated data
+        norm_plots_annotated <- merge(exprs(norm_plots), Annot,by.x=0, by.y=0, all.x=T) 
         y<-paste("_",projectId, sep="")
         tNorm = tempfile(pattern = "normalized_data_", tmpdir =workspace, fileext = paste0(y,'.txt'))
         write.table(norm_annotated,file=tNorm,sep="\t",row.names=F)  
@@ -232,7 +234,7 @@ diffExprGenes = function(norm,cons,projectId,workspace) {
           volcano_plot<-plot_ly(type='scatter', data = volcano_data, x = log_FC, y = log_pval, text = gene, mode = "markers", color = Significant) %>% layout(title=names(listDEGs)[i],xaxis=list(title="Fold Change",range =c(-5,5),tickvals=c(-5,-4,-3,-2,-1,0,1,2,3,4,5),ticktext=c('-32','-16','-8','-4','-2','1','2','4','8','16','32')),yaxis=list(title="-Log10 pvalue",range =c(0,15)))
           htmlwidgets::saveWidget(volcano_plot, paste0(workspace,"/volcano.html"))
         }
-        return(list(listDEGs=listDEGs, norm_annotated=norm_annotated, pheno=pData(norm)))
+        return(list(listDEGs=listDEGs, norm_annotated=norm_annotated, norm_plots_annotated=norm_plots_annotated, pheno=pData(norm)))
       },
       error=function(cond) {
         return(outMsg)
