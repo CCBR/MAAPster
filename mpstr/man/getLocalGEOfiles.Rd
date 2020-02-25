@@ -4,7 +4,14 @@
 \alias{getLocalGEOfiles}
 \title{1) Process GEO mouse or human data from an experiment with raw Affymetrix CEL files, see https://www.ncbi.nlm.nih.gov/geo/}
 \usage{
-getLocalGEOfiles(projectId, id, listGroups, listBatches = NULL, workspace)
+getLocalGEOfiles(
+  projectId,
+  id,
+  listGroups,
+  listBatches = NULL,
+  workspace,
+  chip = NULL
+)
 }
 \arguments{
 \item{projectId}{A unique identifier for the project}
@@ -16,6 +23,8 @@ getLocalGEOfiles(projectId, id, listGroups, listBatches = NULL, workspace)
 \item{listBatches}{Optional list of batches for each sample, follow alphabetical order of samples}
 
 \item{workspace}{Working directory}
+
+\item{chip}{Optional argument specifying platform (ie GPL571) in multi chip GEO datasets}
 }
 \value{
 ExpressionFeatureSet object with raw data and phenotype information
@@ -25,7 +34,7 @@ ExpressionFeatureSet object with raw data and phenotype information
 }
 \examples{
 celfiles = getLocalGEOfiles(projectId='NCI_Project_1',id='GSE61989',listGroups=c('Ctl','Ctl','Ctl','Ctl','RNA_1','RNA_1','RNA_1','RNA_1','RNA_2','RNA_2','RNA_2','RNA_2'),workspace='/Users/name/folderName')      
-celfiles = getLocalGEOfiles(projectId='NCI_Project_2',id='GSE106988',listGroups=c('Ctl_1','Ctl_1','Ctl_1','KO_1','KO_1','KO_1'),listBatches=c(rep('A',6),rep('B',6)),workspace='/Users/name/folderName')
+celfiles = getLocalGEOfiles(projectId='NCI_Project_2',id='GSE106988',listGroups=c('Ctl_1','Ctl_1','Ctl_1','KO_1','KO_1','KO_1'),listBatches=c(rep('A',6),rep('B',6)),workspace='/Users/name/folderName',chip='GPL571')
 }
 \references{
 See packages oligo, GEOquery, Biobase

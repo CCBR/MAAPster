@@ -64,6 +64,8 @@ diffExprGenes = function(norm,norm_plots,cons,projectId,workspace) {
   library(mogene11sttranscriptcluster.db)
   library(pd.hugene.2.1.st)
   library(hugene21sttranscriptcluster.db)
+  library(pd.ht.hg.u133a)
+  library(hthgu133a.db)
   
   diffExprGenes_ERR = file(paste0(workspace,'/diffExprGenes.err'),open='wt')
   sink(diffExprGenes_ERR,type='message',append=TRUE)
@@ -169,8 +171,12 @@ diffExprGenes = function(norm,norm_plots,cons,projectId,workspace) {
                                                 if (norm@annotation=='pd.mogene.1.1.st.v1') {
                                                   Annot <- data.frame(ACCNUM=sapply(contents(mogene11sttranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(mogene11sttranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(mogene11sttranscriptclusterGENENAME), paste, collapse=", "), ENTREZ=sapply(contents(mogene11sttranscriptclusterENTREZID), paste, collapse=", "))
                                                 } else {
-                                                  if (raw()@annotation=='pd.hugene.2.1.st') {
+                                                  if (norm@annotation=='pd.hugene.2.1.st') {
                                                     Annot <- data.frame(ACCNUM=sapply(contents(hugene21sttranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(hugene21sttranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(hugene21sttranscriptclusterGENENAME), paste, collapse=", "), ENTREZ=sapply(contents(hugene21sttranscriptclusterENTREZID), paste, collapse=", "))
+                                                  } else {
+                                                    if (norm@annotation=='pd.ht.hg.u133a') {
+                                                      Annot <- data.frame(ACCNUM=sapply(contents(hthgu133aACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(hthgu133aSYMBOL), paste, collapse=", "), DESC=sapply(contents(hthgu133aGENENAME), paste, collapse=", "), ENTREZ=sapply(contents(hthgu133aENTREZID), paste, collapse=", "))
+                                                    } 
                                                   }
                                                 }
                                               }
