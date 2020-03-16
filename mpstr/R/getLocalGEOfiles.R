@@ -60,10 +60,12 @@ getLocalGEOfiles <- function(projectId,id,listGroups,listBatches=NULL,workspace,
         each = Filter(function(x) {Meta(x)$platform_id==names(GPLList(gds))[i]},GSMList(gds))
         chipChoices[[i]] = data.frame(matrix(ncol=5,nrow=length(each)))
         colnames(chipChoices[[i]]) = c('gsm','title','description','groups','color')
-        if(is.null(each[[j]]@header$description)) {
-          chipChoices[[i]][j,1:3] = c(each[[j]]@header$geo_accession[1], each[[j]]@header$title[1], 'No data available')
-        } else {
-          chipChoices[[i]][j,1:3] = c(each[[j]]@header$geo_accession[1], each[[j]]@header$title[1], each[[j]]@header$description[1])
+        for (j in 1:length(each)) {
+          if(is.null(each[[j]]@header$description)) {
+            chipChoices[[i]][j,1:3] = c(each[[j]]@header$geo_accession[1], each[[j]]@header$title[1], 'No data available')
+          } else {
+            chipChoices[[i]][j,1:3] = c(each[[j]]@header$geo_accession[1], each[[j]]@header$title[1], each[[j]]@header$description[1])
+          }
         }
         names(chipChoices)[i] = names(GPLList(gds))[i]
       }

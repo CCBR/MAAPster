@@ -81,7 +81,6 @@ processGEOfiles <- function(projectId,id,listGroups,listBatches=NULL,workspace,c
           } else {
             chipChoices[[i]][j,1:3] = c(each[[j]]@header$geo_accession[1], each[[j]]@header$title[1], each[[j]]@header$description[1])
           }
-          
         }
         names(chipChoices)[i] = names(GPLList(gds))[i]
       }
