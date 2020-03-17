@@ -45,7 +45,7 @@ processGEOfiles <- function(projectId,id,listGroups,listBatches=NULL,workspace,c
   # check for multiple chips
   if (length(gds@gpls) > 1) {                   # if multi chips present
     if (!is.null(chip)) {                       # if chip is specified
-      
+
       # subset by chip
       shortList = Filter(function(x) {Meta(x)$platform_id==chip},GSMList(gds))
       

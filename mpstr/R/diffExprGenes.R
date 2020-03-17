@@ -66,6 +66,8 @@ diffExprGenes = function(norm,norm_plots,cons,projectId,workspace) {
   library(hugene21sttranscriptcluster.db)
   library(pd.ht.hg.u133a)
   library(hthgu133a.db)
+  library(pd.clariom.d.human)
+  library(clariomdhumantranscriptcluster.db)
   
   diffExprGenes_ERR = file(paste0(workspace,'/diffExprGenes.err'),open='wt')
   sink(diffExprGenes_ERR,type='message',append=TRUE)
@@ -176,7 +178,11 @@ diffExprGenes = function(norm,norm_plots,cons,projectId,workspace) {
                                                   } else {
                                                     if (norm@annotation=='pd.ht.hg.u133a') {
                                                       Annot <- data.frame(ACCNUM=sapply(contents(hthgu133aACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(hthgu133aSYMBOL), paste, collapse=", "), DESC=sapply(contents(hthgu133aGENENAME), paste, collapse=", "), ENTREZ=sapply(contents(hthgu133aENTREZID), paste, collapse=", "))
-                                                    } 
+                                                    }  else {
+                                                      if (norm@annotation=='pd.clariom.d.human') {
+                                                        Annot <- data.frame(ACCNUM=sapply(contents(clariomdhumantranscriptclusterACCNUM), paste, collapse=", "), SYMBOL=sapply(contents(clariomdhumantranscriptclusterSYMBOL), paste, collapse=", "), DESC=sapply(contents(clariomdhumantranscriptclusterGENENAME), paste, collapse=", "), ENTREZ=sapply(contents(clariomdhumantranscriptclusterENTREZID), paste, collapse=", "))
+                                                      }
+                                                    }
                                                   }
                                                 }
                                               }
