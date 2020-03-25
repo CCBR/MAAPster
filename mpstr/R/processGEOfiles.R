@@ -32,15 +32,48 @@ processGEOfiles <- function(projectId,id,listGroups,listBatches=NULL,workspace,c
   id = gsub(" ","",id,fixed=TRUE) 
   #system(paste0('rm *.[cC][eE][lL].gz'))                                   #removes previous CEL files if run consecutively
   
-  saveMessage = ''
-  getGEOSuppFiles(id, makeDirectory = T, baseDir = workspace)
-  fileID = paste0(id, '_RAW.tar')
-  untar(paste0(workspace,'/',id,'/',fileID),exdir=workspace)
-  SampleName = list.files(path = workspace, pattern = '/*CEL.gz|/*CEL$', ignore.case = T, full.names=T)
-  if (length(grep('*CEL*',SampleName,ignore.case = T)) == 0) {
-    saveMessage = "Raw files must be CEL files. "
+  # error handling: invalid GSE 
+  check_GSE = function(id) {
+    tryCatch(
+      {
+        getGEOSuppFiles(id, makeDirectory = T, baseDir = workspace)
+        return(NULL)
+      },
+    error = function(cond) return("Invalid GSE id, check https://www.ncbi.nlm.nih.gov/geo/ and enter a valid id, ex: GSE118295")
+    )
   }
-  gds <- getGEO(id, GSEMatrix = F,getGPL=T,AnnotGPL=T)             #get meta data 
+  isGSE = check_GSE(id)
+  if(!is.null(isGSE)) return(isGSE)
+  
+  # error handling: valid GSE but not Affymetrix
+  check_GSE_2 = function(id) {
+    tryCatch(
+      {
+        fileID = paste0(id, '_RAW.tar')
+        untar(paste0(workspace,'/',id,'/',fileID),exdir=workspace)
+        tryCels = list.files(path = workspace, pattern = '/*CEL.gz|/*CEL$', ignore.case = T, full.names=T)
+        if (length(grep('*CEL*',tryCels,ignore.case = T)) == 0) {
+          stop()
+        }
+        gds <- getGEO(id, GSEMatrix = F,getGPL=T,AnnotGPL=T)             #get meta data 
+        return(gds)
+      },
+      error = function(cond) {
+        gds <- getGEO(id)  
+        platform = c()
+        for (i in 1:length(gds)) {
+          platform = c(platform,gds[[i]]@annotation)
+        }
+        platform = unlist(platform)
+        platform = paste0(platform,collapse = ', ')
+        return(paste0("This GSE id does not correspond to an Affymetrix dataset. Your platform id(s) is/are ",platform,". Check https://www.ncbi.nlm.nih.gov/geo/ for details."))
+      }  
+    )
+  }
+  gds = check_GSE_2(id)
+  if(class(gds)=='character') return(gds)
+  
+  SampleName = list.files(path = workspace, pattern = '/*CEL.gz|/*CEL$', ignore.case = T, full.names=T)
   
   # check for multiple chips
   if (length(gds@gpls) > 1) {                   # if multi chips present
