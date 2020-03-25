@@ -19,6 +19,8 @@ processGEOfiles <- function(projectId,id,listGroups,listBatches=NULL,workspace,c
   library(oligo)
   library(Biobase)
   
+  listPlatforms = c('pd.mogene.2.0.st', 'pd.hg.u133.plus.2', 'pd.hugene.2.0.st', 'pd.clariom.s.human.ht', 'pd.clariom.s.human', 'pd.clariom.s.mouse.ht', 'pd.clariom.s.mouse', 'pd.mouse430.2', 'pd.hg.u133a', 'pd.hugene.1.0.st.v1', 'pd.mogene.1.0.st.v1', 'pd.hg.u133a.2', 'pd.huex.1.0.st.v2', 'pd.hg.u219', 'pd.mg.u74av2', 'pd.mouse430a.2', 'pd.moe430a', 'pd.hg.u95av2', 'pd.hta.2.0', 'pd.moex.1.0.st.v1', 'pd.hg.u133b', 'pd.hugene.1.1.st.v1', 'pd.mogene.1.1.st.v1', 'pd.hugene.2.1.st', 'pd.ht.hg.u133a', 'pd.clariom.d.human')
+  
   if(dir.exists(workspace)) {
     unlink(workspace,recursive = TRUE)                                      #Delete the directory and files in that dir 
   }
@@ -66,7 +68,7 @@ processGEOfiles <- function(projectId,id,listGroups,listBatches=NULL,workspace,c
         }
         platform = unlist(platform)
         platform = paste0(platform,collapse = ', ')
-        return(paste0("This GSE id does not correspond to an Affymetrix dataset. Your platform id(s) is/are ",platform,". Check https://www.ncbi.nlm.nih.gov/geo/ for details."))
+        return(paste0("This GSE id does not correspond to an Affymetrix dataset. Your platform id(s): ",platform,". Check https://www.ncbi.nlm.nih.gov/geo/ for details."))
       }  
     )
   }
@@ -181,6 +183,11 @@ processGEOfiles <- function(projectId,id,listGroups,listBatches=NULL,workspace,c
     celfiles = read.celfiles(SampleName,phenoData = pd)
   } else {
     celfiles = read.celfiles(SampleName[gsub('(_|\\.).*','',basename(SampleName)) %in% names(shortList)], phenoData = pd)
+  }
+  
+  # check if supported Affymetrix chip
+  if (!celfiles@annotation%in%listPlatforms) {
+    return(paste0('Your Affymetrix platform ',celfiles@annotation,' is not yet supported.  You may request to have it added by contacting NCIMicroArrayWebAdmin@mail.nih.gov.'))
   }
   
   if (is.null(listBatches)) {
