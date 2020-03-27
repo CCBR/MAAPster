@@ -28,11 +28,9 @@ processGEOfiles <- function(projectId,id,listGroups,listBatches=NULL,workspace,c
   if(!dir.exists(workspace)) {
     dir.create(workspace)                                                   #Create a directory 
   }
+  
   processGEOfiles_ERR = file(paste0(workspace,"/processGEOfiles.err"),open='wt')    #Open file to write error messages
   sink(processGEOfiles_ERR,type='message',append=TRUE)                      #Save error messages to file
-  
-  processGEOfiles_OUT = file(paste0(workspace,'/processGEOfiles.out'),open='wt')
-  sink(processGEOfiles_OUT,type='output',append=TRUE)
   
   id = gsub(" ","",id,fixed=TRUE) 
   #system(paste0('rm *.[cC][eE][lL].gz'))                                   #removes previous CEL files if run consecutively
@@ -205,4 +203,4 @@ processGEOfiles <- function(projectId,id,listGroups,listBatches=NULL,workspace,c
   ))
   
 }
-sink(type='message')  
+sink(type='message')
