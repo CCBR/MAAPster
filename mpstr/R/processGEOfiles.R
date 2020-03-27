@@ -31,6 +31,9 @@ processGEOfiles <- function(projectId,id,listGroups,listBatches=NULL,workspace,c
   processGEOfiles_ERR = file(paste0(workspace,"/processGEOfiles.err"),open='wt')    #Open file to write error messages
   sink(processGEOfiles_ERR,type='message',append=TRUE)                      #Save error messages to file
   
+  processGEOfiles_OUT = file(paste0(workspace,'/processGEOfiles.out'),open='wt')
+  sink(processGEOfiles_OUT,type='output',append=TRUE)
+  
   id = gsub(" ","",id,fixed=TRUE) 
   #system(paste0('rm *.[cC][eE][lL].gz'))                                   #removes previous CEL files if run consecutively
   
@@ -180,9 +183,9 @@ processGEOfiles <- function(projectId,id,listGroups,listBatches=NULL,workspace,c
   pd = AnnotatedDataFrame(pd)
   
   if (length(gds@gpls) == 1) {
-    celfiles = read.celfiles(SampleName,phenoData = pd)
+    celfiles = read.celfiles(SampleName,phenoData = pd, verbose=FALSE)
   } else {
-    celfiles = read.celfiles(SampleName[gsub('(_|\\.).*','',basename(SampleName)) %in% names(shortList)], phenoData = pd)
+    celfiles = read.celfiles(SampleName[gsub('(_|\\.).*','',basename(SampleName)) %in% names(shortList)], phenoData = pd, verbose = FALSE)
   }
   
   # check if supported Affymetrix chip
