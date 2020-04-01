@@ -13,7 +13,8 @@
 #' @references l2p and m2h from CCBR/CCR/NCI/NIH
 
 l2pPathways = function(degs,species,workspace,projectId,configuration_path) {
-  
+  library(l2p)
+
   l2pPathways_ERR = file(paste0(workspace,'/l2pPathways.err'),open='wt')
   sink(l2pPathways_ERR,type='message',append=TRUE)
   
@@ -21,6 +22,8 @@ l2pPathways = function(degs,species,workspace,projectId,configuration_path) {
   for (i in 1:length(degs$listDEGs)) {
     up_down = vector("list",2)
     all = degs$listDEGs[[i]]
+    all$SYMBOL = as.character(all$SYMBOL)
+    all = all[which(all$SYMBOL!='NA'),]
     iup=which(all$P.Value<0.05 & all$logFC>=0)
     idw=which(all$P.Value<0.05 & all$logFC<0)
     fin.up=all[iup,]
@@ -35,37 +38,24 @@ l2pPathways = function(degs,species,workspace,projectId,configuration_path) {
       fin.dw=fin.dw[order(fin.dw$P.Value),]
       fin.dw=fin.dw[1:500,]
     }
-    fin.up$SYMBOL = as.character(fin.up$SYMBOL)
-    fin.dw$SYMBOL = as.character(fin.dw$SYMBOL)
-    
-    if (tolower(species)=='human')
-    {
-      cat(fin.up$SYMBOL,file=(paste0(workspace,'/',projectId,'_',names(degs$listDEGs[i]),'_Top500_Up.txt')), sep='\n')
-      cat(fin.dw$SYMBOL,file=(paste0(workspace,'/',projectId,'_',names(degs$listDEGs[i]),'_Top500_Down.txt')),sep='\n')
-    }
-    else
-    {
-      
-      cat(fin.up$SYMBOL,file=paste0(workspace,'/',names(degs$listDEGs[i]),"_Top500temp_Up.txt"),sep='\n')
-      cat(fin.dw$SYMBOL,file=paste0(workspace,'/',names(degs$listDEGs[i]),"_Top500temp_Dw.txt"),sep='\n')
-      
-      system(paste0("cd ",configuration_path,"; cat ",workspace,'/',names(degs$listDEGs[i]),"_Top500temp_Up.txt | grep -v \"^NA\" |  ./m2h | grep -v XXXX | cut -f2 -d\" \" >",workspace,'/',projectId,'_',names(degs$listDEGs[i]),"_Top500_Up.txt"))
-      system(paste0("cd ",configuration_path,"; cat ",workspace,'/',names(degs$listDEGs[i]),"_Top500temp_Dw.txt | grep -v \"^NA\" |  ./m2h | grep -v XXXX | cut -f2 -d\" \" >",workspace,'/',projectId,'_',names(degs$listDEGs[i]),"_Top500_Down.txt"))
+    fin.up = unique(fin.up$SYMBOL)
+    fin.dw = unique(fin.dw$SYMBOL)
+    univ = unique(all$SYMBOL)
+    if (tolower(species)=='mouse') {
+      fin.up = m2h(fin.up)
+      fin.dw = m2h(fin.dw)
+      univ = m2h(univ)
     }
     
-    system(paste0("cd ",configuration_path,"; cat ",workspace,'/',projectId,'_',names(degs$listDEGs[i]),"_Top500_Up.txt |sort | uniq |   ./l2p>",workspace,'/',projectId,'_',names(degs$listDEGs[i]),"_Pathways_Up.txt"))
-    system(paste0("cd ",configuration_path,"; cat ",workspace,'/',projectId,'_',names(degs$listDEGs[i]),"_Top500_Down.txt |sort | uniq | ",configuration_path,"/l2p >",workspace,'/',projectId,'_',names(degs$listDEGs[i]),"_Pathways_Down.txt"))
+    addUpCol = l2p(fin.up,universe=univ)
+    addDwCol = l2p(fin.dw,universe=univ)
     
-    
-    addUpCol = read.delim(paste0(workspace,'/',projectId,'_',names(degs$listDEGs[i]),"_Pathways_Up.txt"), sep = '\t')
-    addDwCol = read.delim(paste0(workspace,'/',projectId,'_',names(degs$listDEGs[i]),"_Pathways_Down.txt"), sep = '\t')
-    
-    colnames(addUpCol)=c("P_Value","FDR","Ratio","Number_Hits","Number_Genes_Pathway","Number_User_Genes","Total_Number_Genes","Pathway_ID","Source","Description","Type","Gene_List")
-    colnames(addDwCol)=c("P_Value","FDR","Ratio","Number_Hits","Number_Genes_Pathway","Number_User_Genes","Total_Number_Genes","Pathway_ID","Source","Description","Type","Gene_List")
-    addUpCol = addUpCol[order(addUpCol$P_Value),]
-    addDwCol = addDwCol[order(addDwCol$P_Value),]
-    addUpCol = addUpCol[,c(8,9,10,11,1,2,3,12,4,5,6,7)]
-    addDwCol = addDwCol[,c(8,9,10,11,1,2,3,12,4,5,6,7)]
+    addUpCol = addUpCol[order(addUpCol$pval),]
+    addDwCol = addDwCol[order(addDwCol$pval),]
+    colnames(addUpCol)=c("P_Value","FDR","Ratio","Number_Hits","Number_Misses","Number_User_Genes","Total_Genes_Minus_Input","Pathway_ID","Source","Description","Gene_List")
+    colnames(addDwCol)=c("P_Value","FDR","Ratio","Number_Hits","Number_Misses","Number_User_Genes","Total_Genes_Minus_Input","Pathway_ID","Source","Description","Gene_List")
+    addUpCol = addUpCol[,c(8,9,10,1:7,11)]
+    addDwCol = addDwCol[,c(8,9,10,1:7,11)]
     write.table(addUpCol, file = paste0(workspace,'/',projectId,'_',names(degs$listDEGs[i]),"_Pathways_Up.txt"), sep = '\t', row.names = F)
     write.table(addDwCol, file = paste0(workspace,'/',projectId,'_',names(degs$listDEGs[i]),"_Pathways_Down.txt"), sep = '\t', row.names = F)
     up_down[[1]]=addUpCol
