@@ -69,7 +69,7 @@ processGEOfiles <- function(projectId,id,listGroups,listBatches=NULL,workspace,c
         }
         platform = unlist(platform)
         platform = paste0(platform,collapse = ', ')
-        return(paste0("This GSE id does not correspond to an Affymetrix dataset. Your platform id(s): ",platform,". Check https://www.ncbi.nlm.nih.gov/geo/ for details."))
+        return(paste0("This GSE id does not correspond to an Affymetrix dataset. Your platform id(s): ",platform,". Check https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=",id," for details."))
       }  
     )
   }
