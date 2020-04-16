@@ -181,9 +181,9 @@ processGEOfiles <- function(projectId,id,listGroups,listBatches=NULL,workspace,c
   pd = AnnotatedDataFrame(pd)
   
   if (length(gds@gpls) == 1) {
-    celfiles = read.celfiles(SampleName,phenoData = pd, verbose=FALSE)
+    celfiles = read.celfiles(SampleName,phenoData = pd, verbose=TRUE)
   } else {
-    celfiles = read.celfiles(SampleName[gsub('(_|\\.).*','',basename(SampleName)) %in% names(shortList)], phenoData = pd, verbose = FALSE)
+    celfiles = read.celfiles(SampleName[gsub('(_|\\.).*','',basename(SampleName)) %in% names(shortList)], phenoData = pd, verbose = TRUE)
   }
   
   # check if supported Affymetrix chip
