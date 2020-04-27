@@ -1,5 +1,8 @@
 # MicroArrayPipeline
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3770853.svg)](https://doi.org/10.5281/zenodo.3770853)
+
+
 R Shiny app to process Affymetrix raw data
 
 Main workflow:
