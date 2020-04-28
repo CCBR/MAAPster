@@ -19,6 +19,8 @@ The main workflow consists of the following steps:
 
 ### Input Data
 
+---
+
 There are two input options. Raw data can be uploaded locally or from the Gene Expression Omnibus (GEO): 
 
 **Local File Upload:** Analyze expression data by uploading CEL files from a local computer. Data must be expression data in CEL file format, and all data must be from the same type of Affymetrix chip.
@@ -31,6 +33,8 @@ Once the files are uploaded, groups are assigned for each sample. At least 2 gro
 
 ### Array Probe Quality Control
 
+---
+
 Two plots, NUSE and RLE, display quality control metrics for the microarray probes. Plots are created with the oligo package:
 
 **NUSE:** The Normalized Unscaled Standard Error (NUSE) plot shows standard error estimates for each sample. These estimates are normalized to 1 across all samples, so a sample with a significantly higher value may be of lower quality *(Carvalho & Irizarry, 2010)*.
@@ -39,11 +43,15 @@ Two plots, NUSE and RLE, display quality control metrics for the microarray prob
 
 ### Normalization
 
+---
+
 **RMA:** Each sample is normalized to correct for technical artifacts using the Robust Multichip Averaging (RMA) method described in *(Irizarry et al., 2003)*. 
 
 **Cyclic loess:** This additional round of normalization is also available and can be performed if RMA is insufficient *(Ballman, Grill, Oberg, & Therneau, 2004; Bolstad, Irizarry, Astrand, & Speed, 2003)*. Only selected samples are used for normalization. 
 
 ### Post-normalization QC plots
+
+---
 
 Pre-normalization and post-normalization histograms, MA plots and box plots display relative expression (represented by probe intensity) before and after normalization. Data for the plots are generated with the oligo package *(Carvalho & Irizarry, 2010)*.
 
@@ -55,21 +63,30 @@ Pre-normalization and post-normalization histograms, MA plots and box plots disp
 
 ### Sample Quality Control
 
+---
+
 The sample similarity heatmap and 3D PCA provide information about the quality of replicates in the groups.
 
 **PCA:** In general, samples in the same group should cluster together, and groups of samples should cluster separately from other groups. If batch effects are present, re-run the analysis and assign samples to respective batches for correction. For example, the dataset below has batch effects. The first principal component, PC1, separates replicates 1 and 2 (rep1 and rep2) from replicates 3 and 4 (rep3 and rep4):
 
 ### Differential Gene Expression
 
+---
+
 The DEG-Enrichments Results tab displays differentially expressed genes between groups. MAAPster runs analysis in the background with the limma package. Linear modeling is performed using limma’s lmFit function, and differential gene expression is determined using the contrasts.fit and eBayes functions *(Ritchie et al, 2015)*. Using the toptable function, false discovery rates are calculated to adjust p-values for multiple testing *(Ritchie et al., 2015)*.
 
 ### Pathway Analysis
+
+---
 
 **l2P:** The top 500 significantly upregulated and top 500 significantly downregulated genes are extracted for pathway analysis (significance is determined as unadjusted p-value < 0.05), Pathway analysis is performed with CCBR’s [l2p R package](https://github.com/CCBR/l2p).
 
 **Single-sample GSEA:** ssGSEA is performed using the gsva package as previously described *(Hanzelmann et al., 2013)*. Pathway enrichment scores are then analyzed to determine fold changes and p-values between groups of samples, similar to the differential gene expression analysis described above. Differential pathway enrichment is ranked by p-value, and the top 50 pathways are displayed in a heatmap. Human gene set modules were downloaded from the BROAD Institute’s MSigDB, and mouse gene set modules were downloaded from the Gene Set Knowledgebase.
 
 ### Platform Support
+
+---
+
 The pipeline supports the following Affymetrix chips, more maybe added upon request:
 
 **Human:** `Human Genome U133 Plus 2.0 Array`, `GeneChip™ Human Genome U133A Array`, `GeneChip™ Human Genome U133A 2.0 Array`, `GeneChip™ Human Genome U133B Array`, `GeneChip™ Human Gene 1.0 ST Array (v1 and v2)`, `GeneChip™ Human Gene 1.1 ST Array Version 1`, `GeneChip™ Human Gene 2.0 ST Array`, `GeneChip™ Human Gene 2.1 ST`, `Clariom™ S Assay HT, human`, `Clariom™ S Assay, human`, `Human Genome U219 Array`, `GeneChip Human Genome U95 Version 2`, `GeneChip™ Human Transcriptome Array 2.0`, `Human Exon 1.0 ST Array`, `HT Human Genome U133 Array`, `Clariom™ D Assay, human`
@@ -77,6 +94,9 @@ The pipeline supports the following Affymetrix chips, more maybe added upon requ
 **Mouse:** `GeneChip™ Mouse Gene 1.0 ST Array`, `GeneChip™ Mouse Gene 1.1 ST Array`, `GeneChip™ Mouse Gene 2.0 ST Array`, `Clariom™ S Assay HT, mouse`, `Clariom™ S Assay, mouse`, `GeneChip™ Mouse Genome 430 2.0 Array`, `GeneChip™ Mouse Genome 430A 2.0 Array`, `GeneChip® Mouse Expression Set 430`, `GeneChip® Murine Genome U74v2 Set`, `Mouse Exon 1.0 ST Array`
 
 ### References
+
+---
+
 <sup>Ballman, K. V., Grill, D. E., Oberg, A. L., & Therneau, T. M. (2004). Faster cyclic loess: normalizing RNA arrays via linear models. Bioinformatics, 20(16), 2778-2786. doi:10.1093/bioinformatics/bth327</sup>
 
 <sup>Bolstad, B. M., Irizarry, R. A., Astrand, M., & Speed, T. P. (2003). A comparison of normalization methods for high density oligonucleotide array data based on variance and bias. Bioinformatics, 19(2), 185-193.</sup>
@@ -91,7 +111,6 @@ The pipeline supports the following Affymetrix chips, more maybe added upon requ
 
 <sup>Ritchie, M. E., Phipson, B., Wu, D., Hu, Y., Law, C. W., Shi, W., & Smyth, G. K. (2015). limma powers differential expression analyses for RNA-sequencing and microarray studies. Nucleic Acids Res, 43(7), e47. doi:10.1093/nar/gkv007</sup>
 
-<hr>
 
 <p align="center">
 	<a href="#maapster">Back to Top</a>
