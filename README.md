@@ -17,9 +17,7 @@ The main workflow consists of the following steps:
 - [Limma call for identifying DE genes](#Differential-Gene-Expression) 
 - [Pathway enrichment analysis](#Pathway-Analysis)
 
-### Input Data
-
----
+## Input Data
 
 There are two input options. Raw data can be uploaded locally or from the Gene Expression Omnibus (GEO): 
 
@@ -31,9 +29,7 @@ Once the files are uploaded, groups are assigned for each sample. At least 2 gro
 
 ***Optional:*** If batch effects are present in the dataset, assign batch names as shown. Batch effects will be corrected for differential gene expression analysis by incorporating batches into the linear model. For plots based on normalized gene expression and before ssGSEA analysis, normalized gene expression is corrected for batch effects with the ComBat function from the sva package *(Leek, Johnson, Parker, Jaffe, & Storey, 2012)*. 
 
-### Array Probe Quality Control
-
----
+## Array Probe Quality Control
 
 Two plots, NUSE and RLE, display quality control metrics for the microarray probes. Plots are created with the oligo package:
 
@@ -41,17 +37,13 @@ Two plots, NUSE and RLE, display quality control metrics for the microarray prob
 
 **RLE:** The Relative Log Expression (RLE) plot compares the expression level of one probeset to the median expression of that probeset across all samples.
 
-### Normalization
-
----
+## Normalization
 
 **RMA:** Each sample is normalized to correct for technical artifacts using the Robust Multichip Averaging (RMA) method described in *(Irizarry et al., 2003)*. 
 
 **Cyclic loess:** This additional round of normalization is also available and can be performed if RMA is insufficient *(Ballman, Grill, Oberg, & Therneau, 2004; Bolstad, Irizarry, Astrand, & Speed, 2003)*. Only selected samples are used for normalization. 
 
-### Post-normalization QC plots
-
----
+## Post-normalization QC plots
 
 Pre-normalization and post-normalization histograms, MA plots and box plots display relative expression (represented by probe intensity) before and after normalization. Data for the plots are generated with the oligo package *(Carvalho & Irizarry, 2010)*.
 
@@ -61,31 +53,23 @@ Pre-normalization and post-normalization histograms, MA plots and box plots disp
 
 **Boxplot:** Displays the distribution of log-intensities for each sample. After RMA, distributions across all samples should be approximately the same.
 
-### Sample Quality Control
-
----
+## Sample Quality Control
 
 The sample similarity heatmap and 3D PCA provide information about the quality of replicates in the groups.
 
 **PCA:** In general, samples in the same group should cluster together, and groups of samples should cluster separately from other groups. If batch effects are present, re-run the analysis and assign samples to respective batches for correction. For example, the dataset below has batch effects. The first principal component, PC1, separates replicates 1 and 2 (rep1 and rep2) from replicates 3 and 4 (rep3 and rep4):
 
-### Differential Gene Expression
-
----
+## Differential Gene Expression
 
 The DEG-Enrichments Results tab displays differentially expressed genes between groups. MAAPster runs analysis in the background with the limma package. Linear modeling is performed using limma’s lmFit function, and differential gene expression is determined using the contrasts.fit and eBayes functions *(Ritchie et al, 2015)*. Using the toptable function, false discovery rates are calculated to adjust p-values for multiple testing *(Ritchie et al., 2015)*.
 
-### Pathway Analysis
-
----
+## Pathway Analysis
 
 **l2P:** The top 500 significantly upregulated and top 500 significantly downregulated genes are extracted for pathway analysis (significance is determined as unadjusted p-value < 0.05), Pathway analysis is performed with CCBR’s [l2p R package](https://github.com/CCBR/l2p).
 
 **Single-sample GSEA:** ssGSEA is performed using the gsva package as previously described *(Hanzelmann et al., 2013)*. Pathway enrichment scores are then analyzed to determine fold changes and p-values between groups of samples, similar to the differential gene expression analysis described above. Differential pathway enrichment is ranked by p-value, and the top 50 pathways are displayed in a heatmap. Human gene set modules were downloaded from the BROAD Institute’s MSigDB, and mouse gene set modules were downloaded from the Gene Set Knowledgebase.
 
-### Platform Support
-
----
+## Platform Support
 
 The pipeline supports the following Affymetrix chips, more maybe added upon request:
 
@@ -93,9 +77,7 @@ The pipeline supports the following Affymetrix chips, more maybe added upon requ
 
 **Mouse:** `GeneChip™ Mouse Gene 1.0 ST Array`, `GeneChip™ Mouse Gene 1.1 ST Array`, `GeneChip™ Mouse Gene 2.0 ST Array`, `Clariom™ S Assay HT, mouse`, `Clariom™ S Assay, mouse`, `GeneChip™ Mouse Genome 430 2.0 Array`, `GeneChip™ Mouse Genome 430A 2.0 Array`, `GeneChip® Mouse Expression Set 430`, `GeneChip® Murine Genome U74v2 Set`, `Mouse Exon 1.0 ST Array`
 
-### References
-
----
+## References
 
 <sup>Ballman, K. V., Grill, D. E., Oberg, A. L., & Therneau, T. M. (2004). Faster cyclic loess: normalizing RNA arrays via linear models. Bioinformatics, 20(16), 2778-2786. doi:10.1093/bioinformatics/bth327</sup>
 
@@ -111,6 +93,7 @@ The pipeline supports the following Affymetrix chips, more maybe added upon requ
 
 <sup>Ritchie, M. E., Phipson, B., Wu, D., Hu, Y., Law, C. W., Shi, W., & Smyth, G. K. (2015). limma powers differential expression analyses for RNA-sequencing and microarray studies. Nucleic Acids Res, 43(7), e47. doi:10.1093/nar/gkv007</sup>
 
+<hr>
 
 <p align="center">
 	<a href="#maapster">Back to Top</a>
