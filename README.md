@@ -2,7 +2,7 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3770853.svg)](https://doi.org/10.5281/zenodo.3770853) [![GitHub releases](https://img.shields.io/github/release/CCBR/MicroArrayPipeline)](https://github.com/CCBR/MicroArrayPipeline/releases) [![GitHub issues](https://img.shields.io/github/issues/CCBR/MicroArrayPipeline)](https://github.com/CCBR/MicroArrayPipeline/issues) [![GitHub license](https://img.shields.io/github/license/CCBR/MicroArrayPipeline)](https://github.com/CCBR/MicroArrayPipeline/blob/master/LICENSE)
 
-MicroArray Analysis Pipeline, also known as `MAAPster`, is a comprehensive Shiny application and R package that performs transcriptome analysis of human or mouse Affymetrix gene expression data. Please see the [Platform Support](#Platform-Support) section for a list of all currently supported Affymetrix chips.
+**M**icro**A**rray **A**nalysis **P**ipeline, also known as `MAAPster`, is a comprehensive Shiny application and R package that performs transcriptome analysis of human or mouse Affymetrix gene expression data. Please see the [Platform Support](#Platform-Support) section for a list of all currently supported Affymetrix chips.
 
 Samples may be uploaded locally or accessed from published data by entering a GEO Series identification number. MAAPster can analyze data from a single experiment that includes multiple samples, and the user may investigate multiple contrasts between groups of samples. Raw CEL files are analyzed using several Bioconductor packages in R, including limma and oligo. Output includes array probe quality control plots, sample quality control plots such as 3D PCA, differential gene expression analysis, gene expression heatmaps, pathway analysis and single sample GSEA analysis.
 
