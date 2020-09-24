@@ -47,8 +47,8 @@ l2pPathways = function(degs,species,workspace,projectId,configuration_path) {
       univ = m2h(univ)
     }
     
-    addUpCol = l2p(fin.up,universe=univ,permute=1)
-    addDwCol = l2p(fin.dw,universe=univ,permute=1)
+    addUpCol = l2p(fin.up,universe=univ)
+    addDwCol = l2p(fin.dw,universe=univ)
     # addUpCol = l2p(fin.up,universe=univ)
     # addDwCol = l2p(fin.dw,universe=univ)
     
@@ -58,10 +58,10 @@ l2pPathways = function(degs,species,workspace,projectId,configuration_path) {
     # colnames(addDwCol)=c("P_Value","FDR","Ratio","Number_Hits","Number_Misses","Number_User_Genes","Total_Genes_Minus_Input","Pathway_ID","Source","Description","Gene_List")
     # addUpCol = addUpCol[,c(8,9,10,1:7,11)]
     # addDwCol = addDwCol[,c(8,9,10,1:7,11)]
-    colnames(addUpCol) = c('Pathway_Name','Category','P_Value','Permutation_P-Value','Enrichment_Score','Percent_Gene_Hits_per_Pathway','Significant_Genes_IN_Pathway','Non-Significant_genes_IN_Pathway','Significant_genes_NOT_IN_Pathway','Non-Significant_Genes_NOT_IN_Pathway','Pathway_ID','Pathway_Type','Gene_List')
-    colnames(addDwCol) = c('Pathway_Name','Category','P_Value','Permutation_P-Value','Enrichment_Score','Percent_Gene_Hits_per_Pathway','Significant_Genes_IN_Pathway','Non-Significant_genes_IN_Pathway','Significant_genes_NOT_IN_Pathway','Non-Significant_Genes_NOT_IN_Pathway','Pathway_ID','Pathway_Type','Gene_List')
-    addUpCol = addUpCol[,c('Pathway_Name','Category','P_Value','Permutation_P-Value','Enrichment_Score','Percent_Gene_Hits_per_Pathway','Significant_Genes_IN_Pathway','Non-Significant_genes_IN_Pathway','Significant_genes_NOT_IN_Pathway','Non-Significant_Genes_NOT_IN_Pathway','Pathway_ID','Gene_List')]
-    addDwCol = addDwCol[,c('Pathway_Name','Category','P_Value','Permutation_P-Value','Enrichment_Score','Percent_Gene_Hits_per_Pathway','Significant_Genes_IN_Pathway','Non-Significant_genes_IN_Pathway','Significant_genes_NOT_IN_Pathway','Non-Significant_Genes_NOT_IN_Pathway','Pathway_ID','Gene_List')]
+    colnames(addUpCol) = c('Pathway_Name','Category','P_Value','FDR','Enrichment_Score','Percent_Gene_Hits_per_Pathway','Significant_Genes_IN_Pathway','Non-Significant_genes_IN_Pathway','Significant_genes_NOT_IN_Pathway','Non-Significant_Genes_NOT_IN_Pathway','Pathway_ID','Pathway_Type','Gene_List')
+    colnames(addDwCol) = c('Pathway_Name','Category','P_Value','FDR','Enrichment_Score','Percent_Gene_Hits_per_Pathway','Significant_Genes_IN_Pathway','Non-Significant_genes_IN_Pathway','Significant_genes_NOT_IN_Pathway','Non-Significant_Genes_NOT_IN_Pathway','Pathway_ID','Pathway_Type','Gene_List')
+    addUpCol = addUpCol[,c('Pathway_Name','Category','P_Value','FDR','Enrichment_Score','Percent_Gene_Hits_per_Pathway','Significant_Genes_IN_Pathway','Non-Significant_genes_IN_Pathway','Significant_genes_NOT_IN_Pathway','Non-Significant_Genes_NOT_IN_Pathway','Pathway_ID','Gene_List')]
+    addDwCol = addDwCol[,c('Pathway_Name','Category','P_Value','FDR','Enrichment_Score','Percent_Gene_Hits_per_Pathway','Significant_Genes_IN_Pathway','Non-Significant_genes_IN_Pathway','Significant_genes_NOT_IN_Pathway','Non-Significant_Genes_NOT_IN_Pathway','Pathway_ID','Gene_List')]
     addUpCol$Percent_Gene_Hits_per_Pathway = round(addUpCol$Percent_Gene_Hits_per_Pathway * 100,1)
     addDwCol$Percent_Gene_Hits_per_Pathway = round(addDwCol$Percent_Gene_Hits_per_Pathway * 100,1)
     
