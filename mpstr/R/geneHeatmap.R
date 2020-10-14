@@ -24,7 +24,7 @@ geneHeatmap = function(degs, paths, contrast, upOrDown, pathway_name,saveImageFi
   
   human2mouse = read.delim(paste0(path,'/human2mouse.csv', sep = ''),sep=',')
   paths = paths[[contrast]][[upOrDown]]
-  genes = paths$Gene_List[paths$Description==pathway_name]              #select user input pathway, extract genes
+  genes = paths$Gene_List[paths$Pathway_Name==pathway_name]              #select user input pathway, extract genes
   genes = strsplit(as.character(genes),' ')
   genes = unlist(genes)
   exp = degs$norm_plots_annotated                                             #extract normalized expression, subset by genes, aggregate duplicate symbols by mean
